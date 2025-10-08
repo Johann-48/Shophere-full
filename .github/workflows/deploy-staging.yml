@@ -3,11 +3,13 @@ name: Deploy to Staging
 on:
   push:
     branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
 
 jobs:
-  deploy-staging:
+  test:
     runs-on: ubuntu-latest
     
     steps:
@@ -26,15 +28,32 @@ jobs:
         cd frontend && npm install
         cd ../backend && npm install
         
+    - name: Lint frontend
+      run: |
+        cd frontend
+        npm run lint --if-present
+        
     - name: Build frontend
       run: |
         cd frontend
         npm run build
-        
-    - name: Deploy to Vercel Staging
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_STAGING }}
-        working-directory: ./"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+      
+    - name: Pull Vercel Environment Information
+      run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      
+    - name: Build Project Artifacts
+      run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      
+    - name: Deploy Project Artifacts to Vercel
+      run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

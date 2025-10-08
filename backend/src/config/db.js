@@ -1,18 +1,7 @@
 // src/config/db.js
-const mysql = require('mysql2/promise');
-const dotenv = require('dotenv');
+// Este arquivo mantém compatibilidade com o código existente
+// mas agora usa a configuração mais robusta do database.js
 
-dotenv.config();
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  // opcional: definir timezone se necessário
-});
+const pool = require('./database');
 
 module.exports = pool;
