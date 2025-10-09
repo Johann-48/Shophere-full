@@ -2,32 +2,34 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "frontend/dist",
-        "buildCommand": "cd frontend && npm install && npm run build"
-      }
-    },
-    {
-      "src": "backend/src/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["backend/**"]
+        "distDir": "frontend/dist"
       }
     }
   ],
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/src/index.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "backend/src/index.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/(.*)",
+      "dest": "/frontend/dist/$1"
+    }
+  ]
+}
       "dest": "frontend/dist/$1"
     }
   ],
