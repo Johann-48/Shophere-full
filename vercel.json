@@ -28,16 +28,7 @@
       "src": "/(.*)",
       "dest": "/frontend/dist/$1"
     }
-  ]
-}
-      "dest": "frontend/dist/$1"
-    }
   ],
-  "functions": {
-    "backend/src/index.js": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   }
