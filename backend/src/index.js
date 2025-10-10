@@ -87,6 +87,13 @@ app.use((req, res) => {
 
 // 8) Iniciar servidor
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando: http://localhost:${PORT}`);
-});
+
+// Para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando: http://localhost:${PORT}`);
+  });
+}
+
+// Exportar para Vercel
+module.exports = app;
