@@ -19,7 +19,8 @@ const commerceController = require("./controllers/commerceController");
 const app = express();
 
 // 1) Middlewares globais
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());
 
 // 2) Garante que as pastas uploads e uploads/audios existam
