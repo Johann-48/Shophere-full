@@ -24,7 +24,11 @@ app.use(cors({ origin: allowedOrigin, credentials: true }));
 app.use(express.json());
 
 // 2) Garante que as pastas uploads e uploads/audios existam
-const uploadsDir = path.join(__dirname, "uploads");
+// Em ambiente serverless (Vercel), use /tmp (ephemeral) para evitar erros de escrita
+const isServerless = !!process.env.VERCEL;
+const uploadsDir = isServerless
+  ? path.join("/tmp", "uploads")
+  : path.join(__dirname, "uploads");
 const audiosDir = path.join(uploadsDir, "audios");
 
 if (!fs.existsSync(uploadsDir)) {

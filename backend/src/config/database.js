@@ -74,9 +74,7 @@ const getDatabaseConfig = () => {
       ssl: false, // AlwaysData não requer SSL para conexões externas MySQL
       timezone: "+00:00",
       charset: "utf8mb4",
-      connectTimeout: 30000,
-      acquireTimeout: 30000,
-      reconnect: true,
+      connectTimeout: 30000
     };
   }
 
