@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { FiSearch, FiMenu, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import API_CONFIG from "../../config/api";
 import { useTheme } from "../../contexts/ThemeContext";
 import ThemeToggle from "../ThemeToggle";
 
@@ -21,7 +22,7 @@ export default function Header() {
 
     (async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/auth/me", {
+        const res = await axios.get(API_CONFIG.getApiUrl("/api/auth/me"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserName(res.data.nome);

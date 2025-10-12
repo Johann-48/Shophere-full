@@ -960,8 +960,8 @@ function BatePapo() {
               // monte a URL completa. Se já for "/uploads/...",
               // use diretamente:
               mediaSrc = mediaSrc.startsWith("/")
-                ? `http://localhost:4000${mediaSrc}`
-                : `http://localhost:4000/uploads/audios/${mediaSrc}`;
+                ? `${window.location.origin}${mediaSrc}`
+                : `${window.location.origin}/uploads/audios/${mediaSrc}`;
             }
 
             return (
@@ -983,7 +983,7 @@ function BatePapo() {
                     src={
                       msg.conteudo.startsWith("http")
                         ? msg.conteudo
-                        : `http://localhost:4000${msg.conteudo}`
+                        : `${window.location.origin}${msg.conteudo}`
                     }
                   />
                 )}

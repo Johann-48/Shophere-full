@@ -265,9 +265,9 @@ export default function ContatoLoja() {
                   if (img && img.startsWith("http")) {
                     src = img;
                   } else if (img && img.startsWith("/")) {
-                    src = `http://localhost:4000${img}`;
+                    src = `${window.location.origin}${img}`;
                   } else if (img) {
-                    src = `http://localhost:4000/uploads/${img}`;
+                    src = `${window.location.origin}/uploads/${img}`;
                   } else {
                     // aqui, quando não há arquivo, cai no placeholder local
                     src = "/assets/placeholder.png";
@@ -297,8 +297,8 @@ export default function ContatoLoja() {
                 const src = img.startsWith("http")
                   ? img
                   : img.startsWith("/")
-                  ? `http://localhost:4000${img}`
-                  : `http://localhost:4000/uploads/${img}`;
+                  ? `${window.location.origin}${img}`
+                  : `${window.location.origin}/uploads/${img}`;
                 return (
                   <img
                     src={src}

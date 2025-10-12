@@ -116,6 +116,54 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Debug summary: counts of main tables to check if DB has data
+app.get("/api/debug/summary", async (req, res) => {
+  try {
+    const pool = require("./config/db");
+    const results = {};
+    // Try Portuguese table names first
+    try {
+      const [[c1]] = await pool.query("SELECT COUNT(*) AS cnt FROM categorias");
+      results.categorias = c1.cnt;
+    } catch {}
+    try {
+      const [[c2]] = await pool.query("SELECT COUNT(*) AS cnt FROM comercios");
+      results.comercios = c2.cnt;
+    } catch {}
+    try {
+      const [[c3]] = await pool.query("SELECT COUNT(*) AS cnt FROM produtos");
+      results.produtos = c3.cnt;
+    } catch {}
+    // Try English names as fallback
+    if (results.categories == null) {
+      try {
+        const [[e1]] = await pool.query(
+          "SELECT COUNT(*) AS cnt FROM categories"
+        );
+        results.categories = e1.cnt;
+      } catch {}
+    }
+    if (results.commerces == null) {
+      try {
+        const [[e2]] = await pool.query(
+          "SELECT COUNT(*) AS cnt FROM commerces"
+        );
+        results.commerces = e2.cnt;
+      } catch {}
+    }
+    if (results.products == null) {
+      try {
+        const [[e3]] = await pool.query("SELECT COUNT(*) AS cnt FROM products");
+        results.products = e3.cnt;
+      } catch {}
+    }
+    res.json({ ok: true, results });
+  } catch (err) {
+    console.error("/api/debug/summary error:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // Database health check: verifies connection and simple query
 app.get("/api/db-health", async (req, res) => {
   try {
