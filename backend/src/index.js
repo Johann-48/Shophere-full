@@ -23,7 +23,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:5173",
   "https://shophere-production.vercel.app",
   "https://shophere-full.vercel.app",
-  "https://*.vercel.app"
+  "https://*.vercel.app",
 ];
 
 // For production, allow multiple origins
@@ -31,15 +31,15 @@ const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    
+
     // Check if origin is in allowed list or matches vercel pattern
-    if (allowedOrigins.includes(origin) || origin.includes('.vercel.app')) {
+    if (allowedOrigins.includes(origin) || origin.includes(".vercel.app")) {
       return callback(null, true);
     }
-    
-    callback(new Error('Not allowed by CORS'));
+
+    callback(new Error("Not allowed by CORS"));
   },
-  credentials: true
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -116,7 +116,7 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 4000;
 
 // Para desenvolvimento local
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`Servidor rodando: http://localhost:${PORT}`);
   });

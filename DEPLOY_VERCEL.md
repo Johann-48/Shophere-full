@@ -15,9 +15,11 @@
 ### Problemas Identificados e Soluções Aplicadas:
 
 1. **❌ 404 Errors nas APIs**: Configuração incorreta do vercel.json
+
    - ✅ **Resolvido**: Atualizado vercel.json com estrutura correta de monorepo
 
 2. **❌ URLs hardcodadas**: Frontend usava localhost:4000 em produção
+
    - ✅ **Resolvido**: Criado sistema de configuração de API baseado em ambiente
 
 3. **❌ CORS Issues**: Backend não permitia requests do domínio de produção
@@ -30,6 +32,7 @@
 ### 1.1 vercel.json (Root do Projeto) - ✅ ATUALIZADO
 
 O arquivo `vercel.json` foi configurado para:
+
 - Build do frontend na pasta `frontend/`
 - Função serverless para API em `api/index.js`
 - Roteamento correto para `/api/*` e arquivos estáticos
@@ -37,6 +40,7 @@ O arquivo `vercel.json` foi configurado para:
 ### 1.2 API Configuration - ✅ CRIADO
 
 Criado `frontend/src/config/api.js` para:
+
 - Detecção automática de ambiente (dev/prod)
 - URLs relativas em produção
 - URLs absolutas em desenvolvimento
@@ -44,6 +48,7 @@ Criado `frontend/src/config/api.js` para:
 ### 1.3 Environment Variables - ✅ CONFIGURADO
 
 Criados arquivos de ambiente:
+
 - `.env.production` - Variáveis de produção
 - `frontend/.env.development` - Frontend desenvolvimento
 - `frontend/.env.production` - Frontend produção
@@ -80,6 +85,7 @@ JWT_SECRET=your_super_secure_jwt_secret_for_production_change_this
 ```
 
 **Como configurar**:
+
 1. No Vercel Dashboard → Seu projeto → Settings → Environment Variables
 2. Adicione cada variável uma por vez
 3. Marque todas as opções: Production, Preview, Development
@@ -93,10 +99,12 @@ JWT_SECRET=your_super_secure_jwt_secret_for_production_change_this
 Depois do deploy, teste estas URLs:
 
 **Frontend**:
+
 - `https://seu-projeto.vercel.app/` - Página inicial
 - `https://seu-projeto.vercel.app/login` - Login
 
 **API Endpoints**:
+
 - `https://seu-projeto.vercel.app/api/` - Health check
 - `https://seu-projeto.vercel.app/api/categories` - Listar categorias
 - `https://seu-projeto.vercel.app/api/products` - Listar produtos
@@ -104,6 +112,7 @@ Depois do deploy, teste estas URLs:
 ### 3.2 Verificar Logs
 
 No Vercel Dashboard:
+
 1. **Functions** → Clique na função API
 2. **View Logs** para ver erros em tempo real
 3. **Invocations** para ver histórico de chamadas
@@ -111,50 +120,55 @@ No Vercel Dashboard:
 ### 3.3 Problemas Comuns e Soluções
 
 **❌ "Module not found"**:
+
 ```bash
 # Re-deploy forçando reinstalação
 cd frontend && rm -rf node_modules package-lock.json && npm install
 ```
 
 **❌ "Database connection failed"**:
+
 - Verifique as Environment Variables no Vercel
 - Teste conexão AlwaysData no painel deles
 
 **❌ "CORS errors"**:
-- Adicionado suporte automático para domínios *.vercel.app
+
+- Adicionado suporte automático para domínios \*.vercel.app
 - Configure FRONTEND_URL se usar domínio customizado
 
 ---
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/src/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/src/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/dist/$1"
-    }
-  ],
-  "functions": {
-    "backend/src/index.js": {
-      "maxDuration": 30
-    }
-  }
+
+"builds": [
+{
+"src": "frontend/package.json",
+"use": "@vercel/static-build",
+"config": {
+"distDir": "dist"
 }
-```
+},
+{
+"src": "backend/src/index.js",
+"use": "@vercel/node"
+}
+],
+"routes": [
+{
+"src": "/api/(.*)",
+"dest": "/backend/src/index.js"
+},
+{
+"src": "/(.*)",
+"dest": "/frontend/dist/$1"
+}
+],
+"functions": {
+"backend/src/index.js": {
+"maxDuration": 30
+}
+}
+}
+
+````
 
 ### 1.3 Criar Arquivo api/index.js (Para Vercel Functions)
 
@@ -219,7 +233,7 @@ app.get("/api", (req, res) => {
 });
 
 module.exports = app;
-```
+````
 
 ---
 
@@ -241,6 +255,7 @@ O Vercel fará deploy automático a cada push.
 ### 4.2 Testar Todas as Funcionalidades
 
 **Checklist de Testes**:
+
 - [ ] Página inicial carrega
 - [ ] Login/Signup funcionam
 - [ ] Listar produtos funciona
@@ -297,6 +312,7 @@ O Vercel fará deploy automático a cada push.
 4. **Teste todas as funcionalidades**
 
 **Links Importantes**:
+
 - Vercel Dashboard: https://vercel.com/dashboard
 - Logs da aplicação: No dashboard → Functions → View Logs
 - AlwaysData: https://admin.alwaysdata.com/

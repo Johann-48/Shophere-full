@@ -54,35 +54,39 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
   const handleGoogleLogin = () => {
     // Para teste, vou abrir a página de login do Google
     // Em produção, você precisa configurar OAuth no Google Cloud Console
-    window.open('https://accounts.google.com/signin', '_blank', 'width=500,height=600');
-    
+    window.open(
+      "https://accounts.google.com/signin",
+      "_blank",
+      "width=500,height=600"
+    );
+
     // Simula o retorno do OAuth (para teste)
     setTimeout(() => {
-      const simulateLogin = confirm('Simular login com Google bem-sucedido?');
+      const simulateLogin = confirm("Simular login com Google bem-sucedido?");
       if (simulateLogin) {
         // Simula dados do usuário Google
         const googleUser = {
-          id: 'google_' + Date.now(),
-          nome: 'Usuário Google',
-          email: 'usuario@gmail.com',
-          role: 'user'
+          id: "google_" + Date.now(),
+          nome: "Usuário Google",
+          email: "usuario@gmail.com",
+          role: "user",
         };
-        
+
         // Simula token
-        const token = 'google_token_' + Date.now();
-        
+        const token = "google_token_" + Date.now();
+
         // Salva no localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("role", googleUser.role);
         localStorage.setItem("user", JSON.stringify(googleUser));
         localStorage.setItem("userId", googleUser.id);
-        
+
         // Atualiza o contexto de autenticação
         login(token, googleUser.role);
-        
+
         // Dispara evento para atualizar o header
-        window.dispatchEvent(new Event('localStorageUpdate'));
-        
+        window.dispatchEvent(new Event("localStorageUpdate"));
+
         // Redireciona para home
         navigate("/");
       }
@@ -92,44 +96,48 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
   const handleAppleLogin = () => {
     // Para teste, vou abrir a página de login da Apple
     // Em produção, você precisa configurar OAuth no Apple Developer
-    window.open('https://appleid.apple.com/sign-in', '_blank', 'width=500,height=600');
-    
+    window.open(
+      "https://appleid.apple.com/sign-in",
+      "_blank",
+      "width=500,height=600"
+    );
+
     // Simula o retorno do OAuth (para teste)
     setTimeout(() => {
-      const simulateLogin = confirm('Simular login com Apple bem-sucedido?');
+      const simulateLogin = confirm("Simular login com Apple bem-sucedido?");
       if (simulateLogin) {
         // Simula dados do usuário Apple
         const appleUser = {
-          id: 'apple_' + Date.now(),
-          nome: 'Usuário Apple',
-          email: 'usuario@icloud.com',
-          role: 'user'
+          id: "apple_" + Date.now(),
+          nome: "Usuário Apple",
+          email: "usuario@icloud.com",
+          role: "user",
         };
-        
+
         // Simula token
-        const token = 'apple_token_' + Date.now();
-        
+        const token = "apple_token_" + Date.now();
+
         // Salva no localStorage
         localStorage.setItem("token", token);
         localStorage.setItem("role", appleUser.role);
         localStorage.setItem("user", JSON.stringify(appleUser));
         localStorage.setItem("userId", appleUser.id);
-        
+
         // Atualiza o contexto de autenticação
         login(token, appleUser.role);
-        
+
         // Dispara evento para atualizar o header
-        window.dispatchEvent(new Event('localStorageUpdate'));
-        
+        window.dispatchEvent(new Event("localStorageUpdate"));
+
         // Redireciona para home
         navigate("/");
       }
     }, 2000);
   };
 
-  const backgroundGradient = isDarkMode 
-    ? 'bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100'
-    : 'bg-gradient-to-br from-green-100 via-white to-green-50';
+  const backgroundGradient = isDarkMode
+    ? "bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100"
+    : "bg-gradient-to-br from-green-100 via-white to-green-50";
 
   return (
     <main className={`flex-1 ${backgroundGradient} py-16 px-6 min-h-screen`}>
