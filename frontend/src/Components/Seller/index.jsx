@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import API_CONFIG from "../../config/api";
 
 const Seller = ({ goBackToLogin }) => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Seller = ({ goBackToLogin }) => {
     }
 
     try {
-      await axios.post("http://localhost:4000/api/commerces/signup", {
+      await axios.post(API_CONFIG.getApiUrl("/api/commerces/signup"), {
         nome: form.nomeComercio,
         email: form.email,
         senha: form.senha,

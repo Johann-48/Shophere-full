@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_CONFIG from "../../config/api";
 
 export default function ReviewForm() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function ReviewForm() {
       });
 
       const response = await axios.post(
-        `http://localhost:4000/api/avaliacoes/${productId}`,
+        API_CONFIG.getApiUrl(`/api/avaliacoes/${productId}`),
         payload,
         {
           headers: {

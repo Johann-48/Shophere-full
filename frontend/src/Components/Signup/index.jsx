@@ -4,6 +4,7 @@ import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useTheme } from "../../contexts/ThemeContext";
+import API_CONFIG from "../../config/api";
 
 export default function Signup({ goBackToLogin }) {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export default function Signup({ goBackToLogin }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/auth/signup",
+        API_CONFIG.getApiUrl("/api/auth/signup"),
         {
           nome: form.name.trim(),
           email: form.email.trim().toLowerCase(),

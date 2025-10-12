@@ -5,6 +5,7 @@ import { FaLock, FaEnvelope, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext"; // ou caminho correto
 import { useTheme } from "../../contexts/ThemeContext";
+import API_CONFIG from "../../config/api";
 
 export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        API_CONFIG.getApiUrl("/api/auth/login"),
         {
           email: emailOrPhone,
           senha: password,

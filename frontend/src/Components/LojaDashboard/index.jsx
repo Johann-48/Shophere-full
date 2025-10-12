@@ -12,6 +12,7 @@ import {
   FiSend,
   FiX,
 } from "react-icons/fi";
+import API_CONFIG from "../../config/api";
 
 export default function LojaDashboard() {
   const [abaSelecionada, setAbaSelecionada] = useState("adicionarproduto");
@@ -45,7 +46,7 @@ export default function LojaDashboard() {
               logoUrl
                 ? logoUrl.startsWith("http")
                   ? logoUrl
-                  : `http://localhost:4000/uploads/${logoUrl}`
+                  : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
                 : "https://via.placeholder.com/240?text=Sem+Logo"
             }
             alt={nomeLoja || "Logo da Loja"}
@@ -144,7 +145,7 @@ function AdicionarProduto() {
     try {
       // 1) Cria o produto
       const res = await axios.post(
-        "http://localhost:4000/api/products",
+        API_CONFIG.getApiUrl("/api/products"),
         {
           nome,
           preco,
@@ -169,7 +170,7 @@ function AdicionarProduto() {
         formData.append("foto", foto);
 
         await axios.post(
-          `http://localhost:4000/api/upload/${produtoId}`,
+          API_CONFIG.getApiUrl(`/api/upload/${produtoId}`),
           formData,
           {
             headers: {

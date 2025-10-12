@@ -19,8 +19,30 @@ const commerceController = require("./controllers/commerceController");
 const app = express();
 
 // 1) Middlewares globais
-const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
-app.use(cors({ origin: allowedOrigin, credentials: true }));
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "https://shophere-production.vercel.app",
+  "https://shophere-full.vercel.app",
+  "https://*.vercel.app"
+];
+
+// For production, allow multiple origins
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list or matches vercel pattern
+    if (allowedOrigins.includes(origin) || origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // 2) Garante que as pastas uploads e uploads/audios existam
