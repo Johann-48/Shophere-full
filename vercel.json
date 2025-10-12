@@ -22,7 +22,5 @@
       "src": "/(.*)",
       "dest": "/frontend/dist/$1"
     }
-  ],
-  "installCommand": "cd frontend && npm ci",
-  "buildCommand": "cd frontend && npm run build"
+  ]
 }
