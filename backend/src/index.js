@@ -106,6 +106,31 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend funcionando" });
 });
 
+// Health check endpoint (useful on Vercel)
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    env: process.env.NODE_ENV,
+    vercel: !!process.env.VERCEL,
+    time: new Date().toISOString(),
+  });
+});
+
+// Database health check: verifies connection and simple query
+app.get("/api/db-health", async (req, res) => {
+  try {
+    const pool = require("./config/db");
+    const [rows] = await pool.query("SELECT 1 AS ok");
+    res.json({
+      status: "ok",
+      db: rows && rows[0] && rows[0].ok === 1 ? "reachable" : "unknown",
+    });
+  } catch (err) {
+    console.error("DB health check failed:", err.message);
+    res.status(500).json({ status: "error", message: err.message });
+  }
+});
+
 // 7) Catch‑all de rota não encontrada
 app.use((req, res) => {
   console.log("Rota não encontrada:", req.method, req.url);
