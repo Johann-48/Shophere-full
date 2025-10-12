@@ -5,11 +5,20 @@ const fs = require("fs");
 
 const router = express.Router();
 
-// 1) Monta o caminho absoluto da pasta de áudio
-const audiosDir = path.join(__dirname, "../uploads/audios");
-// 2) Garante que a pasta exista
-if (!fs.existsSync(audiosDir)) {
-  fs.mkdirSync(audiosDir, { recursive: true });
+// Detecta ambiente serverless (Vercel) e usa /tmp como diretório gravável
+const isServerless = !!process.env.VERCEL;
+const baseUploads = isServerless
+  ? path.join("/tmp", "uploads")
+  : path.join(__dirname, "../uploads");
+const audiosDir = path.join(baseUploads, "audios");
+
+// Garante que os diretórios existam (em Vercel, /var/task é read-only; /tmp é permitido)
+try {
+  if (!fs.existsSync(audiosDir)) {
+    fs.mkdirSync(audiosDir, { recursive: true });
+  }
+} catch (e) {
+  console.error("Falha ao criar diretório de áudios:", audiosDir, e.message);
 }
 
 const storage = multer.diskStorage({

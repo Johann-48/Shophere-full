@@ -5,8 +5,16 @@ const path = require("path");
 const fs = require("fs");
 const router = express.Router();
 
-const imagensDir = path.join(__dirname, "../uploads/imagens");
-if (!fs.existsSync(imagensDir)) fs.mkdirSync(imagensDir, { recursive: true });
+const isServerless = !!process.env.VERCEL;
+const baseUploads = isServerless
+  ? path.join("/tmp", "uploads")
+  : path.join(__dirname, "../uploads");
+const imagensDir = path.join(baseUploads, "imagens");
+try {
+  if (!fs.existsSync(imagensDir)) fs.mkdirSync(imagensDir, { recursive: true });
+} catch (e) {
+  console.error("Falha ao criar diretório de imagens:", imagensDir, e.message);
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, imagensDir),
