@@ -3,6 +3,7 @@
   "buildCommand": "npm run build --prefix frontend",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install --prefix frontend && npm install --prefix backend",
+  "regions": ["cdg1"],
   "rewrites": [
     {
       "source": "/api/(.*)",
