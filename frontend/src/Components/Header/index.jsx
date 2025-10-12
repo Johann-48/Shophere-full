@@ -92,7 +92,9 @@ export default function Header() {
               {link.action ? (
                 <button
                   onClick={link.action}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                    currentTheme.text
+                  } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
                     link.underline ? "bg-blue-500/20 text-blue-400" : ""
                   }`}
                 >
@@ -101,7 +103,9 @@ export default function Header() {
               ) : (
                 <Link
                   to={link.to}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                    currentTheme.text
+                  } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
                     link.underline ? "bg-blue-500/20 text-blue-400" : ""
                   }`}
                 >
@@ -110,7 +114,7 @@ export default function Header() {
               )}
             </motion.div>
           ))}
-          
+
           {/* Theme Toggle */}
           <div className="ml-4 pl-4 border-l border-current border-opacity-20">
             <ThemeToggle />
@@ -120,8 +124,8 @@ export default function Header() {
         {/* Mobile menu button */}
         <div className="md:hidden flex items-center space-x-2">
           <ThemeToggle />
-          <button 
-            onClick={() => setIsOpen(!isOpen)} 
+          <button
+            onClick={() => setIsOpen(!isOpen)}
             className={`p-2 rounded-lg ${currentTheme.text} hover:bg-blue-500/10 focus-ring transition-colors`}
           >
             {isOpen ? <FiX size={20} /> : <FiMenu size={20} />}
@@ -147,7 +151,9 @@ export default function Header() {
                       link.action();
                       setIsOpen(false);
                     }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
+                    className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+                      currentTheme.text
+                    } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
                       link.underline ? "bg-blue-500/20 text-blue-400" : ""
                     }`}
                   >
@@ -157,7 +163,9 @@ export default function Header() {
                   <Link
                     to={link.to}
                     onClick={() => setIsOpen(false)}
-                    className={`block px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
+                    className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+                      currentTheme.text
+                    } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
                       link.underline ? "bg-blue-500/20 text-blue-400" : ""
                     }`}
                   >

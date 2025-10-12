@@ -226,223 +226,233 @@ export default function ContatoLoja() {
   const mensagensAtuais = chatId ? mensagensPorLoja[chatId] || [] : [];
 
   // Define o gradiente baseado no tema
-  const backgroundGradient = isDarkMode 
-    ? 'bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100'
-    : 'bg-gradient-to-br from-green-100 via-white to-green-50';
+  const backgroundGradient = isDarkMode
+    ? "bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100"
+    : "bg-gradient-to-br from-green-100 via-white to-green-50";
 
-  const containerBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
-  const sidebarBg = isDarkMode ? 'bg-gray-700' : 'bg-white';
-  const textColor = isDarkMode ? 'text-gray-200' : 'text-gray-900';
+  const containerBg = isDarkMode ? "bg-gray-800" : "bg-white";
+  const sidebarBg = isDarkMode ? "bg-gray-700" : "bg-white";
+  const textColor = isDarkMode ? "text-gray-200" : "text-gray-900";
 
   return (
     <div className={`min-h-screen ${backgroundGradient} py-10`}>
-      <div className={`flex h-[600px] max-w-6xl mx-auto ${containerBg} shadow-xl rounded-lg overflow-hidden`}>
+      <div
+        className={`flex h-[600px] max-w-6xl mx-auto ${containerBg} shadow-xl rounded-lg overflow-hidden`}
+      >
         {/* Lista de Lojas */}
-        <aside className={`w-1/4 ${sidebarBg} border-r ${isDarkMode ? 'border-gray-600' : 'border-gray-200'} p-4 overflow-y-auto`}>
-          <h2 className={`text-lg font-semibold mb-3 ${textColor}`}>Lojas Disponíveis</h2>
-        {lojas.length === 0 ? (
-          <p>Carregando lojas…</p>
-        ) : (
-          <ul className="space-y-3">
-            {lojas.map((loja) => (
-              <li
-                key={loja.id}
-                onClick={() => setLojaSelecionada(loja)}
-                className={`flex items-center gap-3 p-2 rounded cursor-pointer transition ${
-                  lojaSelecionada?.id === loja.id
-                    ? isDarkMode 
-                      ? "bg-blue-800 text-blue-200 font-semibold"
-                      : "bg-blue-100 text-blue-700 font-semibold"
-                    : isDarkMode 
+        <aside
+          className={`w-1/4 ${sidebarBg} border-r ${
+            isDarkMode ? "border-gray-600" : "border-gray-200"
+          } p-4 overflow-y-auto`}
+        >
+          <h2 className={`text-lg font-semibold mb-3 ${textColor}`}>
+            Lojas Disponíveis
+          </h2>
+          {lojas.length === 0 ? (
+            <p>Carregando lojas…</p>
+          ) : (
+            <ul className="space-y-3">
+              {lojas.map((loja) => (
+                <li
+                  key={loja.id}
+                  onClick={() => setLojaSelecionada(loja)}
+                  className={`flex items-center gap-3 p-2 rounded cursor-pointer transition ${
+                    lojaSelecionada?.id === loja.id
+                      ? isDarkMode
+                        ? "bg-blue-800 text-blue-200 font-semibold"
+                        : "bg-blue-100 text-blue-700 font-semibold"
+                      : isDarkMode
                       ? "hover:bg-gray-600"
                       : "hover:bg-gray-100"
-                }`}
-              >
-                {/* Avatar */}
+                  }`}
+                >
+                  {/* Avatar */}
+                  {(() => {
+                    const img = loja.imagem;
+                    let src;
+                    if (img && img.startsWith("http")) {
+                      src = img;
+                    } else if (img && img.startsWith("/")) {
+                      src = `${window.location.origin}${img}`;
+                    } else if (img) {
+                      src = `${window.location.origin}/uploads/${img}`;
+                    } else {
+                      // aqui, quando não há arquivo, cai no placeholder local
+                      src = "/assets/placeholder.png";
+                    }
+                    return (
+                      <img
+                        src={src}
+                        alt={loja.nome}
+                        className="w-10 h-10 rounded-full object-cover border"
+                      />
+                    );
+                  })()}
+                  {loja.nome}
+                </li>
+              ))}
+            </ul>
+          )}
+        </aside>
+
+        {/* Área de Chat */}
+        <div className="flex-1 flex flex-col p-4">
+          {lojaSelecionada && (
+            <>
+              <div className="flex items-center gap-3 mb-2">
                 {(() => {
-                  const img = loja.imagem;
-                  let src;
-                  if (img && img.startsWith("http")) {
-                    src = img;
-                  } else if (img && img.startsWith("/")) {
-                    src = `${window.location.origin}${img}`;
-                  } else if (img) {
-                    src = `${window.location.origin}/uploads/${img}`;
-                  } else {
-                    // aqui, quando não há arquivo, cai no placeholder local
-                    src = "/assets/placeholder.png";
-                  }
+                  const img = lojaSelecionada.imagem || "";
+                  const src = img.startsWith("http")
+                    ? img
+                    : img.startsWith("/")
+                    ? `${window.location.origin}${img}`
+                    : `${window.location.origin}/uploads/${img}`;
                   return (
                     <img
                       src={src}
-                      alt={loja.nome}
+                      alt={lojaSelecionada.nome}
                       className="w-10 h-10 rounded-full object-cover border"
                     />
                   );
                 })()}
-                {loja.nome}
-              </li>
-            ))}
-          </ul>
-        )}
-      </aside>
+                <h2
+                  className={`text-xl font-bold ${
+                    isDarkMode ? "text-blue-300" : "text-blue-800"
+                  }`}
+                >
+                  Contato com {lojaSelecionada.nome}
+                </h2>
+              </div>
+              <div
+                ref={chatRef}
+                className={`flex-1 overflow-y-auto space-y-4 p-4 rounded shadow-inner ${
+                  isDarkMode ? "bg-gray-800" : "bg-white"
+                }`}
+              >
+                {mensagensAtuais.map((msg, index) => {
+                  const isCliente = msg.remetente === "cliente";
 
-      {/* Área de Chat */}
-      <div className="flex-1 flex flex-col p-4">
-        {lojaSelecionada && (
-          <>
-            <div className="flex items-center gap-3 mb-2">
-              {(() => {
-                const img = lojaSelecionada.imagem || "";
-                const src = img.startsWith("http")
-                  ? img
-                  : img.startsWith("/")
-                  ? `${window.location.origin}${img}`
-                  : `${window.location.origin}/uploads/${img}`;
-                return (
-                  <img
-                    src={src}
-                    alt={lojaSelecionada.nome}
-                    className="w-10 h-10 rounded-full object-cover border"
-                  />
-                );
-              })()}
-              <h2 className={`text-xl font-bold ${
-                isDarkMode ? 'text-blue-300' : 'text-blue-800'
-              }`}>
-                Contato com {lojaSelecionada.nome}
-              </h2>
-            </div>
-            <div
-              ref={chatRef}
-              className={`flex-1 overflow-y-auto space-y-4 p-4 rounded shadow-inner ${
-                isDarkMode ? 'bg-gray-800' : 'bg-white'
-              }`}
-            >
-              {mensagensAtuais.map((msg, index) => {
-                const isCliente = msg.remetente === "cliente";
+                  // Define uma chave segura
+                  const key = msg.id ?? `msg-${index}`;
 
-                // Define uma chave segura
-                const key = msg.id ?? `msg-${index}`;
-
-                return (
-                  <div
-                    key={key}
-                    className={`flex ${
-                      isCliente ? "justify-start" : "justify-end"
-                    }`}
-                  >
+                  return (
                     <div
-                      className={`p-3 rounded-xl max-w-[75%] shadow transition-all ${
-                        isCliente
-                          ? isDarkMode 
-                            ? "bg-green-700 text-green-100 rounded-bl-none"
-                            : "bg-green-100 text-gray-800 rounded-bl-none"
-                          : isDarkMode 
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-blue-500 text-white rounded-br-none"
+                      key={key}
+                      className={`flex ${
+                        isCliente ? "justify-start" : "justify-end"
                       }`}
                     >
-                      {msg.tipo === "texto" && <span>{msg.conteudo}</span>}
-                      {msg.tipo === "imagem" && (
-                        <img
-                          src={
-                            msg.conteudo.startsWith("http")
-                              ? msg.conteudo
-                              : `http://localhost:4000${msg.conteudo}`
-                          }
-                        />
-                      )}
-                      {msg.tipo === "audio" && (
-                        <audio
-                          controls
-                          src={
-                            msg.conteudo.startsWith("blob:")
-                              ? msg.conteudo
-                              : msg.conteudo.startsWith("/")
-                              ? `http://localhost:4000${msg.conteudo}`
-                              : msg.conteudo
-                          }
-                        />
-                      )}
+                      <div
+                        className={`p-3 rounded-xl max-w-[75%] shadow transition-all ${
+                          isCliente
+                            ? isDarkMode
+                              ? "bg-green-700 text-green-100 rounded-bl-none"
+                              : "bg-green-100 text-gray-800 rounded-bl-none"
+                            : isDarkMode
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-blue-500 text-white rounded-br-none"
+                        }`}
+                      >
+                        {msg.tipo === "texto" && <span>{msg.conteudo}</span>}
+                        {msg.tipo === "imagem" && (
+                          <img
+                            src={
+                              msg.conteudo.startsWith("http")
+                                ? msg.conteudo
+                                : `http://localhost:4000${msg.conteudo}`
+                            }
+                          />
+                        )}
+                        {msg.tipo === "audio" && (
+                          <audio
+                            controls
+                            src={
+                              msg.conteudo.startsWith("blob:")
+                                ? msg.conteudo
+                                : msg.conteudo.startsWith("/")
+                                ? `http://localhost:4000${msg.conteudo}`
+                                : msg.conteudo
+                            }
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            <form onSubmit={enviarTexto} className="mt-4 space-y-3">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={novaMensagem}
-                  onChange={(e) => setNovaMensagem(e.target.value)}
-                  placeholder="Digite sua mensagem..."
-                  className={`flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${
-                    isDarkMode 
-                      ? 'bg-gray-700 text-gray-200 border-gray-600 placeholder-gray-400' 
-                      : 'bg-white text-gray-900 border-gray-300 placeholder-gray-500'
-                  }`}
-                />
-                <button
-                  type="submit"
-                  disabled={!novaMensagem.trim()}
-                  className={`p-3 text-white rounded disabled:opacity-50 transition ${
-                    isDarkMode 
-                      ? 'bg-blue-600 hover:bg-blue-500' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  <FiSend size={20} />
-                </button>
+                  );
+                })}
               </div>
-              <div className="flex gap-3 items-center">
-                <label
-                  htmlFor="file-upload"
-                  className={`flex items-center gap-1 cursor-pointer px-3 py-2 rounded transition ${
-                    isDarkMode 
-                      ? 'bg-gray-600 hover:bg-gray-500 text-gray-200' 
-                      : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                  }`}
-                  title="Enviar imagem"
-                >
-                  <FiCamera size={18} />
+              <form onSubmit={enviarTexto} className="mt-4 space-y-3">
+                <div className="flex gap-2">
                   <input
-                    id="file-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={enviarImagem}
-                    className="hidden"
+                    type="text"
+                    value={novaMensagem}
+                    onChange={(e) => setNovaMensagem(e.target.value)}
+                    placeholder="Digite sua mensagem..."
+                    className={`flex-1 px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${
+                      isDarkMode
+                        ? "bg-gray-700 text-gray-200 border-gray-600 placeholder-gray-400"
+                        : "bg-white text-gray-900 border-gray-300 placeholder-gray-500"
+                    }`}
                   />
-                </label>
-                {!gravando ? (
                   <button
-                    type="button"
-                    onClick={iniciarGravacao}
-                    className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded"
-                  >
-                    <FiMic size={18} />
-                    Gravar
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={pararGravacao}
-                    className={`flex items-center gap-1 text-white px-3 py-2 rounded transition ${
-                      isDarkMode 
-                        ? 'bg-gray-600 hover:bg-gray-500' 
-                        : 'bg-gray-700 hover:bg-gray-800'
+                    type="submit"
+                    disabled={!novaMensagem.trim()}
+                    className={`p-3 text-white rounded disabled:opacity-50 transition ${
+                      isDarkMode
+                        ? "bg-blue-600 hover:bg-blue-500"
+                        : "bg-blue-600 hover:bg-blue-700"
                     }`}
                   >
-                    <FiX size={18} />
-                    Parar
+                    <FiSend size={20} />
                   </button>
-                )}
-              </div>
-            </form>
-          </>
-        )}
+                </div>
+                <div className="flex gap-3 items-center">
+                  <label
+                    htmlFor="file-upload"
+                    className={`flex items-center gap-1 cursor-pointer px-3 py-2 rounded transition ${
+                      isDarkMode
+                        ? "bg-gray-600 hover:bg-gray-500 text-gray-200"
+                        : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+                    }`}
+                    title="Enviar imagem"
+                  >
+                    <FiCamera size={18} />
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={enviarImagem}
+                      className="hidden"
+                    />
+                  </label>
+                  {!gravando ? (
+                    <button
+                      type="button"
+                      onClick={iniciarGravacao}
+                      className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded"
+                    >
+                      <FiMic size={18} />
+                      Gravar
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={pararGravacao}
+                      className={`flex items-center gap-1 text-white px-3 py-2 rounded transition ${
+                        isDarkMode
+                          ? "bg-gray-600 hover:bg-gray-500"
+                          : "bg-gray-700 hover:bg-gray-800"
+                      }`}
+                    >
+                      <FiX size={18} />
+                      Parar
+                    </button>
+                  )}
+                </div>
+              </form>
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }
