@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { ToastContainer, toast } from "react-toastify";
@@ -17,6 +17,30 @@ export default function ReviewForm() {
     formState: { errors, isSubmitting, isValid },
   } = useForm({ mode: "onChange" });
   const [rating, setRating] = useState(0);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [loadingCheck, setLoadingCheck] = useState(true);
+
+  // Pre-check: user already reviewed this product?
+  useEffect(() => {
+    async function checkUserAlreadyReviewed() {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user?.id) {
+          setLoadingCheck(false);
+          return;
+        }
+        const res = await axios.get(API_CONFIG.getApiUrl(`/api/avaliacoes/${productId}`));
+        const reviews = res.data?.reviews || [];
+        const found = reviews.some((r) => r.usuario_id === user.id);
+        setAlreadyReviewed(found);
+      } catch (e) {
+        // swallow; allow submission to proceed, backend will enforce
+      } finally {
+        setLoadingCheck(false);
+      }
+    }
+    if (productId) checkUserAlreadyReviewed();
+  }, [productId]);
 
   const submit = async (data) => {
     try {
@@ -46,9 +70,19 @@ export default function ReviewForm() {
       console.log("Resposta:", response.data);
 
       toast.success("Avaliação enviada!", { autoClose: 3000 });
+      // Opcional: voltar para a página do produto
+      setTimeout(() => navigate(`/produto/${productId}`), 500);
     } catch (err) {
-      console.error("Erro ao enviar avaliação:", err);
-      toast.error("Erro ao enviar avaliação.");
+      console.error("Erro ao enviar avaliação:", err?.response || err);
+      const backendMsg = err?.response?.data?.error || err?.response?.data?.message;
+      if (err?.response?.status === 400 && backendMsg) {
+        toast.error(backendMsg);
+      } else if (err?.response?.status === 401) {
+        toast.error("Sessão expirada. Faça login novamente.");
+        navigate("/login");
+      } else {
+        toast.error("Erro ao enviar avaliação.");
+      }
     }
   };
 
@@ -62,6 +96,14 @@ export default function ReviewForm() {
           className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-xl space-y-6"
         >
           <h2 className="text-2xl font-bold">Deixe sua avaliação</h2>
+
+          {loadingCheck ? (
+            <p className="text-sm text-gray-500">Carregando…</p>
+          ) : alreadyReviewed ? (
+            <div className="p-3 rounded bg-yellow-100 text-yellow-800 border border-yellow-300">
+              Você já avaliou este produto. No momento não é possível enviar outra avaliação.
+            </div>
+          ) : null}
 
           {/* Rating Stars */}
           <div>
@@ -112,9 +154,9 @@ export default function ReviewForm() {
           {/* Botão de Envio */}
           <button
             type="submit"
-            disabled={!isValid || rating === 0 || isSubmitting}
+            disabled={!isValid || rating === 0 || isSubmitting || alreadyReviewed || loadingCheck}
             className={`w-full py-3 rounded-lg font-semibold transition ${
-              isValid && rating > 0
+              isValid && rating > 0 && !alreadyReviewed && !loadingCheck
                 ? "bg-blue-600 hover:bg-blue-700 text-white"
                 : "bg-gray-300 cursor-not-allowed"
             }`}
