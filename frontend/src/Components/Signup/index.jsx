@@ -8,7 +8,8 @@ import API_CONFIG from "../../config/api";
 
 export default function Signup({ goBackToLogin }) {
   const navigate = useNavigate();
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, dark, light } = useTheme();
+  const currentTheme = isDarkMode ? dark : light;
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -85,24 +86,22 @@ export default function Signup({ goBackToLogin }) {
     }
   };
 
-  const backgroundGradient = isDarkMode
-    ? "bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100"
-    : "bg-gradient-to-br from-green-100 via-white to-green-50";
+  const accentText = isDarkMode ? 'text-blue-400' : 'text-blue-700';
 
   return (
     <main
-      className={`flex items-center justify-center min-h-screen ${backgroundGradient} px-4 py-12`}
+      className={`flex items-center justify-center min-h-screen ${currentTheme.background} px-4 py-12`}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-lg bg-white p-10 rounded-3xl shadow-xl border border-[#90CAF9]"
+        className={`w-full max-w-lg ${currentTheme.card} p-10 rounded-3xl shadow-xl`}
       >
-        <h2 className="text-4xl font-bold text-[#1565C0] mb-3 text-center">
+        <h2 className={`text-4xl font-bold ${currentTheme.textPrimary} mb-3 text-center`}>
           Criar Conta
         </h2>
-        <p className="text-gray-700 mb-8 text-center">
+        <p className={`${currentTheme.text} mb-8 text-center`}>
           Preencha os campos abaixo para se cadastrar
         </p>
 
@@ -110,12 +109,12 @@ export default function Signup({ goBackToLogin }) {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-medium ${currentTheme.text} mb-1`}
             >
               Nome
             </label>
             <div className="relative">
-              <FaUser className="absolute left-3 top-3.5 text-gray-500" />
+              <FaUser className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`} />
               <input
                 id="name"
                 type="text"
@@ -123,7 +122,7 @@ export default function Signup({ goBackToLogin }) {
                 value={form.name}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
               />
             </div>
           </div>
@@ -131,12 +130,12 @@ export default function Signup({ goBackToLogin }) {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-medium ${currentTheme.text} mb-1`}
             >
               Email
             </label>
             <div className="relative">
-              <FaEnvelope className="absolute left-3 top-3.5 text-gray-500" />
+              <FaEnvelope className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`} />
               <input
                 id="email"
                 type="email"
@@ -144,7 +143,7 @@ export default function Signup({ goBackToLogin }) {
                 value={form.email}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
               />
             </div>
           </div>
@@ -152,12 +151,12 @@ export default function Signup({ goBackToLogin }) {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-medium ${currentTheme.text} mb-1`}
             >
               Criar Senha
             </label>
             <div className="relative">
-              <FaLock className="absolute left-3 top-3.5 text-gray-500" />
+              <FaLock className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`} />
               <input
                 id="password"
                 type="password"
@@ -165,7 +164,7 @@ export default function Signup({ goBackToLogin }) {
                 value={form.password}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
               />
             </div>
           </div>
@@ -173,12 +172,12 @@ export default function Signup({ goBackToLogin }) {
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-medium ${currentTheme.text} mb-1`}
             >
               Confirmar Senha
             </label>
             <div className="relative">
-              <FaLock className="absolute left-3 top-3.5 text-gray-500" />
+              <FaLock className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`} />
               <input
                 id="confirmPassword"
                 type="password"
@@ -186,7 +185,7 @@ export default function Signup({ goBackToLogin }) {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
               />
             </div>
           </div>
@@ -194,12 +193,12 @@ export default function Signup({ goBackToLogin }) {
           <div>
             <label
               htmlFor="telefone"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className={`block text-sm font-medium ${currentTheme.text} mb-1`}
             >
               Telefone
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-3.5 text-gray-500">📞</span>
+              <span className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>📞</span>
               <input
                 id="telefone"
                 type="tel"
@@ -207,51 +206,24 @@ export default function Signup({ goBackToLogin }) {
                 value={form.telefone}
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1565C0]"
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#1565C0] text-white py-3 rounded-lg font-semibold text-lg hover:bg-[#0D47A1] transition"
+            className={`w-full text-white py-3 rounded-lg font-semibold text-lg transition ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}
           >
             Criar Conta
           </button>
         </form>
 
-        <div className="my-6">
-          <div className="flex items-center">
-            <hr className="flex-grow border-[#90CAF9]" />
-            <span className="mx-4 text-gray-600">ou</span>
-            <hr className="flex-grow border-[#90CAF9]" />
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <button className="w-full flex items-center justify-center border border-[#64B5F6] py-2 rounded-lg bg-white text-[#1976D2] hover:bg-[#E3F2FD] transition font-semibold">
-              <img
-                src="https://www.svgrepo.com/show/355037/google.svg"
-                alt="Google"
-                className="w-5 h-5 mr-2"
-              />
-              Cadastrar com o Google
-            </button>
-            <button className="w-full flex items-center justify-center border border-[#64B5F6] py-2 rounded-lg bg-white text-[#1976D2] hover:bg-[#E3F2FD] transition font-semibold">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg"
-                alt="Apple"
-                className="w-5 h-5 mr-2"
-              />
-              Cadastrar com Apple
-            </button>
-          </div>
-        </div>
-
-        <p className="text-center text-gray-700 mt-6">
+        <p className={`text-center ${currentTheme.text} mt-6`}>
           Já possui uma conta?{" "}
           <span
             onClick={() => navigate("/login")}
-            className="text-[#1565C0] hover:underline font-semibold cursor-pointer"
+            className="text-blue-600 hover:text-blue-700 hover:underline font-semibold cursor-pointer"
           >
             Fazer Login
           </span>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { FiSearch, FiMenu, FiX } from "react-icons/fi";
+import { FiMenu, FiX, FiUser } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import API_CONFIG from "../../config/api";
@@ -11,6 +11,8 @@ export default function Header() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [userName, setUserName] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
   const { isDarkMode, dark, light } = useTheme();
 
   // Get current theme
@@ -36,97 +38,131 @@ export default function Header() {
     })();
   }, []);
 
-  const defaultLinks = [
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    if (profileOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
+
+  const rightNavLinks = [
     { to: "/", label: "Página Inicial" },
     { to: "/contact", label: "Contato" },
     { to: "/about", label: "Sobre" },
   ];
 
-  const authLinks = [
-    { to: "/accountmanager", label: userName || "Perfil", underline: true },
-    { to: "/lojadashboard", label: "Dashboard", underline: false },
+  const authMenu = [
+    { to: "/accountmanager", label: "Meu Perfil" },
+    { to: "/lojadashboard", label: "Dashboard" },
     {
-      to: "/",
-      label: "Logout",
+      label: "Sair",
       action: () => {
         localStorage.clear();
         setUserName(null);
+        setProfileOpen(false);
         navigate("/login");
       },
     },
   ];
 
-  const guestLinks = [
-    { to: "/seller", label: "Sign Up Seller" },
-    { to: "/signup", label: "Sign Up", underline: true },
-    { to: "/login", label: "Login" },
+  const guestMenu = [
+    { to: "/login", label: "Entrar" },
+    { to: "/signup", label: "Criar conta" },
+    { to: "/seller", label: "Vender" },
   ];
-
-  const navLinks = userName
-    ? [...defaultLinks, ...authLinks]
-    : [...defaultLinks, ...guestLinks];
 
   return (
     <header className={`w-full ${currentTheme.header} glass sticky top-0 z-50`}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-4 md:px-6">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="text-xl md:text-2xl font-bold gradient-text">
-              SHOPHERE
+      <div className="max-w-7xl mx-auto grid grid-cols-3 items-center py-3 px-4 md:px-6">
+        {/* Left: Brand (start of page) */}
+        <div className="flex items-center">
+          <Link to="/" className="inline-flex items-center gap-2 select-none">
+            <span className="text-xl md:text-2xl font-extrabold tracking-tight">
+              <span className={isDarkMode ? "text-white" : "text-gray-900"}>SHOP</span>
+              <span className="text-blue-600">HERE</span>
             </span>
           </Link>
         </div>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-1">
-          {navLinks.map((link, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {link.action ? (
-                <button
-                  onClick={link.action}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    currentTheme.text
-                  } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
-                    link.underline ? "bg-blue-500/20 text-blue-400" : ""
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ) : (
+        {/* Center: spacer */}
+        <div className="hidden md:flex" />
+
+        {/* Right: Theme + User icon */}
+        <div className="hidden md:flex items-center justify-end gap-2">
+          {/* Nav links near theme toggle */}
+          <nav className="hidden md:flex items-center gap-1 pr-2 mr-2 border-r border-current/20">
+            {rightNavLinks.map((link, idx) => (
+              <motion.div key={idx} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   to={link.to}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                    currentTheme.text
-                  } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
-                    link.underline ? "bg-blue-500/20 text-blue-400" : ""
-                  }`}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring`}
                 >
                   {link.label}
                 </Link>
+              </motion.div>
+            ))}
+          </nav>
+          <ThemeToggle />
+          <div className="relative" ref={profileRef}>
+            <button
+              aria-label="Abrir menu do usuário"
+              onClick={() => setProfileOpen((v) => !v)}
+              className={`inline-flex items-center justify-center w-9 h-9 rounded-full border border-current/20 ${currentTheme.text} hover:bg-blue-500/10 transition-colors focus-ring`}
+            >
+              <FiUser size={18} />
+            </button>
+            <AnimatePresence>
+              {profileOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                  className={`absolute right-0 mt-2 min-w-48 ${currentTheme.card} shadow-lg rounded-xl border p-2`}
+                >
+                  <div className="px-2 pb-2 border-b border-current/10">
+                    <p className="text-xs opacity-70">{userName ? "Conectado como" : "Bem-vindo"}</p>
+                    <p className="text-sm font-semibold truncate">{userName || "Visitante"}</p>
+                  </div>
+                  <div className="py-1">
+                    {(userName ? authMenu : guestMenu).map((item, idx) => (
+                      <div key={idx}>
+                        {item.action ? (
+                          <button
+                            onClick={item.action}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                          >
+                            {item.label}
+                          </button>
+                        ) : (
+                          <Link
+                            to={item.to}
+                            onClick={() => setProfileOpen(false)}
+                            className={`block px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                          >
+                            {item.label}
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
               )}
-            </motion.div>
-          ))}
-
-          {/* Theme Toggle */}
-          <div className="ml-4 pl-4 border-l border-current border-opacity-20">
-            <ThemeToggle />
+            </AnimatePresence>
           </div>
-        </nav>
+        </div>
 
-        {/* Mobile menu button */}
-        <div className="md:hidden flex items-center space-x-2">
+        {/* Right (mobile): theme + menu button */}
+        <div className="md:hidden flex items-center justify-end gap-2">
           <ThemeToggle />
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen((v) => !v)}
             className={`p-2 rounded-lg ${currentTheme.text} hover:bg-blue-500/10 focus-ring transition-colors`}
+            aria-label="Abrir menu"
           >
             {isOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </button>
@@ -143,36 +179,47 @@ export default function Header() {
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
-            {navLinks.map((link, idx) => (
-              <div key={idx}>
-                {link.action ? (
-                  <button
-                    onClick={() => {
-                      link.action();
-                      setIsOpen(false);
-                    }}
-                    className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                      currentTheme.text
-                    } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
-                      link.underline ? "bg-blue-500/20 text-blue-400" : ""
-                    }`}
-                  >
-                    {link.label}
-                  </button>
-                ) : (
-                  <Link
-                    to={link.to}
-                    onClick={() => setIsOpen(false)}
-                    className={`block px-3 py-2 rounded-lg text-sm font-medium ${
-                      currentTheme.text
-                    } hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring ${
-                      link.underline ? "bg-blue-500/20 text-blue-400" : ""
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                )}
+            {/* Auth block */}
+            <div className="mb-2">
+              <div className="px-2 pb-2 border-b border-current/10">
+                <p className="text-xs opacity-70">{userName ? "Conectado como" : "Bem-vindo"}</p>
+                <p className="text-sm font-semibold truncate">{userName || "Visitante"}</p>
               </div>
+              {(userName ? authMenu : guestMenu).map((item, idx) => (
+                <div key={`m-auth-${idx}`}>
+                  {item.action ? (
+                    <button
+                      onClick={() => {
+                        item.action();
+                        setIsOpen(false);
+                      }}
+                      className={`block w-full text-left px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.to}
+                      onClick={() => setIsOpen(false)}
+                      className={`block px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Main nav */}
+            {rightNavLinks.map((link, idx) => (
+              <Link
+                key={`m-nav-${idx}`}
+                to={link.to}
+                onClick={() => setIsOpen(false)}
+                className={`block px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring`}
+              >
+                {link.label}
+              </Link>
             ))}
           </motion.div>
         )}
