@@ -29,6 +29,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [commerces, setCommerces] = useState([]);
   const [showAllCommerces, setShowAllCommerces] = useState(false);
+  const [catCanScroll, setCatCanScroll] = useState({ left: false, right: true });
+  const catScrollRef = React.useRef(null);
 
   const [sortOption, setSortOption] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -114,6 +116,37 @@ export default function Home() {
 
   const handleCategorySelect = (id) => {
     setSelectedCategory(id);
+  };
+
+  // Category carousel helpers
+  const updateCatScrollShadows = () => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    setCatCanScroll({
+      left: el.scrollLeft > 0,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    });
+  };
+
+  useEffect(() => {
+    updateCatScrollShadows();
+    const el = catScrollRef.current;
+    if (!el) return;
+    const onScroll = () => updateCatScrollShadows();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const onResize = () => updateCatScrollShadows();
+    window.addEventListener('resize', onResize);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
+
+  const snapScroll = (dir) => {
+    const el = catScrollRef.current;
+    if (!el) return;
+    const width = el.clientWidth * 0.8;
+    el.scrollTo({ left: el.scrollLeft + (dir === 'right' ? width : -width), behavior: 'smooth' });
   };
 
   const handleProductClick = (id) => {
@@ -210,23 +243,79 @@ export default function Home() {
             🗂 Navegue por Categorias
           </h2>
 
-          <div className="flex overflow-x-auto gap-4 pb-4 px-1 hide-scrollbar">
-            {categories.map((cat) => (
-              <motion.div
-                key={cat.id}
-                onClick={() => handleCategorySelect(cat.id)}
-                className={`min-w-[140px] rounded-xl flex flex-col items-center justify-center text-center px-4 py-5 text-sm font-semibold cursor-pointer border-2 transition-all duration-200 card-hover ${
-                  selectedCategory === cat.id 
-                    ? `${currentTheme.accent} text-white border-blue-400` 
-                    : `${currentTheme.card} ${currentTheme.text} border-transparent hover:border-blue-400`
-                }`}
-                whileHover={{ scale: 1.03 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              >
-                <div className="text-3xl mb-2">🗂</div>
-                {cat.nome}
-              </motion.div>
-            ))}
+          {/* Interactive category carousel with arrows */}
+          <div className="relative">
+            {/* Left arrow */}
+            <button
+              aria-label="Categorias anteriores"
+              onClick={() => snapScroll('left')}
+              className={`hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 items-center justify-center rounded-full shadow ${currentTheme.card} ${currentTheme.text} border ${catCanScroll.left ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}
+            >
+              ‹
+            </button>
+
+            {/* Scroll container */}
+            <div
+              ref={catScrollRef}
+              className="flex overflow-x-auto gap-4 pb-4 px-1 hide-scrollbar scroll-smooth snap-x snap-mandatory"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') snapScroll('right');
+                if (e.key === 'ArrowLeft') snapScroll('left');
+              }}
+              tabIndex={0}
+              role="listbox"
+              aria-label="Categorias"
+            >
+            {categories.map((cat) => {
+              const iconByName = {
+                Eletrônicos: "🔌",
+                Moda: "👗",
+                Esportes: "🏀",
+                Mercado: "🛒",
+                Beleza: "💄",
+                Casa: "🏠",
+                Livros: "📚",
+                Jogos: "🎮",
+                Outros: "✨",
+                Todos: "🌐",
+              };
+              const icon = iconByName[cat.nome] || "✨";
+              const isActive = selectedCategory === cat.id;
+              return (
+                <motion.button
+                  key={cat.id ?? 'all'}
+                  onClick={() => handleCategorySelect(cat.id)}
+                  className={`min-w-[200px] snap-start rounded-2xl text-left px-5 py-4 cursor-pointer border-2 transition-all duration-200 group ${
+                    isActive
+                      ? `${currentTheme.accent} text-white border-blue-400`
+                      : `${currentTheme.card} ${currentTheme.text} border-transparent hover:border-blue-400`
+                  }`}
+                  whileHover={{ y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl" aria-hidden>{icon}</span>
+                    <div>
+                      <div className="text-sm opacity-70">Categoria</div>
+                      <div className="text-base font-bold">{cat.nome}</div>
+                    </div>
+                  </div>
+                  <div className={`mt-3 h-1.5 rounded-full transition-all duration-300 ${
+                    isActive ? 'bg-white/80' : 'bg-blue-500/30 group-hover:bg-blue-500/60'
+                  }`} />
+                </motion.button>
+              );
+              })}
+            </div>
+
+            {/* Right arrow */}
+            <button
+              aria-label="Próximas categorias"
+              onClick={() => snapScroll('right')}
+              className={`hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 items-center justify-center rounded-full shadow ${currentTheme.card} ${currentTheme.text} border ${catCanScroll.right ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}
+            >
+              ›
+            </button>
           </div>
         </div>
       </section>
