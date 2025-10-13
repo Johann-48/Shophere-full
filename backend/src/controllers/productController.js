@@ -303,6 +303,7 @@ exports.getProductsByCommerce = async (req, res) => {
 exports.getProductsByBarcode = async (req, res) => {
   const { codigo } = req.params;
   try {
+    const publicBase = process.env.PUBLIC_UPLOADS_BASE_URL || "";
     const [rows] = await pool.query(
       `SELECT 
   p.id,
@@ -310,15 +311,14 @@ exports.getProductsByBarcode = async (req, res) => {
   p.preco AS price,
   p.descricao AS description,
   p.codigo_barras AS barcode,
-  CONCAT('http://localhost:4000/uploads/', fp.url) AS mainImage,
+  ${publicBase ? `CONCAT(?, '/', TRIM(LEADING '/' FROM COALESCE(fp.url, '')))` : `COALESCE(fp.url, '')`} AS mainImage,
   c.nome AS commerceName
 FROM produtos p
 LEFT JOIN comercios c ON p.comercio_id = c.id
 LEFT JOIN fotos_produto fp ON fp.produto_id = p.id AND fp.principal = 1
 WHERE p.codigo_barras = ?
-
       `,
-      [codigo]
+      publicBase ? [publicBase.replace(/\/$/, ""), codigo] : [codigo]
     );
 
     res.json(rows);

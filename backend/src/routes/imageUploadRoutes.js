@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const router = express.Router();
+const { DRIVER, uploadBufferToS3, buildPublicUrl } = require("../config/storage");
 
 const isServerless = !!process.env.VERCEL;
 const baseUploads = isServerless
@@ -16,21 +17,38 @@ try {
   console.error("Falha ao criar diretório de imagens:", imagensDir, e.message);
 }
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, imagensDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const nome = `img_${Date.now()}${ext}`;
-    cb(null, nome);
-  },
-});
-
-const upload = multer({ storage });
-
-router.post("/imagem", upload.single("imagem"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "Arquivo não enviado" });
-  // retorna caminho público
-  return res.json({ caminho: `/uploads/imagens/${req.file.filename}` });
-});
+if (DRIVER === "s3") {
+  const upload = multer({ storage: multer.memoryStorage() });
+  router.post("/imagem", upload.single("imagem"), async (req, res) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "Arquivo não enviado" });
+      const ext = path.extname(req.file.originalname) || ".jpg";
+      const key = `uploads/imagens/img_${Date.now()}${ext}`;
+      const url = await uploadBufferToS3({
+        buffer: req.file.buffer,
+        contentType: req.file.mimetype,
+        key,
+      });
+      return res.json({ caminho: url });
+    } catch (e) {
+      console.error("Upload S3 falhou:", e.message);
+      return res.status(500).json({ error: "Falha ao enviar imagem" });
+    }
+  });
+} else {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, imagensDir),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const nome = `img_${Date.now()}${ext}`;
+      cb(null, nome);
+    },
+  });
+  const upload = multer({ storage });
+  router.post("/imagem", upload.single("imagem"), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "Arquivo não enviado" });
+    return res.json({ caminho: `/uploads/imagens/${req.file.filename}` });
+  });
+}
 
 module.exports = router;
