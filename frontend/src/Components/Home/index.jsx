@@ -189,7 +189,7 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen font-sans ${currentTheme.textPrimary} ${currentTheme.background} animate-fadeInUp`}>
-      {/* Banner */}
+      {/* Hero Banner removed (moved to Login page as requested) */}
 
       {/* Comércios */}
       <section className="px-4 md:px-6 py-6">

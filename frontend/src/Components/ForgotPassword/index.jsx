@@ -3,9 +3,12 @@ import { FaEnvelope, FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { LuArrowLeft } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function ForgotPassword({ goBackToLogin }) {
   const navigate = useNavigate();
+  const { isDarkMode, dark, light } = useTheme();
+  const currentTheme = isDarkMode ? dark : light;
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,23 +37,23 @@ export default function ForgotPassword({ goBackToLogin }) {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 px-4 py-12 transition-colors">
+    <main className={`flex items-center justify-center min-h-screen ${currentTheme.background} px-4 py-12 transition-colors`}>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white shadow-2xl p-10 rounded-3xl max-w-md w-full border border-gray-200"
+        className={`${currentTheme.card} shadow-2xl p-10 rounded-3xl max-w-md w-full`}
       >
-        <h2 className="text-3xl font-extrabold text-center text-[#0D47A1] mb-4">
+        <h2 className={`text-3xl font-extrabold text-center ${currentTheme.textPrimary} mb-4`}>
           Recuperar Senha
         </h2>
-        <p className="text-[#0D47A1] text-sm text-center mb-6">
+        <p className={`${currentTheme.text} text-sm text-center mb-6`}>
           Digite seu e-mail para receber um link de redefinição de senha.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="relative">
-            <FaEnvelope className="absolute left-3 top-3.5 text-[#0D47A1]" />
+            <FaEnvelope className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-blue-400' : 'text-blue-700'}`} />
             <input
               type="email"
               value={email}
@@ -63,12 +66,12 @@ export default function ForgotPassword({ goBackToLogin }) {
               placeholder="seuemail@exemplo.com"
               className={`w-full pl-10 border px-4 py-2 rounded-lg focus:outline-none transition focus:ring-2 ${
                 isValid
-                  ? "border-[#0D47A1] focus:ring-[#0D47A1]"
-                  : "border-red-400 focus:ring-red-300"
+                  ? `${isDarkMode ? 'border-slate-700 focus:ring-blue-500 bg-slate-800 text-white placeholder-slate-400' : 'border-blue-200 focus:ring-blue-500 bg-white text-gray-900 placeholder-gray-500'}`
+                  : `${isDarkMode ? 'border-red-700 bg-slate-800 text-white placeholder-slate-400 focus:ring-red-500' : 'border-red-400 bg-white text-gray-900 placeholder-gray-500 focus:ring-red-300'}`
               }`}
             />
             {!isValid && (
-              <p className="text-red-500 text-xs mt-1 ml-1">Email inválido.</p>
+              <p className={`${isDarkMode ? 'text-red-300' : 'text-red-500'} text-xs mt-1 ml-1`}>Email inválido.</p>
             )}
           </div>
 
@@ -77,7 +80,7 @@ export default function ForgotPassword({ goBackToLogin }) {
             whileHover={{ scale: 1.02 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-[#0D47A1] text-white py-2 rounded-lg font-semibold hover:bg-[#0B3A75] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full text-white py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
@@ -98,7 +101,7 @@ export default function ForgotPassword({ goBackToLogin }) {
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center text-[#0D47A1] mt-4 text-sm font-medium flex items-center justify-center gap-2"
+            className={`text-center ${currentTheme.text} mt-4 text-sm font-medium flex items-center justify-center gap-2`}
           >
             <FaCheckCircle /> {msg}
           </motion.p>
@@ -108,7 +111,7 @@ export default function ForgotPassword({ goBackToLogin }) {
           <motion.button
             whileHover={{ scale: 1.05, x: -3 }}
             onClick={() => navigate("/login")}
-            className="inline-flex items-center gap-2 text-[#0D47A1] hover:text-[#0B3A75] transition font-medium"
+            className={`inline-flex items-center gap-2 transition font-medium ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-700 hover:text-blue-800'}`}
           >
             <LuArrowLeft className="text-lg" />
             Voltar para o login
