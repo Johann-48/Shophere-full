@@ -66,9 +66,9 @@ Criados arquivos de ambiente:
 
 **Framework Preset**: Other
 **Root Directory**: `./` (deixe vazio)
-**Build Command**: `cd frontend && npm run build`
+**Build Command**: `npm run build --prefix frontend`
 **Output Directory**: `frontend/dist`
-**Install Command**: `cd frontend && npm ci`
+**Install Command**: `npm install --prefix frontend && npm install --prefix backend`
 
 ### 2.2 Environment Variables no Vercel
 
@@ -105,7 +105,7 @@ Depois do deploy, teste estas URLs:
 
 **API Endpoints**:
 
-- `https://seu-projeto.vercel.app/api/` - Health check
+- `https://seu-projeto.vercel.app/api/health` - Health check
 - `https://seu-projeto.vercel.app/api/categories` - Listar categorias
 - `https://seu-projeto.vercel.app/api/products` - Listar produtos
 
@@ -138,35 +138,21 @@ cd frontend && rm -rf node_modules package-lock.json && npm install
 
 ---
 
-"builds": [
+vercel.json (resumo atual):
+
+```json
 {
-"src": "frontend/package.json",
-"use": "@vercel/static-build",
-"config": {
-"distDir": "dist"
+  "version": 2,
+  "buildCommand": "npm run build --prefix frontend",
+  "installCommand": "npm install --prefix frontend && npm install --prefix backend",
+  "outputDirectory": "frontend/dist",
+  "regions": ["cdg1"],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
-},
-{
-"src": "backend/src/index.js",
-"use": "@vercel/node"
-}
-],
-"routes": [
-{
-"src": "/api/(.*)",
-"dest": "/backend/src/index.js"
-},
-{
-"src": "/(.*)",
-"dest": "/frontend/dist/$1"
-}
-],
-"functions": {
-"backend/src/index.js": {
-"maxDuration": 30
-}
-}
-}
+```
 
 ````
 
@@ -232,7 +218,7 @@ app.get("/api", (req, res) => {
   });
 });
 
-module.exports = app;
+module.exports = app; // exportar o app Express diretamente é o recomendado na Vercel
 ````
 
 ---
@@ -363,12 +349,7 @@ CORS_ORIGIN=https://shophere-production.vercel.app,https://*.vercel.app
       }
     }
   ],
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
-    }
-  },
+  "regions": ["cdg1"],
   "routes": [
     {
       "src": "/api/(.*)",

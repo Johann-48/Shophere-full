@@ -1,102 +1,118 @@
 # Shophere - Plataforma de E-commerce
 
-Uma plataforma completa de e-commerce construída com React (frontend) e Node.js (backend).
+Aplicação completa de e‑commerce com React (Vite) no frontend e Node.js/Express no backend, hospedada na Vercel. O banco de dados MySQL roda na AlwaysData.
 
-## 🚀 Estrutura do Projeto
+## 🚀 Arquitetura
 
 ```
 Shophere-Full/
-├── frontend/          # Aplicação React + Vite
-├── backend/           # API Node.js + Express
-├── .github/workflows/ # GitHub Actions para deploy
+├── frontend/          # React + Vite
+├── backend/           # Express + MySQL2
+├── api/               # Entrada Serverless para Vercel (reexporta o app Express)
+├── database/          # Schemas SQL (PT‑BR)
+├── vercel.json        # Configuração de deploy
 └── README.md
 ```
 
-## 📋 Pré-requisitos
+Backend e API são expostos pela função serverless `api/index.js`, que importa `backend/src/index.js` e exporta o app Express diretamente.
+
+## 📋 Pré‑requisitos (dev local)
 
 - Node.js 18+
-- npm ou yarn
-- MySQL (para desenvolvimento local)
+- npm
+- MySQL local (opcional; produção usa AlwaysData)
 
-## 🛠️ Configuração Local
+## 🛠️ Como rodar localmente
 
-### 1. Instalar dependências
+1) Instalar dependências por app
 
 ```bash
-npm run install:all
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-### 2. Configurar variáveis de ambiente
+2) Backend: criar `.env` na pasta `backend/`
 
-#### Backend (.env)
 ```env
+NODE_ENV=development
 DB_HOST=localhost
 DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
 DB_NAME=shophere_db
-PORT=4000
-JWT_SECRET=seu_jwt_secret
+DB_PORT=3306
+JWT_SECRET=uma_chave_segura
 ```
 
-#### Frontend (.env)
+3) Frontend: (opcional) criar `frontend/.env.development`
+
 ```env
-VITE_API_URL=http://localhost:4000
+VITE_API_BASE_URL=http://localhost:4000
 ```
 
-### 3. Executar em desenvolvimento
+4) Iniciar
 
 ```bash
-# Executa backend e frontend simultaneamente
-npm run dev
+# terminal 1
+cd backend && npm run dev     # http://localhost:4000
 
-# Ou separadamente:
-npm run dev:frontend  # Porta 5173
-npm run dev:backend   # Porta 4000
+# terminal 2
+cd frontend && npm run dev    # http://localhost:5173
 ```
 
-## 🚀 Deploy
+O frontend chamará a API usando a variável `VITE_API_BASE_URL` em dev e caminhos relativos (`/api/...`) em produção.
 
-### Branches
-- **main**: Produção
-- **develop**: Staging/desenvolvimento
+## ☁️ Deploy (Vercel + AlwaysData)
 
-### Deploy automático via GitHub Actions
-- Push para `main` → Deploy em produção no Vercel
-- Push para `develop` → Deploy em staging no Vercel
+- App hospedado na Vercel; DB MySQL na AlwaysData
+- vercel.json atual (resumo):
+
+```json
+{
+	"version": 2,
+	"buildCommand": "npm run build --prefix frontend",
+	"installCommand": "npm install --prefix frontend && npm install --prefix backend",
+	"outputDirectory": "frontend/dist",
+	"regions": ["cdg1"],
+	"rewrites": [
+		{ "source": "/api/(.*)", "destination": "/api/index.js" },
+		{ "source": "/(.*)", "destination": "/index.html" }
+	]
+}
+```
+
+Variáveis de ambiente na Vercel (Settings → Environment Variables):
+
+```
+NODE_ENV=production
+DB_HOST=mysql-johann.alwaysdata.net
+DB_USER=johann
+DB_PASSWORD=********
+DB_NAME=johann_shophere_db
+DB_PORT=3306
+JWT_SECRET=uma_chave_segura
+FRONTEND_URL=https://<seu‑dominio>.vercel.app
+```
+
+Endpoints úteis (produção):
+
+- `/api/health` — status da API
+- `/api/db-health` — teste de conexão com o MySQL
+- `/api/debug/summary` — contagem de registros principais
+
+Observação de uploads em serverless: arquivos são gravados em `/tmp` durante a execução. Para persistência, considere mover para um storage externo (S3/R2) no futuro.
 
 ## 🏗️ Tecnologias
 
-### Frontend
-- React 19
-- Vite
-- TailwindCSS
-- React Router Dom
-- Axios
-- Socket.io Client
-
-### Backend
-- Node.js
-- Express
-- MySQL2
-- Socket.io
-- JWT
-- Bcrypt
-- Multer
-
-## 📝 Scripts Disponíveis
-
-- `npm run dev` - Desenvolvimento (frontend + backend)
-- `npm run build` - Build para produção
-- `npm run install:all` - Instala todas as dependências
+- Frontend: React 19, Vite, TailwindCSS, React Router, Axios
+- Backend: Node.js, Express, MySQL2, JWT, Bcrypt, Multer, CORS
 
 ## 🤝 Contribuição
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
+1. Fork
+2. Branch: `feat/minha-feature`
+3. Commits claros
+4. PR para `main`
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT.
+MIT

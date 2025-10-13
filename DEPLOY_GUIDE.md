@@ -14,9 +14,9 @@
 Project Name: shophere-production
 Framework Preset: Other
 Root Directory: ./
-Build Command: cd frontend && npm run build
+Build Command: npm run build --prefix frontend
 Output Directory: frontend/dist
-Install Command: npm install && cd frontend && npm install && cd ../backend && npm install
+Install Command: npm install --prefix frontend && npm install --prefix backend
 ```
 
 ### 2. Configurar Variáveis de Ambiente
@@ -25,11 +25,11 @@ Install Command: npm install && cd frontend && npm install && cd ../backend && n
 ```env
 NODE_ENV=production
 
-# Database (PlanetScale Production)
-DB_HOST=aws.connect.psdb.cloud
-DB_USER=seu_usuario_planetscale
-DB_PASSWORD=sua_senha_planetscale
-DB_NAME=shophere-db
+# Database (AlwaysData)
+DB_HOST=mysql-<sua-conta>.alwaysdata.net
+DB_USER=<sua-conta>
+DB_PASSWORD=<sua-senha>
+DB_NAME=<sua-conta>_shophere_db
 
 # JWT
 JWT_SECRET=seu_jwt_secret_super_seguro
@@ -38,26 +38,8 @@ JWT_SECRET=seu_jwt_secret_super_seguro
 CORS_ORIGIN=https://shophere-production.vercel.app
 ```
 
-#### Staging (Develop Branch) - Criar projeto separado:
-```
-Project Name: shophere-staging
-```
-
-```env
-NODE_ENV=staging
-
-# Database (PlanetScale Develop Branch)
-DB_HOST_STAGING=aws.connect.psdb.cloud
-DB_USER_STAGING=seu_usuario_planetscale_staging
-DB_PASSWORD_STAGING=sua_senha_planetscale_staging
-DB_NAME_STAGING=shophere-db-staging
-
-# JWT
-JWT_SECRET=seu_jwt_secret_staging
-
-# CORS
-CORS_ORIGIN=https://shophere-staging.vercel.app
-```
+#### Staging (opcional)
+- Use um projeto Vercel adicional e um banco de dados separado se necessário.
 
 ### 3. Configurar GitHub Secrets
 
@@ -102,9 +84,8 @@ VERCEL_PROJECT_ID_STAGING=id_do_projeto_staging
 ### 5. Configurações Avançadas
 
 #### Em vercel.json (já configurado):
-- Timeout de funções: 30s
-- Redirecionamentos de API
-- Servir arquivos estáticos
+- Build do frontend e rewrites para `/api/*` → `api/index.js`
+- Região das funções: `cdg1` (Europa)
 
 #### Branch Settings:
 - **Production:** Só deploys da branch `main`

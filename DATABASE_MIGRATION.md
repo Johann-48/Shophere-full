@@ -85,18 +85,14 @@
 
    - Selecione seu database
    - Clique em "Import"
-   - Escolha o arquivo `sistemacomercioslocais (11).sql` (ou use `database/current_schema.sql` se copiou para o projeto)
+   - Escolha o arquivo `database/current_schema.sql` (este repositório)
    - Execute a importação
 
 3. **Verificar tabelas criadas**
    - Confirme que todas as tabelas foram criadas:
-     - users
-     - categories
-     - commerces
-     - products
-     - avaliacoes_produto
-     - mensagens
-     - chat_rooms
+   - categorias, comercios, produtos, fotos_produto, produtos_categorias
+   - usuarios, sessions, sessions_comercios
+   - avaliacoesproduto, mensagens, chats
 
 #### Passo 4: Preparar Aplicação para Deploy
 
@@ -115,8 +111,8 @@
    JWT_SECRET=sua_chave_jwt_super_secreta_aqui
 
    # URLs para CORS
-   FRONTEND_URL=https://johann.alwaysdata.net
-   BACKEND_URL=https://johann.alwaysdata.net/api
+   FRONTEND_URL=https://<seu-subdominio>.alwaysdata.net
+   BACKEND_URL=https://<seu-subdominio>.alwaysdata.net/api
 
    # Upload settings
    UPLOAD_DIR=uploads/
@@ -319,13 +315,7 @@ const uploadDir =
 
 ### Schema de Migration
 
-Execute estes comandos SQL no AlwaysData (via phpMyAdmin) para criar as tabelas:
-
-```sql
--- Use o arquivo sistemacomercioslocais (11).sql
--- Ou o arquivo database/current_schema.sql (se copiado para o projeto)
--- Importe diretamente via phpMyAdmin
-```
+Para criar o schema, basta importar diretamente `database/current_schema.sql` via phpMyAdmin (menu Import) no banco de produção.
 
 ## Configuração Alternativa: PlanetScale (Apenas Database)
 
