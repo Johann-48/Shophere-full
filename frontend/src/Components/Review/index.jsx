@@ -29,7 +29,9 @@ export default function ReviewForm() {
           setLoadingCheck(false);
           return;
         }
-        const res = await axios.get(API_CONFIG.getApiUrl(`/api/avaliacoes/${productId}`));
+        const res = await axios.get(
+          API_CONFIG.getApiUrl(`/api/avaliacoes/${productId}`)
+        );
         const reviews = res.data?.reviews || [];
         const found = reviews.some((r) => r.usuario_id === user.id);
         setAlreadyReviewed(found);
@@ -74,7 +76,8 @@ export default function ReviewForm() {
       setTimeout(() => navigate(`/produto/${productId}`), 500);
     } catch (err) {
       console.error("Erro ao enviar avaliação:", err?.response || err);
-      const backendMsg = err?.response?.data?.error || err?.response?.data?.message;
+      const backendMsg =
+        err?.response?.data?.error || err?.response?.data?.message;
       if (err?.response?.status === 400 && backendMsg) {
         toast.error(backendMsg);
       } else if (err?.response?.status === 401) {
@@ -101,7 +104,8 @@ export default function ReviewForm() {
             <p className="text-sm text-gray-500">Carregando…</p>
           ) : alreadyReviewed ? (
             <div className="p-3 rounded bg-yellow-100 text-yellow-800 border border-yellow-300">
-              Você já avaliou este produto. No momento não é possível enviar outra avaliação.
+              Você já avaliou este produto. No momento não é possível enviar
+              outra avaliação.
             </div>
           ) : null}
 
@@ -154,7 +158,13 @@ export default function ReviewForm() {
           {/* Botão de Envio */}
           <button
             type="submit"
-            disabled={!isValid || rating === 0 || isSubmitting || alreadyReviewed || loadingCheck}
+            disabled={
+              !isValid ||
+              rating === 0 ||
+              isSubmitting ||
+              alreadyReviewed ||
+              loadingCheck
+            }
             className={`w-full py-3 rounded-lg font-semibold transition ${
               isValid && rating > 0 && !alreadyReviewed && !loadingCheck
                 ? "bg-blue-600 hover:bg-blue-700 text-white"

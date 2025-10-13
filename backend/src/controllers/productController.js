@@ -44,9 +44,10 @@ exports.getProductById = async (req, res) => {
        ORDER BY principal DESC, id ASC`,
       [id]
     );
-    const thumbnails = fotoRows.map((f) => f.url);
+    const { toAbsoluteUrl } = require("../utils/url");
+    const thumbnails = fotoRows.map((f) => toAbsoluteUrl(f.url));
     const mainImage =
-      (fotoRows.find((f) => f.principal) || {}).url ||
+      toAbsoluteUrl((fotoRows.find((f) => f.principal) || {}).url) ||
       thumbnails[0] ||
       "https://via.placeholder.com/400x400?text=Sem+Imagem";
 
@@ -149,7 +150,7 @@ exports.listProducts = async (req, res) => {
       const avg = parseFloat(prod.avgRating); // converte a string em número
       const fotosDoProduto = fotos
         .filter((f) => f.produto_id === prod.id)
-        .map((f) => f.url);
+        .map((f) => require("../utils/url").toAbsoluteUrl(f.url));
 
       const mainImage =
         fotosDoProduto[0] ||
@@ -311,7 +312,11 @@ exports.getProductsByBarcode = async (req, res) => {
   p.preco AS price,
   p.descricao AS description,
   p.codigo_barras AS barcode,
-  ${publicBase ? `CONCAT(?, '/', TRIM(LEADING '/' FROM COALESCE(fp.url, '')))` : `COALESCE(fp.url, '')`} AS mainImage,
+  ${
+    publicBase
+      ? `CONCAT(?, '/', TRIM(LEADING '/' FROM COALESCE(fp.url, '')))`
+      : `COALESCE(fp.url, '')`
+  } AS mainImage,
   c.nome AS commerceName
 FROM produtos p
 LEFT JOIN comercios c ON p.comercio_id = c.id

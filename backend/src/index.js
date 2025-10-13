@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const { DRIVER, uploadBufferToS3 } = require("./config/storage");
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ const commerceRoutes = require("./routes/commerceRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const avaliacoesRouter = require("./routes/avaliacaoProduto.routes");
 const commerceController = require("./controllers/commerceController");
+const productImagesRoutes = require("./routes/productImages.routes");
+const { toAbsoluteUrl } = require("./utils/url");
 
 const app = express();
 
@@ -75,31 +78,73 @@ app.use("/api/chats/:chatId/mensagens", require("./routes/mensagemRoutes"));
 app.use("/api/upload", uploadRoutes); // Inclui upload de áudio
 // src/index.js — logo abaixo de app.use("/api/upload", uploadRoutes);
 app.use("/api/upload/image", require("./routes/imageUploadRoutes"));
+app.use("/api", productImagesRoutes);
 
-// 5) Upload de imagem de produto
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-const upload = multer({ storage });
+// 5) Upload de imagem de produto (suporta S3 quando configurado)
+if (DRIVER === "s3") {
+  const upload = multer({ storage: multer.memoryStorage() });
+  app.post(
+    "/api/upload/:produtoId",
+    upload.single("foto"),
+    async (req, res) => {
+      try {
+        if (!req.file)
+          return res.status(400).json({ error: "Arquivo não enviado" });
+        const pool = require("./config/db");
+        const { produtoId } = req.params;
+        const ext = require("path").extname(req.file.originalname) || ".jpg";
+        const safeName = req.file.originalname.replace(/[^a-zA-Z0-9_.-]/g, "_");
+        const key = `uploads/produtos/${Date.now()}-${safeName}${ext}`;
+        const url = await uploadBufferToS3({
+          buffer: req.file.buffer,
+          contentType: req.file.mimetype,
+          key,
+        });
 
-app.post("/api/upload/:produtoId", upload.single("foto"), async (req, res) => {
-  try {
-    const pool = require("./config/db");
-    const { produtoId } = req.params;
-    const filePath = `/uploads/${req.file.filename}`;
+        await pool.query(
+          "INSERT INTO fotos_produto (produto_id, url, principal) VALUES (?, ?, 1)",
+          [produtoId, url]
+        );
 
-    await pool.query(
-      "INSERT INTO fotos_produto (produto_id, url, principal) VALUES (?, ?, 1)",
-      [produtoId, filePath]
-    );
+        return res.json({ message: "Imagem enviada com sucesso", url });
+      } catch (err) {
+        console.error("Upload de produto (S3) falhou:", err.message);
+        return res.status(500).json({ error: "Erro ao salvar imagem" });
+      }
+    }
+  );
+} else {
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadsDir),
+    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+  });
+  const upload = multer({ storage });
 
-    return res.json({ message: "Imagem enviada com sucesso", url: filePath });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Erro ao salvar no banco" });
-  }
-});
+  app.post(
+    "/api/upload/:produtoId",
+    upload.single("foto"),
+    async (req, res) => {
+      try {
+        const pool = require("./config/db");
+        const { produtoId } = req.params;
+        const filePath = `/uploads/${req.file.filename}`;
+
+        await pool.query(
+          "INSERT INTO fotos_produto (produto_id, url, principal) VALUES (?, ?, 1)",
+          [produtoId, filePath]
+        );
+
+        return res.json({
+          message: "Imagem enviada com sucesso",
+          url: filePath,
+        });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Erro ao salvar no banco" });
+      }
+    }
+  );
+}
 
 // 6) Teste básico
 app.get("/", (req, res) => {

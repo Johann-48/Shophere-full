@@ -22,6 +22,7 @@ Install Command: npm install --prefix frontend && npm install --prefix backend
 ### 2. Configurar Variáveis de Ambiente
 
 #### Produção (Main Branch):
+
 ```env
 NODE_ENV=production
 
@@ -39,6 +40,7 @@ CORS_ORIGIN=https://shophere-production.vercel.app
 ```
 
 #### Staging (opcional)
+
 - Use um projeto Vercel adicional e um banco de dados separado se necessário.
 
 ### 3. Configurar GitHub Secrets
@@ -55,15 +57,18 @@ VERCEL_PROJECT_ID_STAGING=id_do_projeto_staging
 #### Como obter os valores:
 
 1. **VERCEL_TOKEN:**
+
    - Vá em https://vercel.com/account/tokens
    - Crie um novo token
    - Copie o valor
 
 2. **VERCEL_ORG_ID:**
+
    - Execute `vercel` no terminal
    - Ou vá em Settings do projeto → General → Project ID
 
 3. **VERCEL_PROJECT_ID:**
+
    - Vá em Settings do projeto de produção → General
    - Copie o Project ID
 
@@ -74,32 +79,38 @@ VERCEL_PROJECT_ID_STAGING=id_do_projeto_staging
 ### 4. Configurar Domínios (Opcional)
 
 #### Produção:
+
 - Domínio: `shophere.com.br` (exemplo)
 - Branch: `main`
 
 #### Staging:
+
 - Domínio: `staging.shophere.com.br` (exemplo)
 - Branch: `develop`
 
 ### 5. Configurações Avançadas
 
 #### Em vercel.json (já configurado):
+
 - Build do frontend e rewrites para `/api/*` → `api/index.js`
 - Região das funções: `cdg1` (Europa)
 
 #### Branch Settings:
+
 - **Production:** Só deploys da branch `main`
 - **Preview:** Deploys da branch `develop` e PRs
 
 ## 🎯 Fluxo de Deploy
 
 ### Desenvolvimento:
+
 1. Fazer mudanças em branch feature
 2. Abrir PR para `develop`
 3. GitHub Actions roda testes
 4. Merge para `develop` → Deploy automático no staging
 
 ### Produção:
+
 1. Abrir PR de `develop` para `main`
 2. Review e aprovação
 3. Merge para `main` → Deploy automático na produção
@@ -109,10 +120,12 @@ VERCEL_PROJECT_ID_STAGING=id_do_projeto_staging
 ### Problemas comuns:
 
 1. **Build falha:**
+
    - Verificar se todas as dependências estão no package.json
    - Verificar variáveis de ambiente
 
 2. **API não funciona:**
+
    - Verificar configuração do banco de dados
    - Verificar roteamento no vercel.json
 
@@ -121,6 +134,7 @@ VERCEL_PROJECT_ID_STAGING=id_do_projeto_staging
    - Verificar configuração no backend
 
 ### Logs úteis:
+
 ```bash
 # Ver logs do Vercel
 vercel logs [deployment-url]

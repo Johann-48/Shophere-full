@@ -4,7 +4,11 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const router = express.Router();
-const { DRIVER, uploadBufferToS3, buildPublicUrl } = require("../config/storage");
+const {
+  DRIVER,
+  uploadBufferToS3,
+  buildPublicUrl,
+} = require("../config/storage");
 
 const isServerless = !!process.env.VERCEL;
 const baseUploads = isServerless
@@ -21,7 +25,8 @@ if (DRIVER === "s3") {
   const upload = multer({ storage: multer.memoryStorage() });
   router.post("/imagem", upload.single("imagem"), async (req, res) => {
     try {
-      if (!req.file) return res.status(400).json({ error: "Arquivo não enviado" });
+      if (!req.file)
+        return res.status(400).json({ error: "Arquivo não enviado" });
       const ext = path.extname(req.file.originalname) || ".jpg";
       const key = `uploads/imagens/img_${Date.now()}${ext}`;
       const url = await uploadBufferToS3({
@@ -46,7 +51,8 @@ if (DRIVER === "s3") {
   });
   const upload = multer({ storage });
   router.post("/imagem", upload.single("imagem"), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: "Arquivo não enviado" });
+    if (!req.file)
+      return res.status(400).json({ error: "Arquivo não enviado" });
     return res.json({ caminho: `/uploads/imagens/${req.file.filename}` });
   });
 }
