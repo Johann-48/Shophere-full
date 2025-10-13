@@ -2,9 +2,13 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FiMail, FiMapPin, FiPhone, FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 export default function Footer() {
+  const { isDarkMode, dark, light } = useTheme();
+  const currentTheme = isDarkMode ? dark : light;
+  const accentText = isDarkMode ? "text-blue-400" : "text-blue-700";
   return (
-    <footer className="bg-gray-900 text-gray-300 py-12">
+    <footer className={`${currentTheme.footer} ${currentTheme.text} py-12`}>
       <div
         className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4
 gap-10 px-6"
@@ -16,25 +20,24 @@ gap-10 px-6"
           transition={{ duration: 0.5 }}
         >
           <h4
-            className="text-[#0D47A1] font-semibold mb-3
-text-lg"
+            className={`${accentText} font-semibold mb-3
+text-lg`}
           >
             Fique de Olho
           </h4>
-          <p className="mb-4 text-sm">Receba novidades por e-mail</p>
+          <p className="mb-4 text-sm opacity-80">Receba novidades por e-mail</p>
           <div className="relative w-full">
             <input
               type="email"
               placeholder="Digite seu email"
-              className="w-full py-3 pl-5 pr-12 rounded-full
-bg-gray-800 text-gray-200 border border-gray-700 placeholder-gray-400
-focus:outline-none focus:ring-2 focus:ring-[#0D47A1] transition-all
-text-sm"
+              className={`w-full py-3 pl-5 pr-12 rounded-full
+${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700 placeholder-slate-400' : 'bg-white text-gray-800 border border-blue-200 placeholder-gray-500'}
+focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
+text-sm`}
             />
             <button
-              className="absolute top-1/2 right-2 transform
--translate-y-1/2 bg-[#0D47A1] hover:bg-blue-800 text-white p-2
-rounded-full transition-all"
+              className={`absolute top-1/2 right-2 transform
+-translate-y-1/2 text-white p-2 rounded-full transition-all ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}
               aria-label="Enviar"
             >
               <FiArrowRight size={18} />
@@ -48,22 +51,22 @@ rounded-full transition-all"
           transition={{ delay: 0.1, duration: 0.5 }}
         >
           <h4
-            className="text-[#0D47A1] font-semibold mb-3
-text-lg"
+            className={`${accentText} font-semibold mb-3
+text-lg`}
           >
             Ajuda
           </h4>
           <ul className="space-y-3 text-sm">
             <li className="flex items-start gap-2">
-              <FiMapPin className="mt-1 text-[#0D47A1]" />
+              <FiMapPin className={`mt-1 ${accentText}`} />
               111 Bijoy Sarani, Dhaka, DH 1515, Bangladesh
             </li>
             <li className="flex items-center gap-2">
-              <FiMail className="text-[#0D47A1]" />
+              <FiMail className={`${accentText}`} />
               shopherecompany1@gmail.com
             </li>
             <li className="flex items-center gap-2">
-              <FiPhone className="text-[#0D47A1]" />
+              <FiPhone className={`${accentText}`} />
               (19) 99358-8498
             </li>
           </ul>
@@ -75,8 +78,8 @@ text-lg"
           transition={{ delay: 0.2, duration: 0.5 }}
         >
           <h4
-            className="text-[#0D47A1] font-semibold mb-3
-text-lg"
+            className={`${accentText} font-semibold mb-3
+text-lg`}
           >
             Conta
           </h4>
@@ -84,8 +87,8 @@ text-lg"
             <li>
               <Link
                 to="/accountmanager"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 Minha Conta
               </Link>
@@ -93,8 +96,8 @@ transition"
             <li>
               <Link
                 to="/login"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 Login / Signup
               </Link>
@@ -108,8 +111,8 @@ transition"
           transition={{ delay: 0.3, duration: 0.5 }}
         >
           <h4
-            className="text-[#0D47A1] font-semibold mb-3
-text-lg"
+            className={`${accentText} font-semibold mb-3
+text-lg`}
           >
             Links Úteis
           </h4>
@@ -117,8 +120,8 @@ text-lg"
             <li>
               <Link
                 to="/privacidade"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 Política de Privacidade
               </Link>
@@ -126,8 +129,8 @@ transition"
             <li>
               <Link
                 to="/termos"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 Termos de Uso
               </Link>
@@ -135,8 +138,8 @@ transition"
             <li>
               <Link
                 to="/faq"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 FAQ
               </Link>
@@ -144,8 +147,8 @@ transition"
             <li>
               <Link
                 to="/contact"
-                className="hover:text-[#0D47A1]
-transition"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
+transition`}
               >
                 Contato
               </Link>
@@ -155,8 +158,8 @@ transition"
       </div>
       {/* Copyright */}
       <div
-        className="mt-10 border-t border-gray-700 pt-6 text-center
-text-sm text-gray-500"
+        className={`mt-10 border-t pt-6 text-center
+text-sm ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-blue-200 text-gray-500'}`}
       >
         © {new Date().getFullYear()} ShopHere. Todos os direitos reservados.
       </div>
