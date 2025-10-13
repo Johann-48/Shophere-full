@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { FiSend, FiCamera, FiMic, FiX } from "react-icons/fi";
 import { useTheme } from "../../contexts/ThemeContext";
 
 export default function ContatoLoja() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const params = new URLSearchParams(location.search);
   const presetMsg = params.get("message");
