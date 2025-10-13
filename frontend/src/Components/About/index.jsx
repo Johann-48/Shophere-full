@@ -33,7 +33,7 @@ const About = () => {
       nome: "Johann Bauermann",
       cargo: "Back-End e Banco de Dados",
       imagem:
-        "https://instagram.fqps2-1.fna.fbcdn.net/v/t51.2885-19/473993506_2043483882791388_169030346276186047_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.fqps2-1.fna.fbcdn.net&_nc_cat=100&_nc_oc=Q6cZ2QFYwocE9Zxe5nL0BbB3Xbdol0bbQlv4UOa-Iw961S4Ymfn7xVdsLB4JWDCI7Ac-FefeaLyF7Z4Z-C_XviPnN12E&_nc_ohc=9K71eo4jhn0Q7kNvwG2s6KS&_nc_gid=B6oZDJsxLkE0aokXQKFu6Q&edm=AP4sbd4BAAAA&ccb=7-5&oh=00_AfRa7PaoFr4rz-Z_SqdzAbk4Et2AEPiVXyi7f731eCOUtA&oe=688FD2AD&_nc_sid=7a9f4b",
+        "https://f.i.uol.com.br/fotografia/2021/08/11/162871253661142e587ca24_1628712536_3x2_md.jpg",
       bio: "especialista em Node e SQL, cria a parte funcional do site",
       instagram: "https://www.instagram.com/johannsb2008",
     },
@@ -41,7 +41,7 @@ const About = () => {
       nome: "Gabriel Luccas",
       cargo: "Front-End e Back-End",
       imagem:
-        "https://instagram.fqps2-1.fna.fbcdn.net/v/t51.2885-19/434429450_952256095968187_9130657042695330855_n.jpg?stp=dst-jpg_s150x150_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby44MjguYzIifQ&_nc_ht=instagram.fqps2-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2QELtEshFSRhRw-AW89RSe-BFXg9njdVc3dz1nSYyjHCdUCR50PDef7w4Dq1dPLvR6-Z2ecPgDPmOrlBMHgsXa2D&_nc_ohc=kRNXUVGmpAcQ7kNvwGivtna&_nc_gid=9QJ1kDhJ24_H7tVYOXEkzg&edm=AP4sbd4BAAAA&ccb=7-5&oh=00_AfRF1ZQgOnq1AybnRXtymBBmauhI0-W2CbhNABLvq16DQg&oe=688FDE1D&_nc_sid=7a9f4b",
+        "https://upload.wikimedia.org/wikipedia/pt/b/bf/SpongeBob_SquarePants_personagem.png",
       bio: "Especialista em React e design responsivo, cria interfaces modernas e funcionais.",
       instagram: "https://www.instagram.com/gabrieel.lc",
     },
@@ -59,8 +59,8 @@ const About = () => {
   return (
     <div className={`min-h-screen py-16 px-4 sm:px-6 lg:px-8 select-none font-inter ${
       isDarkMode 
-        ? 'bg-gradient-to-br from-gray-800 via-blue-50 to-gray-100' 
-        : 'bg-gradient-to-br from-green-100 via-white to-green-50'
+        ? 'bg-slate-900' 
+        : 'bg-white'
     }`}>
       <div className="max-w-7xl mx-auto">
         {/* Título principal */}
@@ -83,7 +83,7 @@ const About = () => {
         {/* Descrição da empresa */}
         <motion.p
           className={`max-w-3xl mx-auto text-center text-lg sm:text-xl font-medium leading-relaxed mb-20 font-sans ${
-            isDarkMode ? 'text-gray-200' : 'text-black'
+            isDarkMode ? 'text-gray-200' : 'text-gray-800'
           }`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -191,7 +191,7 @@ const About = () => {
                 src={membro.imagem}
                 alt={membro.nome}
                 className={`w-28 h-28 rounded-full mx-auto mb-6 object-cover ring-4 transition-transform duration-500 group-hover:scale-110 ${
-                  isDarkMode ? 'ring-gray-400' : 'ring-[#43444F]'
+                  isDarkMode ? 'ring-gray-500' : 'ring-blue-500'
                 }`}
               />
               <h4 className={`text-center text-2xl font-extrabold ${
