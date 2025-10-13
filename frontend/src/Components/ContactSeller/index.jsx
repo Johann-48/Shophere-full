@@ -359,7 +359,9 @@ export default function ContatoLoja() {
                             src={
                               msg.conteudo.startsWith("http")
                                 ? msg.conteudo
-                                : `http://localhost:4000${msg.conteudo}`
+                                : msg.conteudo.startsWith("/")
+                                ? `${window.location.origin}${msg.conteudo}`
+                                : `${window.location.origin}/uploads/${msg.conteudo}`
                             }
                           />
                         )}
@@ -369,8 +371,10 @@ export default function ContatoLoja() {
                             src={
                               msg.conteudo.startsWith("blob:")
                                 ? msg.conteudo
+                                : msg.conteudo.startsWith("http")
+                                ? msg.conteudo
                                 : msg.conteudo.startsWith("/")
-                                ? `http://localhost:4000${msg.conteudo}`
+                                ? `${window.location.origin}${msg.conteudo}`
                                 : msg.conteudo
                             }
                           />
