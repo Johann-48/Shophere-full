@@ -92,9 +92,11 @@ if (DRIVER === "s3") {
           return res.status(400).json({ error: "Arquivo não enviado" });
         const pool = require("./config/db");
         const { produtoId } = req.params;
-        const ext = require("path").extname(req.file.originalname) || ".jpg";
-        const safeName = req.file.originalname.replace(/[^a-zA-Z0-9_.-]/g, "_");
-        const key = `uploads/produtos/${Date.now()}-${safeName}${ext}`;
+        const pathMod = require("path");
+        const ext = pathMod.extname(req.file.originalname) || ".jpg";
+        const base = pathMod.basename(req.file.originalname, ext);
+        const safeBase = base.replace(/[^a-zA-Z0-9_.-]/g, "_");
+  const key = `uploads/produtos/${Date.now()}-${safeBase}${ext}`;
         const url = await uploadBufferToS3({
           buffer: req.file.buffer,
           contentType: req.file.mimetype,
@@ -157,6 +159,10 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     env: process.env.NODE_ENV,
     vercel: !!process.env.VERCEL,
+    storage: {
+      driver: DRIVER,
+      uploadsDir,
+    },
     time: new Date().toISOString(),
   });
 });

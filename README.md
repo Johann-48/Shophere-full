@@ -1,4 +1,4 @@
-# Shophere - Plataforma de E-commerce
+  # Shophere - Plataforma de E-commerce
 
 Aplicação completa de e‑commerce com React (Vite) no frontend e Node.js/Express no backend, hospedada na Vercel. O banco de dados MySQL roda na AlwaysData.
 

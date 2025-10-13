@@ -212,10 +212,11 @@ exports.getProductsByCategory = async (req, res) => {
     );
 
     // 3. Montar os dados finais
+    const { toAbsoluteUrl } = require("../utils/url");
     const result = produtos.map((prod) => {
       const fotosDoProduto = fotos
         .filter((f) => f.produto_id === prod.id)
-        .map((f) => f.url);
+        .map((f) => toAbsoluteUrl(f.url));
 
       const mainImage =
         fotosDoProduto[0] ||
@@ -249,7 +250,7 @@ exports.getProductsByCategory = async (req, res) => {
 exports.searchProducts = async (req, res) => {
   const q = req.query.q || "";
   try {
-    const [rows] = await pool.query(
+  const [rows] = await pool.query(
       `
       SELECT 
         p.id,
@@ -267,7 +268,12 @@ exports.searchProducts = async (req, res) => {
     `,
       [`%${q}%`]
     );
-    res.json({ products: rows });
+    const { toAbsoluteUrl } = require("../utils/url");
+    const products = rows.map((r) => ({
+      ...r,
+      mainImage: r.mainImage ? toAbsoluteUrl(r.mainImage) : r.mainImage,
+    }));
+    res.json({ products });
   } catch (err) {
     console.error("Erro na busca:", err);
     res.status(500).json({ error: "Erro ao buscar produtos" });
@@ -277,7 +283,7 @@ exports.searchProducts = async (req, res) => {
 exports.getProductsByCommerce = async (req, res) => {
   const { id } = req.params; // id do comércio
   try {
-    const [rows] = await pool.query(
+  const [rows] = await pool.query(
       `SELECT 
     p.id,
     p.nome        AS name,
@@ -293,7 +299,12 @@ exports.getProductsByCommerce = async (req, res) => {
   `,
       [id]
     );
-    res.json({ products: rows });
+    const { toAbsoluteUrl } = require("../utils/url");
+    const products = rows.map((r) => ({
+      ...r,
+      mainImage: r.mainImage ? toAbsoluteUrl(r.mainImage) : r.mainImage,
+    }));
+    res.json({ products });
   } catch (err) {
     console.error("Erro ao buscar produtos por comércio:", err);
     res.status(500).json({ error: "Erro ao buscar produtos do comércio" });
@@ -326,7 +337,12 @@ WHERE p.codigo_barras = ?
       publicBase ? [publicBase.replace(/\/$/, ""), codigo] : [codigo]
     );
 
-    res.json(rows);
+    const { toAbsoluteUrl } = require("../utils/url");
+    const normalized = rows.map((r) => ({
+      ...r,
+      mainImage: r.mainImage ? toAbsoluteUrl(r.mainImage) : r.mainImage,
+    }));
+    res.json(normalized);
   } catch (err) {
     console.error("Erro ao buscar produtos por código de barras:", err);
     res.status(500).json({ message: "Erro interno ao buscar produtos." });
@@ -420,10 +436,11 @@ exports.getMyProducts = async (req, res) => {
     );
 
     // converte preco e renomeia campos para o frontend
+    const { toAbsoluteUrl } = require("../utils/url");
     const produtos = rows.map((p) => ({
       ...p,
       preco: parseFloat(p.preco),
-      imagem: p.imagem || null,
+      imagem: p.imagem ? toAbsoluteUrl(p.imagem) : null,
       codigoBarras: p.codigoBarras || "",
     }));
 

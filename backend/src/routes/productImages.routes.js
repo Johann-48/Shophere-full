@@ -62,8 +62,9 @@ router.post(
       let finalUrl;
       if (DRIVER === "s3") {
         const ext = path.extname(req.file.originalname) || ".jpg";
-        const safeName = req.file.originalname.replace(/[^a-zA-Z0-9_.-]/g, "_");
-        const key = `uploads/produtos/${Date.now()}-${safeName}${ext}`;
+        const base = path.basename(req.file.originalname, ext);
+        const safeBase = base.replace(/[^a-zA-Z0-9_.-]/g, "_");
+        const key = `uploads/produtos/${Date.now()}-${safeBase}${ext}`;
         finalUrl = await uploadBufferToS3({
           buffer: req.file.buffer,
           contentType: req.file.mimetype,

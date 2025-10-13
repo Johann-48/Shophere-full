@@ -15,11 +15,28 @@ function getPublicBaseUrl() {
   return process.env.PUBLIC_UPLOADS_BASE_URL || ""; // e.g., https://cdn.example.com
 }
 
+function buildDefaultS3PublicUrl(key) {
+  const region = process.env.S3_REGION || "us-east-1";
+  const bucket = process.env.S3_BUCKET;
+  const endpoint = process.env.S3_ENDPOINT; // optional (e.g., R2/Spaces)
+  const forcePathStyle = process.env.S3_FORCE_PATH_STYLE === "true";
+  const cleanKey = key.replace(/^\//, "");
+  if (!bucket) return `/${cleanKey}`; // last resort
+
+  if (endpoint) {
+    const base = endpoint.replace(/\/$/, "");
+    // Prefer path-style for custom endpoints (works for R2/Spaces)
+    return `${base}/${bucket}/${cleanKey}`;
+  }
+  // Default AWS S3 virtual-hosted–style URL
+  return `https://${bucket}.s3.${region}.amazonaws.com/${cleanKey}`;
+}
+
 function buildPublicUrl(key) {
   const base = getPublicBaseUrl();
   if (base) return `${base.replace(/\/$/, "")}/${key.replace(/^\//, "")}`;
-  // fallback to relative path (works locally); on Vercel this may 404 if file not present
-  return `/${key.replace(/^\//, "")}`;
+  // Fallback: construct from S3 settings (bucket/endpoint) so links are public by default
+  return buildDefaultS3PublicUrl(key);
 }
 
 async function uploadBufferToS3({ buffer, contentType, key }) {
@@ -48,15 +65,17 @@ async function uploadBufferToS3({ buffer, contentType, key }) {
     forcePathStyle,
     credentials,
   });
-  await client.send(
-    new PutObjectCommand({
-      Bucket: bucket,
-      Key: key.replace(/^\//, ""),
-      Body: buffer,
-      ContentType: contentType || "application/octet-stream",
-      ACL: "public-read",
-    })
-  );
+  const putParams = {
+    Bucket: bucket,
+    Key: key.replace(/^\//, ""),
+    Body: buffer,
+    ContentType: contentType || "application/octet-stream",
+  };
+  // Some S3-compatible providers (e.g., Cloudflare R2) don't support ACL; make it optional
+  if (process.env.S3_DISABLE_ACL !== "true") {
+    putParams.ACL = process.env.S3_ACL || "public-read";
+  }
+  await client.send(new PutObjectCommand(putParams));
   return buildPublicUrl(key);
 }
 
