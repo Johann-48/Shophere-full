@@ -16,7 +16,9 @@ async function getBlobPut() {
       try {
         const mod = await import("@vercel/blob");
         if (!mod.put) {
-          throw new Error("@vercel/blob does not export put(). Update the package.");
+          throw new Error(
+            "@vercel/blob does not export put(). Update the package."
+          );
         }
         return mod.put;
       } catch (err) {
@@ -37,8 +39,7 @@ async function getBlobPut() {
   return blobPutPromise;
 }
 
-const DRIVER =
-  process.env.STORAGE_DRIVER || (process.env.VERCEL ? "local" : "local");
+const DRIVER = process.env.STORAGE_DRIVER || process.env.NEXT_PUBLIC_STORAGE_DRIVER || "local";
 
 function getPublicBaseUrl() {
   return process.env.PUBLIC_UPLOADS_BASE_URL || ""; // e.g., https://cdn.example.com
