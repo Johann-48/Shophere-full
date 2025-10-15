@@ -8,11 +8,33 @@ try {
   // not installed; only needed if STORAGE_DRIVER=s3
 }
 
-let put;
-try {
-  ({ put } = require("@vercel/blob"));
-} catch (_) {
-  // optional; only needed if STORAGE_DRIVER=vercel-blob
+let blobPutPromise;
+
+async function getBlobPut() {
+  if (!blobPutPromise) {
+    blobPutPromise = (async () => {
+      try {
+        const mod = await import("@vercel/blob");
+        if (!mod.put) {
+          throw new Error("@vercel/blob does not export put(). Update the package.");
+        }
+        return mod.put;
+      } catch (err) {
+        if (err.code === "ERR_MODULE_NOT_FOUND") {
+          throw new Error(
+            "@vercel/blob not installed. Add it to backend/package.json."
+          );
+        }
+        if (err.code === "ERR_REQUIRE_ESM") {
+          throw new Error(
+            "@vercel/blob is ESM-only. Ensure Node 18+ and dynamic import are available."
+          );
+        }
+        throw err;
+      }
+    })();
+  }
+  return blobPutPromise;
 }
 
 const DRIVER =
@@ -87,16 +109,12 @@ async function uploadBufferToS3({ buffer, contentType, key }) {
 }
 
 async function uploadBufferToBlob({ buffer, contentType, key }) {
-  if (!put) {
-    throw new Error(
-      "@vercel/blob not installed. Add it to backend/package.json."
-    );
-  }
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) {
     throw new Error("Missing BLOB_READ_WRITE_TOKEN environment variable.");
   }
   const cleanKey = key.replace(/^\/+/, "");
+  const put = await getBlobPut();
   const blob = await put(cleanKey, buffer, {
     access: "public",
     contentType: contentType || "application/octet-stream",
