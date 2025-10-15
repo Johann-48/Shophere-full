@@ -9,6 +9,7 @@ const {
   uploadBufferToS3,
   buildPublicUrl,
 } = require("../config/storage");
+const { toAbsoluteUrl } = require("../utils/url");
 
 const isServerless = !!process.env.VERCEL;
 const baseUploads = isServerless
@@ -53,7 +54,9 @@ if (DRIVER === "s3") {
   router.post("/imagem", upload.single("imagem"), (req, res) => {
     if (!req.file)
       return res.status(400).json({ error: "Arquivo não enviado" });
-    return res.json({ caminho: `/uploads/imagens/${req.file.filename}` });
+    const relative = `/uploads/imagens/${req.file.filename}`;
+    // Always return absolute URL so the frontend doesn't depend on window.location
+    return res.json({ caminho: toAbsoluteUrl(relative) || relative });
   });
 }
 

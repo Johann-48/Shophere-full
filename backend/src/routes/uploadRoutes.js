@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
+const { toAbsoluteUrl } = require("../utils/url");
 
 // Detecta ambiente serverless (Vercel) e usa /tmp como diretório gravável
 const isServerless = !!process.env.VERCEL;
@@ -39,8 +40,8 @@ router.post("/audio", upload.single("audio"), (req, res) => {
   }
 
   // Retorna a URL pública correta
-  const caminho = `/uploads/audios/${req.file.filename}`;
-  res.json({ caminho });
+  const relative = `/uploads/audios/${req.file.filename}`;
+  res.json({ caminho: toAbsoluteUrl(relative) || relative });
 });
 
 module.exports = router;

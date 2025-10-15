@@ -130,6 +130,7 @@ if (DRIVER === "s3") {
         const pool = require("./config/db");
         const { produtoId } = req.params;
         const filePath = `/uploads/${req.file.filename}`;
+        const { toAbsoluteUrl } = require("./utils/url");
 
         await pool.query(
           "INSERT INTO fotos_produto (produto_id, url, principal) VALUES (?, ?, 1)",
@@ -138,7 +139,7 @@ if (DRIVER === "s3") {
 
         return res.json({
           message: "Imagem enviada com sucesso",
-          url: filePath,
+          url: toAbsoluteUrl(filePath) || filePath,
         });
       } catch (err) {
         console.error(err);

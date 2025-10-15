@@ -72,7 +72,8 @@ router.post(
         });
       } else {
         // local/dev path
-        finalUrl = `/uploads/${req.file.filename}`;
+        const relative = `/uploads/${req.file.filename}`;
+        finalUrl = require("../utils/url").toAbsoluteUrl(relative) || relative;
       }
 
       // If product has no principal yet, make this one principal
