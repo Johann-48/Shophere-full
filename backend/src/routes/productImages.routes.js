@@ -3,7 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const { DRIVER, uploadBufferToS3 } = require("../config/storage");
 const pool = require("../config/db");
-const { toAbsoluteUrl } = require("../utils/url");
+const { toAbsoluteUrl, isAbsoluteUrl } = require("../utils/url");
 const { requireAuth, requireCommerce } = require("../middleware/auth");
 
 const router = express.Router();
@@ -93,13 +93,11 @@ router.post(
         [id, finalUrl, makePrincipal ? 1 : 0]
       );
 
-      res
-        .status(201)
-        .json({
-          id: result.insertId,
-          url: toAbsoluteUrl(finalUrl),
-          principal: makePrincipal,
-        });
+      res.status(201).json({
+        id: result.insertId,
+        url: toAbsoluteUrl(finalUrl),
+        principal: makePrincipal,
+      });
     } catch (e) {
       console.error("upload product image error:", e.message);
       res.status(500).json({ error: "Erro ao enviar imagem" });
@@ -127,6 +125,51 @@ router.put(
     } catch (e) {
       console.error("set principal error:", e.message);
       res.status(500).json({ error: "Erro ao definir principal" });
+    }
+  }
+);
+
+// POST /api/products/:id/images/url — attach an external URL (no upload)
+router.post(
+  "/products/:id/images/url",
+  requireAuth,
+  requireCommerce,
+  async (req, res) => {
+    try {
+      const { id } = req.params; // product id
+      const { url, principal } = req.body || {};
+      if (!url || !isAbsoluteUrl(url)) {
+        return res
+          .status(400)
+          .json({ error: "Informe uma URL absoluta (http/https)." });
+      }
+
+      // If product has no principal yet (or principal=true requested), set this one principal
+      const [[{ count }]] = await pool.query(
+        `SELECT COUNT(*) AS count FROM fotos_produto WHERE produto_id = ? AND principal = 1`,
+        [id]
+      );
+      const makePrincipal = count === 0 || principal === true || principal === 1 || principal === "1";
+      if (makePrincipal) {
+        await pool.query(
+          `UPDATE fotos_produto SET principal = 0 WHERE produto_id = ?`,
+          [id]
+        );
+      }
+
+      const [result] = await pool.query(
+        `INSERT INTO fotos_produto (produto_id, url, principal) VALUES (?, ?, ?)`
+        , [id, url, makePrincipal ? 1 : 0]
+      );
+
+      res.status(201).json({
+        id: result.insertId,
+        url, // already absolute
+        principal: makePrincipal,
+      });
+    } catch (e) {
+      console.error("attach external image url error:", e.message);
+      res.status(500).json({ error: "Erro ao anexar URL da imagem" });
     }
   }
 );
