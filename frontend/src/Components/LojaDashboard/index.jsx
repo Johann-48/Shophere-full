@@ -322,13 +322,17 @@ function MeusProdutos() {
     fetchProdutos();
   }, []);
 
-  function iniciarEdicao(produto) {
+  async function iniciarEdicao(produto) {
     setProdutoEditandoId(produto.id);
     setProdutoEditando({
       ...produto,
       categoria_id: produto.categoria_id || "", // ensure the field exists
     });
-    carregarGaleria(produto.id);
+    const imgs = await carregarGaleria(produto.id);
+    const principal = (imgs || []).find((g) => g.principal);
+    if (principal) {
+      setProdutoEditando((prev) => ({ ...prev, imagem: principal.url }));
+    }
   }
 
   function cancelarEdicao() {
@@ -340,9 +344,12 @@ function MeusProdutos() {
     setGaleriaLoading(true);
     try {
       const res = await axios.get(`/api/products/${produtoId}/images`);
-      setGaleria(res.data || []);
+      const data = res.data || [];
+      setGaleria(data);
+      return data;
     } catch (e) {
       console.error("Erro ao carregar galeria:", e);
+      return [];
     } finally {
       setGaleriaLoading(false);
     }
@@ -360,7 +367,16 @@ function MeusProdutos() {
           Authorization: `Bearer ${token}`,
         },
       });
-      await carregarGaleria(produtoEditandoId);
+      const imgs = await carregarGaleria(produtoEditandoId);
+      const principal = (imgs || []).find((g) => g.principal);
+      if (principal) {
+        setProdutoEditando((prev) => ({ ...prev, imagem: principal.url }));
+        setProdutos((prev) =>
+          prev.map((p) =>
+            p.id === produtoEditandoId ? { ...p, imagem: principal.url } : p
+          )
+        );
+      }
     } catch (e) {
       console.error("Erro ao enviar imagem:", e);
       alert("Falha ao enviar imagem.");
@@ -377,7 +393,16 @@ function MeusProdutos() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNovaImagemUrl("");
-      await carregarGaleria(produtoEditandoId);
+      const imgs = await carregarGaleria(produtoEditandoId);
+      const principal = (imgs || []).find((g) => g.principal);
+      if (principal) {
+        setProdutoEditando((prev) => ({ ...prev, imagem: principal.url }));
+        setProdutos((prev) =>
+          prev.map((p) =>
+            p.id === produtoEditandoId ? { ...p, imagem: principal.url } : p
+          )
+        );
+      }
     } catch (e) {
       console.error("Erro ao anexar URL:", e);
       alert(
@@ -394,7 +419,16 @@ function MeusProdutos() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await carregarGaleria(produtoEditandoId);
+      const imgs = await carregarGaleria(produtoEditandoId);
+      const principal = (imgs || []).find((g) => g.principal);
+      if (principal) {
+        setProdutoEditando((prev) => ({ ...prev, imagem: principal.url }));
+        setProdutos((prev) =>
+          prev.map((p) =>
+            p.id === produtoEditandoId ? { ...p, imagem: principal.url } : p
+          )
+        );
+      }
     } catch (e) {
       console.error("Erro ao definir principal:", e);
       alert("Falha ao definir imagem principal.");
