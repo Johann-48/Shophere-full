@@ -11,6 +11,8 @@ import {
   FiMic,
   FiSend,
   FiX,
+  FiStar,
+  FiLink,
 } from "react-icons/fi";
 import API_CONFIG from "../../config/api";
 
@@ -127,6 +129,7 @@ function AdicionarProduto() {
   const [codigoBarras, setCodigoBarras] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [foto, setFoto] = useState(null);
+  const [imagemUrl, setImagemUrl] = useState("");
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
@@ -164,21 +167,23 @@ function AdicionarProduto() {
       );
       const produtoId = res.data.id; // ajuste conforme seu backend
 
-      // 2) Se veio foto, envia pelo endpoint de upload
-      if (foto) {
-        const formData = new FormData();
-        formData.append("foto", foto);
-
+      // 2) Imagem principal: prioriza URL externa se informada, senão arquivo
+      if (imagemUrl && /^https?:\/\//i.test(imagemUrl)) {
         await axios.post(
-          API_CONFIG.getApiUrl(`/api/upload/${produtoId}`),
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          `/api/products/${produtoId}/images/url`,
+          { url: imagemUrl, principal: true },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+      } else if (foto) {
+        // usa rota de galeria para adicionar imagem (será principal pois é a primeira)
+        const formData = new FormData();
+        formData.append("file", foto);
+        await axios.post(`/api/products/${produtoId}/images`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       setMensagem("Produto cadastrado com sucesso!");
@@ -191,6 +196,7 @@ function AdicionarProduto() {
       setQuantidade("");
       setCodigoBarras("");
       setFoto(null);
+      setImagemUrl("");
     } catch (error) {
       console.error(error);
       setMensagem("Erro ao cadastrar produto.");
@@ -266,6 +272,11 @@ function AdicionarProduto() {
           className="mt-1"
         />
       </label>
+      <AnimatedInput
+        placeholder="OU URL externa da imagem (https://...)"
+        value={imagemUrl}
+        onChange={(e) => setImagemUrl(e.target.value)}
+      />
 
       <button
         type="submit"
@@ -288,6 +299,9 @@ function MeusProdutos() {
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
   const [produtoEditando, setProdutoEditando] = useState(null);
   const [categorias, setCategorias] = useState([]);
+  const [galeria, setGaleria] = useState([]);
+  const [galeriaLoading, setGaleriaLoading] = useState(false);
+  const [novaImagemUrl, setNovaImagemUrl] = useState("");
 
   useEffect(() => {
     axios
@@ -314,11 +328,77 @@ function MeusProdutos() {
       ...produto,
       categoria_id: produto.categoria_id || "", // ensure the field exists
     });
+    carregarGaleria(produto.id);
   }
 
   function cancelarEdicao() {
     setProdutoEditandoId(null);
     setProdutoEditando(null);
+  }
+
+  async function carregarGaleria(produtoId) {
+    setGaleriaLoading(true);
+    try {
+      const res = await axios.get(`/api/products/${produtoId}/images`);
+      setGaleria(res.data || []);
+    } catch (e) {
+      console.error("Erro ao carregar galeria:", e);
+    } finally {
+      setGaleriaLoading(false);
+    }
+  }
+
+  async function uploadImagemArquivo(file) {
+    if (!file || !produtoEditandoId) return;
+    const token = localStorage.getItem("token");
+    const form = new FormData();
+    form.append("file", file);
+    try {
+      await axios.post(`/api/products/${produtoEditandoId}/images`, form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      await carregarGaleria(produtoEditandoId);
+    } catch (e) {
+      console.error("Erro ao enviar imagem:", e);
+      alert("Falha ao enviar imagem.");
+    }
+  }
+
+  async function anexarImagemUrl() {
+    if (!novaImagemUrl.trim()) return;
+    const token = localStorage.getItem("token");
+    try {
+      await axios.post(
+        `/api/products/${produtoEditandoId}/images/url`,
+        { url: novaImagemUrl, principal: galeria.length === 0 },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNovaImagemUrl("");
+      await carregarGaleria(produtoEditandoId);
+    } catch (e) {
+      console.error("Erro ao anexar URL:", e);
+      alert(
+        e.response?.data?.error || "Não foi possível anexar a URL informada."
+      );
+    }
+  }
+
+  async function definirComoPrincipal(imageId) {
+    const token = localStorage.getItem("token");
+    try {
+      await axios.put(
+        `/api/products/${produtoEditandoId}/images/${imageId}/principal`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await carregarGaleria(produtoEditandoId);
+    } catch (e) {
+      console.error("Erro ao definir principal:", e);
+      alert("Falha ao definir imagem principal.");
+    }
   }
 
   function handleEditChange(e) {
@@ -390,9 +470,7 @@ function MeusProdutos() {
             >
               <div className="flex items-center gap-4">
                 <img
-                  src={
-                    produtoEditando.imagem || "https://via.placeholder.com/100"
-                  }
+                  src={(galeria.find((g) => g.principal)?.url) || produtoEditando.imagem || "https://via.placeholder.com/100"}
                   alt={produtoEditando.nome}
                   className="w-24 h-24 object-cover rounded-lg border border-gray-300"
                 />
@@ -435,42 +513,7 @@ function MeusProdutos() {
                       ))}
                     </select>
                   </label>
-                  <label className="flex flex-col">
-                    Imagem do produto
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-                        const form = new FormData();
-                        form.append("foto", file);
-                        try {
-                          const token = localStorage.getItem("token");
-                          // supondo que sua rota de upload seja POST /api/upload/:produtoId
-                          const resp = await axios.post(
-                            `/api/upload/${produtoEditando.id}`,
-                            form,
-                            {
-                              headers: {
-                                "Content-Type": "multipart/form-data",
-                                Authorization: `Bearer ${token}`,
-                              },
-                            }
-                          );
-                          // resp.data.url → nova URL da imagem
-                          setProdutoEditando((prev) => ({
-                            ...prev,
-                            imagem: resp.data.url,
-                          }));
-                        } catch (err) {
-                          console.error("Erro no upload da imagem:", err);
-                          alert("Falha ao enviar imagem");
-                        }
-                      }}
-                      className="mt-1"
-                    />
-                  </label>
+                  
 
                   <input
                     name="marca"
@@ -493,6 +536,69 @@ function MeusProdutos() {
                     placeholder="Código de Barras"
                   />
                 </div>
+            
+              </div>
+              {/* Galeria de Imagens */}
+              <div className="mt-2">
+                <h4 className="font-semibold mb-2">Imagens do Produto</h4>
+                <div className="flex items-center gap-3 flex-wrap mb-3">
+                  <label className="cursor-pointer p-2 bg-gray-200 rounded hover:bg-gray-300 transition flex items-center gap-2">
+                    <FiCamera />
+                    Enviar arquivo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => uploadImagemArquivo(e.target.files[0])}
+                    />
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <FiLink />
+                    <input
+                      type="url"
+                      placeholder="https://imagem.externa/..."
+                      value={novaImagemUrl}
+                      onChange={(e) => setNovaImagemUrl(e.target.value)}
+                      className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 w-72"
+                    />
+                    <button
+                      type="button"
+                      onClick={anexarImagemUrl}
+                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                      Anexar URL
+                    </button>
+                  </div>
+                </div>
+                {galeriaLoading ? (
+                  <p>Carregando imagens…</p>
+                ) : galeria.length === 0 ? (
+                  <p className="text-sm text-zinc-500">Nenhuma imagem ainda.</p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {galeria.map((img) => (
+                      <div key={img.id} className="relative group border rounded overflow-hidden">
+                        <img src={img.url} alt="imagem" className="aspect-square object-cover w-full" />
+                        <div className="absolute top-1 left-1 flex items-center gap-1 bg-white/80 rounded px-2 py-1 text-xs">
+                          {img.principal ? (
+                            <>
+                              <FiStar className="text-yellow-500" /> Principal
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => definirComoPrincipal(img.id)}
+                              className="flex items-center gap-1 hover:text-blue-700"
+                              title="Definir como principal"
+                            >
+                              <FiStar /> Tornar principal
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <textarea
                 name="descricao"
