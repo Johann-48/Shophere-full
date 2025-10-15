@@ -7,7 +7,7 @@ const router = express.Router();
 const {
   DRIVER,
   uploadBufferToS3,
-  buildPublicUrl,
+  uploadBufferToBlob,
 } = require("../config/storage");
 const { toAbsoluteUrl } = require("../utils/url");
 
@@ -22,7 +22,7 @@ try {
   console.error("Falha ao criar diretório de imagens:", imagensDir, e.message);
 }
 
-if (DRIVER === "s3") {
+if (DRIVER === "s3" || DRIVER === "vercel-blob") {
   const upload = multer({ storage: multer.memoryStorage() });
   router.post("/imagem", upload.single("imagem"), async (req, res) => {
     try {
@@ -30,14 +30,15 @@ if (DRIVER === "s3") {
         return res.status(400).json({ error: "Arquivo não enviado" });
       const ext = path.extname(req.file.originalname) || ".jpg";
       const key = `uploads/imagens/img_${Date.now()}${ext}`;
-      const url = await uploadBufferToS3({
+      const uploader = DRIVER === "s3" ? uploadBufferToS3 : uploadBufferToBlob;
+      const url = await uploader({
         buffer: req.file.buffer,
         contentType: req.file.mimetype,
         key,
       });
       return res.json({ caminho: url });
     } catch (e) {
-      console.error("Upload S3 falhou:", e.message);
+      console.error("Upload remoto falhou:", e.message);
       return res.status(500).json({ error: "Falha ao enviar imagem" });
     }
   });

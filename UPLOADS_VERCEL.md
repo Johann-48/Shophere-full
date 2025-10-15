@@ -11,13 +11,15 @@ TL;DR: Serverless instances have no persistent local disk. Use S3-compatible sto
 
 ## Quick Start (Recommended: S3/R2/Spaces)
 
-1) Create a bucket
+1. Create a bucket
+
 - AWS S3, Cloudflare R2, or DigitalOcean Spaces.
 - Ensure public GET access for objects (via bucket policy or a CDN with the correct configuration).
 
-2) Add environment variables (Vercel → Project Settings → Environment Variables)
+2. Add environment variables (Vercel → Project Settings → Environment Variables)
 
 Required
+
 - `STORAGE_DRIVER = s3`
 - `S3_BUCKET = <your-bucket>`
 - `S3_REGION = <your-region>` (e.g., `us-east-1`)
@@ -25,23 +27,45 @@ Required
 - `S3_SECRET_ACCESS_KEY = <secret>`
 
 S3-compatible (R2/Spaces)
+
 - `S3_ENDPOINT = https://<your-endpoint>`
 - `S3_FORCE_PATH_STYLE = true`
 - `S3_DISABLE_ACL = true` (R2/Spaces usually don’t support ACLs)
 
 Optional (nicer public URLs)
+
 - `PUBLIC_UPLOADS_BASE_URL = https://cdn.example.com` (or your bucket/CDN URL). When set, the backend builds absolute URLs with this base.
 
-3) Deploy
+3. Deploy
+
 - No code changes required beyond envs. The backend detects `STORAGE_DRIVER=s3`, uploads to the bucket, and returns public URLs.
 
-4) Validate
+4. Validate
+
 - Open: `https://<your-vercel-app>/api/health` → it should show `{ storage: { driver: "s3", ... } }`.
 - Upload test (PowerShell example):
   ```powershell
   curl.exe -s -X POST -F "imagem=@C:\\path\\to\\file.jpg;type=image/jpeg" https://<your-vercel-app>/api/upload/image/imagem
   ```
   You should get `{ caminho: "https://..." }` pointing at your bucket or CDN.
+
+## Quick Start (Alternative: Vercel Blob)
+
+1. Create a Blob Store in the Vercel dashboard (Storage → Blob) for the project.
+2. Generate a **Read-Write Token** (`BLOB_READ_WRITE_TOKEN`) from the Blob settings page.
+3. Add environment variables in Vercel → Project Settings → Environment Variables:
+
+- `STORAGE_DRIVER = vercel-blob`
+- `BLOB_READ_WRITE_TOKEN = <token-gerado>`
+
+4. Deploy a new build. The backend auto-detects the driver and pushes uploads to Vercel Blob using public access links.
+5. Validate: open `https://<your-vercel-app>/api/health` and confirm `storage.driver` is `"vercel-blob"`, then test an upload (same curl command as acima).
+
+Observações:
+
+- URLs retornadas já são públicas (por exemplo `https://pub-...blob.vercel-storage.com/...`). Nenhuma configuração adicional de CDN é necessária.
+- O backend salva os arquivos com o padrão `uploads/produtos/<produtoId>/<timestamp>-<arquivo>` para facilitar a organização dentro do Blob.
+- Tokens podem ser rotacionados sem redeploy — basta atualizar o valor no painel da Vercel e disparar um novo deploy.
 
 ## Local driver (for development only)
 
@@ -62,14 +86,17 @@ Optional (nicer public URLs)
 ## Endpoints and field names
 
 - Dashboard product image upload (make photo principal):
+
   - `POST /api/upload/:produtoId` with form-data field `foto`
   - Returns `{ url: "<display-ready-URL>" }`
 
 - Chat image upload:
+
   - `POST /api/upload/image/imagem` with form-data field `imagem`
   - Returns `{ caminho: "<display-ready-URL>" }`
 
 - Product gallery image (attach additional images):
+
   - `POST /api/products/:id/images` with form-data field `file`
   - Returns `{ id, url, principal }`
 
@@ -110,12 +137,15 @@ For R2/Spaces, configure the equivalent visibility on your provider.
 ## Troubleshooting
 
 - 403 on S3 URL
+
   - Ensure bucket policy allows public GET or place a CDN with the correct access configuration. For R2/Spaces, set `S3_DISABLE_ACL=true` and make objects public via provider settings.
 
 - Wrong or broken URLs for R2/Spaces
+
   - Set `S3_ENDPOINT` and `S3_FORCE_PATH_STYLE=true`. We construct URLs as `https://<endpoint>/<bucket>/<key>` for custom endpoints.
 
 - Upload works locally but fails on Vercel
+
   - Verify envs are set in Vercel (Production & Preview as needed) and a new deployment picked them up.
   - Check `https://<your-vercel-app>/api/health` for the active driver.
 

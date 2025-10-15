@@ -8,6 +8,13 @@ try {
   // not installed; only needed if STORAGE_DRIVER=s3
 }
 
+let put;
+try {
+  ({ put } = require("@vercel/blob"));
+} catch (_) {
+  // optional; only needed if STORAGE_DRIVER=vercel-blob
+}
+
 const DRIVER =
   process.env.STORAGE_DRIVER || (process.env.VERCEL ? "local" : "local");
 
@@ -79,9 +86,29 @@ async function uploadBufferToS3({ buffer, contentType, key }) {
   return buildPublicUrl(key);
 }
 
+async function uploadBufferToBlob({ buffer, contentType, key }) {
+  if (!put) {
+    throw new Error(
+      "@vercel/blob not installed. Add it to backend/package.json."
+    );
+  }
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) {
+    throw new Error("Missing BLOB_READ_WRITE_TOKEN environment variable.");
+  }
+  const cleanKey = key.replace(/^\/+/, "");
+  const blob = await put(cleanKey, buffer, {
+    access: "public",
+    contentType: contentType || "application/octet-stream",
+    token,
+  });
+  return blob.url;
+}
+
 module.exports = {
   DRIVER,
   buildPublicUrl,
   getPublicBaseUrl,
   uploadBufferToS3,
+  uploadBufferToBlob,
 };

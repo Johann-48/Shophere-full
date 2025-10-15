@@ -5,7 +5,11 @@ const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
-const { DRIVER, uploadBufferToS3 } = require("./config/storage");
+const {
+  DRIVER,
+  uploadBufferToS3,
+  uploadBufferToBlob,
+} = require("./config/storage");
 
 dotenv.config();
 
@@ -80,8 +84,8 @@ app.use("/api/upload", uploadRoutes); // Inclui upload de áudio
 app.use("/api/upload/image", require("./routes/imageUploadRoutes"));
 app.use("/api", productImagesRoutes);
 
-// 5) Upload de imagem de produto (suporta S3 quando configurado)
-if (DRIVER === "s3") {
+// 5) Upload de imagem de produto (suporta S3/Vercel Blob quando configurado)
+if (DRIVER === "s3" || DRIVER === "vercel-blob") {
   const upload = multer({ storage: multer.memoryStorage() });
   app.post(
     "/api/upload/:produtoId",
@@ -96,8 +100,10 @@ if (DRIVER === "s3") {
         const ext = pathMod.extname(req.file.originalname) || ".jpg";
         const base = pathMod.basename(req.file.originalname, ext);
         const safeBase = base.replace(/[^a-zA-Z0-9_.-]/g, "_");
-  const key = `uploads/produtos/${Date.now()}-${safeBase}${ext}`;
-        const url = await uploadBufferToS3({
+        const key = `uploads/produtos/${produtoId}/${Date.now()}-${safeBase}${ext}`;
+        const uploader =
+          DRIVER === "s3" ? uploadBufferToS3 : uploadBufferToBlob;
+        const url = await uploader({
           buffer: req.file.buffer,
           contentType: req.file.mimetype,
           key,
@@ -110,7 +116,7 @@ if (DRIVER === "s3") {
 
         return res.json({ message: "Imagem enviada com sucesso", url });
       } catch (err) {
-        console.error("Upload de produto (S3) falhou:", err.message);
+        console.error("Upload de produto (remoto) falhou:", err.message);
         return res.status(500).json({ error: "Erro ao salvar imagem" });
       }
     }

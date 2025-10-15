@@ -504,7 +504,11 @@ function MeusProdutos() {
             >
               <div className="flex items-center gap-4">
                 <img
-                  src={(galeria.find((g) => g.principal)?.url) || produtoEditando.imagem || "https://via.placeholder.com/100"}
+                  src={
+                    galeria.find((g) => g.principal)?.url ||
+                    produtoEditando.imagem ||
+                    "https://via.placeholder.com/100"
+                  }
                   alt={produtoEditando.nome}
                   className="w-24 h-24 object-cover rounded-lg border border-gray-300"
                 />
@@ -547,7 +551,6 @@ function MeusProdutos() {
                       ))}
                     </select>
                   </label>
-                  
 
                   <input
                     name="marca"
@@ -570,7 +573,6 @@ function MeusProdutos() {
                     placeholder="Código de Barras"
                   />
                 </div>
-            
               </div>
               {/* Galeria de Imagens */}
               <div className="mt-2">
@@ -611,8 +613,15 @@ function MeusProdutos() {
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {galeria.map((img) => (
-                      <div key={img.id} className="relative group border rounded overflow-hidden">
-                        <img src={img.url} alt="imagem" className="aspect-square object-cover w-full" />
+                      <div
+                        key={img.id}
+                        className="relative group border rounded overflow-hidden"
+                      >
+                        <img
+                          src={img.url}
+                          alt="imagem"
+                          className="aspect-square object-cover w-full"
+                        />
                         <div className="absolute top-1 left-1 flex items-center gap-1 bg-white/80 rounded px-2 py-1 text-xs">
                           {img.principal ? (
                             <>
