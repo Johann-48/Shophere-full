@@ -39,7 +39,10 @@ async function getBlobPut() {
   return blobPutPromise;
 }
 
-const DRIVER = process.env.STORAGE_DRIVER || process.env.NEXT_PUBLIC_STORAGE_DRIVER || "local";
+const DRIVER =
+  process.env.STORAGE_DRIVER ||
+  process.env.NEXT_PUBLIC_STORAGE_DRIVER ||
+  "local";
 
 function getPublicBaseUrl() {
   return process.env.PUBLIC_UPLOADS_BASE_URL || ""; // e.g., https://cdn.example.com
