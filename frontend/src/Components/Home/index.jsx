@@ -32,6 +32,14 @@ export default function Home() {
   const [catCanScroll, setCatCanScroll] = useState({ left: false, right: true });
   const catScrollRef = React.useRef(null);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+  // Close modal with Escape
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') setIsCatModalOpen(false);
+    };
+    if (isCatModalOpen) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isCatModalOpen]);
 
   const [sortOption, setSortOption] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -116,7 +124,7 @@ export default function Home() {
   }, [selectedCategory, allProducts]);
 
   const handleCategorySelect = (id) => {
-    setSelectedCategory(id);
+    setSelectedCategory(id == null ? null : Number(id));
   };
 
   // Remove slider behavior; we'll use a modal popup instead
@@ -233,7 +241,7 @@ export default function Home() {
 
           {/* Modal de categorias */}
           {isCatModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/40" onClick={() => setIsCatModalOpen(false)} />
               <motion.div
                 initial={{ opacity: 0, scale: 0.98, y: 10 }}
