@@ -6,6 +6,7 @@ import axios from "axios";
 import API_CONFIG from "../../config/api";
 import { useTheme } from "../../contexts/ThemeContext";
 import ThemeToggle from "../ThemeToggle";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const { isDarkMode, dark, light } = useTheme();
+  const { role } = useAuth();
 
   // Get current theme
   const currentTheme = isDarkMode ? dark : light;
@@ -55,9 +57,8 @@ export default function Header() {
     { to: "/about", label: "Sobre" },
   ];
 
-  const authMenu = [
+  const authMenuBase = [
     { to: "/accountmanager", label: "Meu Perfil" },
-    { to: "/lojadashboard", label: "Dashboard" },
     {
       label: "Sair",
       action: () => {
@@ -68,6 +69,9 @@ export default function Header() {
       },
     },
   ];
+  const authMenu = role === "commerce"
+    ? [{ to: "/accountmanager", label: "Meu Perfil" }, { to: "/lojadashboard", label: "Dashboard" }, ...authMenuBase.slice(1)]
+    : authMenuBase;
 
   const guestMenu = [
     { to: "/login", label: "Entrar" },
