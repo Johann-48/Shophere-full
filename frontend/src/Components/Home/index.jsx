@@ -29,17 +29,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [commerces, setCommerces] = useState([]);
   const [showAllCommerces, setShowAllCommerces] = useState(false);
-  const [catCanScroll, setCatCanScroll] = useState({ left: false, right: true });
-  const catScrollRef = React.useRef(null);
-  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-  // Close modal with Escape
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape') setIsCatModalOpen(false);
-    };
-    if (isCatModalOpen) window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isCatModalOpen]);
+  // Categoria via filtro (sem seção dedicada)
 
   const [sortOption, setSortOption] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -226,83 +216,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categorias (Popup) */}
-      <section className="px-4 md:px-6 py-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-2xl md:text-3xl font-bold ${currentTheme.textPrimary}`}>🗂 Categorias</h2>
-            <button
-              onClick={() => setIsCatModalOpen(true)}
-              className={`px-4 py-2 rounded-lg text-white ${currentTheme.button} btn-primary`}
-            >
-              Abrir categorias
-            </button>
-          </div>
-
-          {/* Modal de categorias */}
-          {isCatModalOpen && (
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setIsCatModalOpen(false)} />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.98, y: 10 }}
-                className={`relative w-full max-w-3xl ${currentTheme.card} rounded-2xl p-6 shadow-lg`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Selecione uma categoria</h3>
-                  <button
-                    onClick={() => setIsCatModalOpen(false)}
-                    className={`px-3 py-1.5 rounded-lg ${currentTheme.secondary}`}
-                  >
-                    Fechar
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-auto pr-1">
-                  {categories.map((cat) => {
-                    const iconByName = {
-                      Eletrônicos: "🔌",
-                      Moda: "👗",
-                      Esportes: "🏀",
-                      Mercado: "🛒",
-                      Beleza: "💄",
-                      Casa: "🏠",
-                      Livros: "📚",
-                      Jogos: "🎮",
-                      Outros: "✨",
-                      Todos: "🌐",
-                    };
-                    const icon = iconByName[cat.nome] || "✨";
-                    const isActive = selectedCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id ?? 'all'}
-                        onClick={() => {
-                          handleCategorySelect(cat.id);
-                          setIsCatModalOpen(false);
-                        }}
-                        className={`text-left px-4 py-3 rounded-xl border transition ${
-                          isActive
-                            ? 'border-blue-400 bg-blue-500/20'
-                            : 'border-transparent hover:border-blue-300 hover:bg-blue-500/10'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl" aria-hidden>{icon}</span>
-                          <div>
-                            <div className="text-xs opacity-70">Categoria</div>
-                            <div className="text-base font-bold">{cat.nome}</div>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </div>
-      </section>
+  {/* (Sem seção de categorias) */}
       {/* Produtos em Destaque */}
       <section className="px-4 md:px-6 py-6">
         <div className="max-w-7xl mx-auto">
@@ -426,6 +340,22 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Categoria como filtro central da página */}
+        <div className="my-6 flex justify-center">
+          <div className="flex items-center gap-3">
+            <label className={`text-sm font-medium ${currentTheme.text}`}>Categoria</label>
+            <select
+              value={selectedCategory ?? ""}
+              onChange={(e) => handleCategorySelect(e.target.value === "" ? null : e.target.value)}
+              className={`px-4 py-2 rounded-lg border ${currentTheme.card} ${currentTheme.text}`}
+            >
+              <option value="">Todos</option>
+              {categories.filter((c) => c.id != null).map((c) => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.slice(0, 10).map((product) => (
             <motion.div
