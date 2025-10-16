@@ -189,7 +189,17 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen font-sans ${currentTheme.textPrimary} ${currentTheme.background} animate-fadeInUp`}>
-      {/* Hero Banner removed (moved to Login page as requested) */}
+      {/* Hero Image */}
+      <section className="w-full">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <img
+            src="https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D"
+            alt="Banner"
+            className="w-full h-48 md:h-72 object-cover rounded-2xl shadow"
+            loading="lazy"
+          />
+        </div>
+      </section>
 
       {/* Comércios */}
       <section className="px-4 md:px-6 py-6">

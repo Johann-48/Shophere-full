@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FiMail, FiMapPin, FiPhone, FiArrowRight } from "react-icons/fi";
+import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 export default function Footer() {
@@ -10,40 +10,8 @@ export default function Footer() {
   return (
     <footer className={`${currentTheme.footer} ${currentTheme.text} py-12`}>
       <div
-        className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4
-gap-10 px-6"
+        className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6 justify-items-center text-center"
       >
-        {/* Newsletter */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h4
-            className={`${accentText} font-semibold mb-3
-text-lg`}
-          >
-            Fique de Olho
-          </h4>
-          <p className="mb-4 text-sm opacity-80">Receba novidades por e-mail</p>
-          <div className="relative w-full">
-            <input
-              type="email"
-              placeholder="Digite seu email"
-              className={`w-full py-3 pl-5 pr-12 rounded-full
-${isDarkMode ? 'bg-slate-800 text-slate-200 border border-slate-700 placeholder-slate-400' : 'bg-white text-gray-800 border border-blue-200 placeholder-gray-500'}
-focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
-text-sm`}
-            />
-            <button
-              className={`absolute top-1/2 right-2 transform
--translate-y-1/2 text-white p-2 rounded-full transition-all ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'}`}
-              aria-label="Enviar"
-            >
-              <FiArrowRight size={18} />
-            </button>
-          </div>
-        </motion.div>
         {/* Ajuda / Contato */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -57,15 +25,15 @@ text-lg`}
             Ajuda
           </h4>
           <ul className="space-y-3 text-sm">
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-2 justify-center">
               <FiMapPin className={`mt-1 ${accentText}`} />
               111 Bijoy Sarani, Dhaka, DH 1515, Bangladesh
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2 justify-center">
               <FiMail className={`${accentText}`} />
               shopherecompany1@gmail.com
             </li>
-            <li className="flex items-center gap-2">
+            <li className="flex items-center gap-2 justify-center">
               <FiPhone className={`${accentText}`} />
               (19) 99358-8498
             </li>
@@ -158,8 +126,7 @@ transition`}
       </div>
       {/* Copyright */}
       <div
-        className={`mt-10 border-t pt-6 text-center
-text-sm ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-blue-200 text-gray-500'}`}
+        className={`mt-10 border-t pt-6 text-center text-sm ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-blue-200 text-gray-500'}`}
       >
         © {new Date().getFullYear()} ShopHere. Todos os direitos reservados.
       </div>
