@@ -27,6 +27,11 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [liked, setLiked] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  // Enhanced category filter state (searchable combobox)
+  const [catQuery, setCatQuery] = useState("");
+  const [catOpen, setCatOpen] = useState(false);
+  const [catHighlight, setCatHighlight] = useState(0);
+  const catBoxRef = React.useRef(null);
   const [commerces, setCommerces] = useState([]);
   const [showAllCommerces, setShowAllCommerces] = useState(false);
   // Categoria via filtro (sem seção dedicada)
@@ -115,7 +120,43 @@ export default function Home() {
 
   const handleCategorySelect = (id) => {
     setSelectedCategory(id == null ? null : Number(id));
+    setCatOpen(false);
+    setCatQuery("");
   };
+
+  // Close category dropdown on outside click
+  useEffect(() => {
+    const onDocClick = (e) => {
+      if (!catBoxRef.current) return;
+      if (!catBoxRef.current.contains(e.target)) setCatOpen(false);
+    };
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  const iconByName = {
+    "Eletrônicos": "🔌",
+    "Moda": "👗",
+    "Esportes": "🏀",
+    "Mercado": "🛒",
+    "Beleza": "💄",
+    "Casa": "🏠",
+    "Livros": "📚",
+    "Jogos": "🎮",
+    "Outros": "✨",
+    "Todos": "🌐",
+  };
+
+  const normalizedCategories = categories.map((c) => ({
+    id: c.id,
+    nome: c.nome,
+    icon: iconByName[c.nome] || "✨",
+  }));
+  const filteredCats = normalizedCategories.filter((c) =>
+    (catQuery || "").length === 0
+      ? true
+      : c.nome.toLowerCase().includes(catQuery.toLowerCase())
+  );
 
   // Remove slider behavior; we'll use a modal popup instead
 
@@ -340,20 +381,127 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* Categoria como filtro central da página */}
+        {/* Categoria como filtro central — combobox moderno */}
         <div className="my-6 flex justify-center">
-          <div className="flex items-center gap-3">
-            <label className={`text-sm font-medium ${currentTheme.text}`}>Categoria</label>
-            <select
-              value={selectedCategory ?? ""}
-              onChange={(e) => handleCategorySelect(e.target.value === "" ? null : e.target.value)}
-              className={`px-4 py-2 rounded-lg border ${currentTheme.card} ${currentTheme.text}`}
-            >
-              <option value="">Todos</option>
-              {categories.filter((c) => c.id != null).map((c) => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
+          <div ref={catBoxRef} className={`w-full max-w-2xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg`}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className={`text-sm font-semibold ${currentTheme.textPrimary}`}>Filtrar por categoria</h3>
+              {selectedCategory !== null && (
+                <button
+                  onClick={() => handleCategorySelect(null)}
+                  className={`text-xs px-2 py-1 rounded-lg ${currentTheme.secondary}`}
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
+            {/* Input de busca */}
+            <div className="relative">
+              <input
+                type="text"
+                value={catQuery}
+                onChange={(e) => { setCatQuery(e.target.value); setCatOpen(true); setCatHighlight(0); }}
+                onFocus={() => setCatOpen(true)}
+                onKeyDown={(e) => {
+                  if (!catOpen) return;
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setCatHighlight((h) => Math.min(h + 1, filteredCats.length - 1));
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setCatHighlight((h) => Math.max(h - 1, 0));
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const choice = filteredCats[catHighlight];
+                    if (choice) handleCategorySelect(choice.id);
+                  } else if (e.key === 'Escape') {
+                    setCatOpen(false);
+                  }
+                }}
+                placeholder={(() => {
+                  const sel = normalizedCategories.find((c) => c.id === selectedCategory);
+                  return sel ? `Categoria selecionada: ${sel.nome}` : 'Buscar categoria (ex.: Moda, Esportes)';
+                })()}
+                className={`w-full pl-4 pr-28 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-900/60 text-white border-slate-700' : 'bg-white text-gray-900 border-blue-200'}`}
+                aria-autocomplete="list"
+                aria-expanded={catOpen}
+              />
+              {/* Ações rápidas à direita */}
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <button
+                  onClick={() => setCatOpen((v) => !v)}
+                  className={`text-xs px-3 py-1.5 rounded-lg ${currentTheme.secondary}`}
+                >
+                  {catOpen ? 'Fechar' : 'Abrir'}
+                </button>
+              </div>
+
+              {/* Dropdown de sugestões */}
+              {catOpen && (
+                <motion.ul
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  className={`absolute z-50 mt-2 w-full max-h-64 overflow-auto rounded-xl shadow-xl border ${isDarkMode ? 'bg-slate-900/95 border-slate-700' : 'bg-white border-blue-200'}`}
+                  role="listbox"
+                >
+                  <li
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => handleCategorySelect(null)}
+                    className={`px-4 py-2 cursor-pointer flex items-center gap-3 ${catHighlight === 0 ? (isDarkMode ? 'bg-slate-800' : 'bg-blue-50') : ''}`}
+                    role="option"
+                    aria-selected={catHighlight === 0}
+                  >
+                    <span className="text-xl">🌐</span>
+                    <span>Todos</span>
+                  </li>
+                  {filteredCats
+                    .filter((c) => c.id != null)
+                    .map((c, idx) => {
+                      const pos = idx + 1; // 0 is "Todos"
+                      const active = catHighlight === pos;
+                      return (
+                        <li
+                          key={c.id}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onMouseEnter={() => setCatHighlight(pos)}
+                          onClick={() => handleCategorySelect(c.id)}
+                          className={`px-4 py-2 cursor-pointer flex items-center gap-3 ${active ? (isDarkMode ? 'bg-slate-800' : 'bg-blue-50') : ''}`}
+                          role="option"
+                          aria-selected={active}
+                        >
+                          <span className="text-xl">{c.icon}</span>
+                          <span>{c.nome}</span>
+                        </li>
+                      );
+                    })}
+                </motion.ul>
+              )}
+            </div>
+
+            {/* Sugestões rápidas (chips) */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {normalizedCategories
+                .filter((c) => c.id != null)
+                .slice(0, 8)
+                .map((c) => (
+                  <button
+                    key={`chip-${c.id}`}
+                    onClick={() => handleCategorySelect(c.id)}
+                    className={`px-3 py-1.5 rounded-full text-sm border transition ${
+                      selectedCategory === c.id
+                        ? 'border-blue-400 bg-blue-500/20'
+                        : isDarkMode
+                          ? 'border-slate-600 hover:border-slate-500'
+                          : 'border-blue-200 hover:border-blue-300'
+                    }`}
+                    title={c.nome}
+                  >
+                    <span className="mr-1" aria-hidden>{c.icon}</span>
+                    {c.nome}
+                  </button>
+                ))}
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
