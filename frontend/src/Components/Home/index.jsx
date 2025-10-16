@@ -31,6 +31,7 @@ export default function Home() {
   const [showAllCommerces, setShowAllCommerces] = useState(false);
   const [catCanScroll, setCatCanScroll] = useState({ left: false, right: true });
   const catScrollRef = React.useRef(null);
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
 
   const [sortOption, setSortOption] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -118,36 +119,7 @@ export default function Home() {
     setSelectedCategory(id);
   };
 
-  // Category carousel helpers
-  const updateCatScrollShadows = () => {
-    const el = catScrollRef.current;
-    if (!el) return;
-    setCatCanScroll({
-      left: el.scrollLeft > 0,
-      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
-    });
-  };
-
-  useEffect(() => {
-    updateCatScrollShadows();
-    const el = catScrollRef.current;
-    if (!el) return;
-    const onScroll = () => updateCatScrollShadows();
-    el.addEventListener('scroll', onScroll, { passive: true });
-    const onResize = () => updateCatScrollShadows();
-    window.addEventListener('resize', onResize);
-    return () => {
-      el.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-    };
-  }, []);
-
-  const snapScroll = (dir) => {
-    const el = catScrollRef.current;
-    if (!el) return;
-    const width = el.clientWidth * 0.8;
-    el.scrollTo({ left: el.scrollLeft + (dir === 'right' ? width : -width), behavior: 'smooth' });
-  };
+  // Remove slider behavior; we'll use a modal popup instead
 
   const handleProductClick = (id) => {
     navigate(`/produto/${id}`);
@@ -246,87 +218,81 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categorias */}
+      {/* Categorias (Popup) */}
       <section className="px-4 md:px-6 py-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className={`text-2xl md:text-3xl font-bold mb-6 ${currentTheme.textPrimary}`}>
-            🗂 Navegue por Categorias
-          </h2>
-
-          {/* Interactive category carousel with arrows */}
-          <div className="relative">
-            {/* Left arrow */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className={`text-2xl md:text-3xl font-bold ${currentTheme.textPrimary}`}>🗂 Categorias</h2>
             <button
-              aria-label="Categorias anteriores"
-              onClick={() => snapScroll('left')}
-              className={`hidden md:flex absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 items-center justify-center rounded-full shadow ${currentTheme.card} ${currentTheme.text} border ${catCanScroll.left ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}
+              onClick={() => setIsCatModalOpen(true)}
+              className={`px-4 py-2 rounded-lg text-white ${currentTheme.button} btn-primary`}
             >
-              ‹
-            </button>
-
-            {/* Scroll container */}
-            <div
-              ref={catScrollRef}
-              className="flex overflow-x-auto gap-4 pb-4 px-1 hide-scrollbar scroll-smooth snap-x snap-mandatory"
-              onKeyDown={(e) => {
-                if (e.key === 'ArrowRight') snapScroll('right');
-                if (e.key === 'ArrowLeft') snapScroll('left');
-              }}
-              tabIndex={0}
-              role="listbox"
-              aria-label="Categorias"
-            >
-            {categories.map((cat) => {
-              const iconByName = {
-                Eletrônicos: "🔌",
-                Moda: "👗",
-                Esportes: "🏀",
-                Mercado: "🛒",
-                Beleza: "💄",
-                Casa: "🏠",
-                Livros: "📚",
-                Jogos: "🎮",
-                Outros: "✨",
-                Todos: "🌐",
-              };
-              const icon = iconByName[cat.nome] || "✨";
-              const isActive = selectedCategory === cat.id;
-              return (
-                <motion.button
-                  key={cat.id ?? 'all'}
-                  onClick={() => handleCategorySelect(cat.id)}
-                  className={`min-w-[200px] snap-start rounded-2xl text-left px-5 py-4 cursor-pointer border-2 transition-all duration-200 group ${
-                    isActive
-                      ? `${currentTheme.accent} text-white border-blue-400`
-                      : `${currentTheme.card} ${currentTheme.text} border-transparent hover:border-blue-400`
-                  }`}
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl" aria-hidden>{icon}</span>
-                    <div>
-                      <div className="text-sm opacity-70">Categoria</div>
-                      <div className="text-base font-bold">{cat.nome}</div>
-                    </div>
-                  </div>
-                  <div className={`mt-3 h-1.5 rounded-full transition-all duration-300 ${
-                    isActive ? 'bg-white/80' : 'bg-blue-500/30 group-hover:bg-blue-500/60'
-                  }`} />
-                </motion.button>
-              );
-              })}
-            </div>
-
-            {/* Right arrow */}
-            <button
-              aria-label="Próximas categorias"
-              onClick={() => snapScroll('right')}
-              className={`hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 items-center justify-center rounded-full shadow ${currentTheme.card} ${currentTheme.text} border ${catCanScroll.right ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}
-            >
-              ›
+              Abrir categorias
             </button>
           </div>
+
+          {/* Modal de categorias */}
+          {isCatModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setIsCatModalOpen(false)} />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.98, y: 10 }}
+                className={`relative w-full max-w-3xl ${currentTheme.card} rounded-2xl p-6 shadow-lg`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Selecione uma categoria</h3>
+                  <button
+                    onClick={() => setIsCatModalOpen(false)}
+                    className={`px-3 py-1.5 rounded-lg ${currentTheme.secondary}`}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-auto pr-1">
+                  {categories.map((cat) => {
+                    const iconByName = {
+                      Eletrônicos: "🔌",
+                      Moda: "👗",
+                      Esportes: "🏀",
+                      Mercado: "🛒",
+                      Beleza: "💄",
+                      Casa: "🏠",
+                      Livros: "📚",
+                      Jogos: "🎮",
+                      Outros: "✨",
+                      Todos: "🌐",
+                    };
+                    const icon = iconByName[cat.nome] || "✨";
+                    const isActive = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id ?? 'all'}
+                        onClick={() => {
+                          handleCategorySelect(cat.id);
+                          setIsCatModalOpen(false);
+                        }}
+                        className={`text-left px-4 py-3 rounded-xl border transition ${
+                          isActive
+                            ? 'border-blue-400 bg-blue-500/20'
+                            : 'border-transparent hover:border-blue-300 hover:bg-blue-500/10'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl" aria-hidden>{icon}</span>
+                          <div>
+                            <div className="text-xs opacity-70">Categoria</div>
+                            <div className="text-base font-bold">{cat.nome}</div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>
+          )}
         </div>
       </section>
       {/* Produtos em Destaque */}

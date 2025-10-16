@@ -129,8 +129,8 @@ export default function Header() {
                   className={`absolute right-0 mt-2 min-w-48 ${currentTheme.card} shadow-lg rounded-xl border p-2`}
                 >
                   <div className="px-2 pb-2 border-b border-current/10">
-                    <p className="text-xs opacity-70">{userName ? "Conectado como" : "Bem-vindo"}</p>
-                    <p className="text-sm font-semibold truncate">{userName || "Visitante"}</p>
+                    <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'opacity-70 text-gray-600'}`}>{userName ? "Conectado como" : "Bem-vindo"}</p>
+                    <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-slate-100' : ''}`}>{userName || "Visitante"}</p>
                   </div>
                   <div className="py-1">
                     {(userName ? authMenu : guestMenu).map((item, idx) => (
@@ -138,7 +138,7 @@ export default function Header() {
                         {item.action ? (
                           <button
                             onClick={item.action}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
                           >
                             {item.label}
                           </button>
@@ -146,7 +146,7 @@ export default function Header() {
                           <Link
                             to={item.to}
                             onClick={() => setProfileOpen(false)}
-                            className={`block px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                            className={`block px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
                           >
                             {item.label}
                           </Link>
@@ -186,8 +186,8 @@ export default function Header() {
             {/* Auth block */}
             <div className="mb-2">
               <div className="px-2 pb-2 border-b border-current/10">
-                <p className="text-xs opacity-70">{userName ? "Conectado como" : "Bem-vindo"}</p>
-                <p className="text-sm font-semibold truncate">{userName || "Visitante"}</p>
+                <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'opacity-70 text-gray-600'}`}>{userName ? "Conectado como" : "Bem-vindo"}</p>
+                <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-slate-100' : ''}`}>{userName || "Visitante"}</p>
               </div>
               {(userName ? authMenu : guestMenu).map((item, idx) => (
                 <div key={`m-auth-${idx}`}>
@@ -197,7 +197,7 @@ export default function Header() {
                         item.action();
                         setIsOpen(false);
                       }}
-                      className={`block w-full text-left px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                      className={`block w-full text-left px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
                     >
                       {item.label}
                     </button>
@@ -205,7 +205,7 @@ export default function Header() {
                     <Link
                       to={item.to}
                       onClick={() => setIsOpen(false)}
-                      className={`block px-3 py-2 rounded-lg text-sm ${currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                      className={`block px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
                     >
                       {item.label}
                     </Link>
