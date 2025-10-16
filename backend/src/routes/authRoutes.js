@@ -14,6 +14,10 @@ router.post("/signup", authController.signup);
 router.post("/signup-commerce", signupCommerce);
 router.put("/change-password", requireAuth, authController.changePassword);
 
+// Rotas de recuperação de senha
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
+
 // GET /api/auth/me — retorna perfil (precisa de token)
 router.get("/me", requireAuth, authController.getMyProfile);
 router.put("/me", requireAuth, authController.updateMyProfile);
