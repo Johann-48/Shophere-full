@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { LuArrowLeft } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import API_CONFIG from "../../config/api";
 
 export default function ForgotPassword({ goBackToLogin }) {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function ForgotPassword({ goBackToLogin }) {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateEmail(email)) {
       setIsValid(false);
@@ -27,13 +28,28 @@ export default function ForgotPassword({ goBackToLogin }) {
     setLoading(true);
     setMsg("");
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const res = await fetch(API_CONFIG.getApiUrl("/api/auth/forgot-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      // Sempre mostra mensagem de sucesso por segurança
+      setMsg(
+        data?.message ||
+          "✅ Se este email estiver cadastrado, você receberá o link em breve."
+      );
+      setEmail("");
+    } catch (err) {
+      // Mesmo em erro, não exponha existência do email
       setMsg(
         "✅ Se este email estiver cadastrado, você receberá o link em breve."
       );
-      setEmail("");
-    }, 2000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

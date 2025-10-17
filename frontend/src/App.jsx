@@ -18,6 +18,7 @@ import CommerceSearchPage from "./Pages/CommerceSearchPage";
 import LojaDashboardPage from "./Pages/LojaDashboardPage";
 import NotFoundPage from "./Pages/NotFoundPage";
 import ReviewPage from "./Pages/ReviewPage";
+import ResetPasswordPage from "./Pages/ResetPasswordPage";
 
 import ProtectedRoute from "./Components/ProtectedRoute";
 
@@ -30,6 +31,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+  <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/produto/:id" element={<ProductPage />} />
       <Route path="/seller" element={<SellerPage />} />
       <Route path="/about" element={<AboutPage />} />
