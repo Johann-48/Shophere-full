@@ -19,6 +19,9 @@ const PRICE_BANDS = [
   { id: "premium", label: "Acima de R$500", range: [500, Infinity] },
 ];
 
+const HERO_IMAGE_URL = "https://web.whatsapp.com/4f123d19-7f29-4d2d-8baa-3f7360283603";
+const HERO_FALLBACK_URL = "https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D";
+
 export default function Home() {
   const navigate = useNavigate();
   const { isDarkMode, dark, light } = useTheme();
@@ -50,6 +53,7 @@ export default function Home() {
   const [selectedPriceBand, setSelectedPriceBand] = useState(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
+  const [heroSrc, setHeroSrc] = useState(HERO_IMAGE_URL);
 
   const toggleLike = (id) => {
     setLiked((prev) =>
@@ -360,10 +364,14 @@ export default function Home() {
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
           <img
-            src="https://web.whatsapp.com/4f123d19-7f29-4d2d-8baa-3f7360283603"
+            src={heroSrc}
             alt="Banner principal"
             className="w-full h-48 md:h-72 object-cover rounded-2xl shadow"
             loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => {
+              if (heroSrc !== HERO_FALLBACK_URL) setHeroSrc(HERO_FALLBACK_URL);
+            }}
           />
         </div>
       </section>
