@@ -13,6 +13,12 @@ import ProductCard from "../ProductCard";
 import CommerceCard from "../CommerceCard";
 import { useTheme } from "../../contexts/ThemeContext";
 
+const PRICE_BANDS = [
+  { id: "budget", label: "Até R$100", range: [0, 100] },
+  { id: "smart", label: "R$100 - R$500", range: [100, 500] },
+  { id: "premium", label: "Acima de R$500", range: [500, Infinity] },
+];
+
 export default function Home() {
   const navigate = useNavigate();
   const { isDarkMode, dark, light } = useTheme();
@@ -41,6 +47,10 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState("");
   const [minRating, setMinRating] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedPriceBand, setSelectedPriceBand] = useState(null);
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
+  const [onlyDiscounted, setOnlyDiscounted] = useState(false);
+  const [onlyFreeShipping, setOnlyFreeShipping] = useState(false);
 
   const toggleLike = (id) => {
     setLiked((prev) =>
@@ -166,20 +176,170 @@ export default function Home() {
 
   const toggleFilters = () => setShowFilters((prev) => !prev);
 
+  const productHasStock = (prod) => {
+    if (!prod || typeof prod !== "object") return true;
+    if (typeof prod.available === "boolean") return prod.available;
+    const stockFields = [
+      "stock",
+      "quantity",
+      "estoque",
+      "qtd",
+      "availableQuantity",
+    ];
+    for (const field of stockFields) {
+      const value = prod[field];
+      if (value != null) {
+        const asNumber = Number(value);
+        if (!Number.isNaN(asNumber)) return asNumber > 0;
+        return Boolean(value);
+      }
+    }
+    return true;
+  };
+
+  const productHasDiscount = (prod) => {
+    if (!prod || typeof prod !== "object") return false;
+    const discountFields = [
+      "discountPercent",
+      "discount",
+      "discountPercentage",
+    ];
+    if (discountFields.some((field) => Number(prod[field]) > 0)) return true;
+    const priceValue = toNumber(prod.price);
+    const oldPriceValue = toNumber(prod.oldPrice);
+    if (!Number.isNaN(priceValue) && !Number.isNaN(oldPriceValue)) {
+      return oldPriceValue > priceValue;
+    }
+    return false;
+  };
+
+  const productHasFreeShipping = (prod) => {
+    if (!prod || typeof prod !== "object") return false;
+    const freeShipFields = ["freeShipping", "hasFreeShipping", "freteGratis"];
+    if (freeShipFields.some((field) => prod[field])) return true;
+    const shippingFields = ["shippingCost", "freight", "frete"];
+    return shippingFields.some((field) => {
+      const value = prod[field];
+      if (value == null) return false;
+      const cost = toNumber(value);
+      if (!Number.isNaN(cost)) return cost === 0;
+      return value === 0;
+    });
+  };
+
+  const selectedBand = PRICE_BANDS.find((band) => band.id === selectedPriceBand);
+  const totalCount = baseProducts.length;
+  const filteredCount = products.length;
+  const availableCount = baseProducts.filter((prod) => productHasStock(prod)).length;
+  const categoryCount = Math.max(categories.length - 1, 0);
+  const softSurface = isDarkMode
+    ? "bg-slate-900/60 border-slate-700/60 text-slate-200"
+    : "bg-white/80 border-blue-100 text-slate-700";
+  const toggleActive = isDarkMode
+    ? "bg-blue-500/30 border-blue-400 text-blue-100 shadow-inner"
+    : "bg-blue-500/10 border-blue-400 text-blue-700 shadow-sm";
+  const toggleInactive = isDarkMode
+    ? "bg-slate-900/40 border-slate-700 text-slate-200 hover:border-blue-400"
+    : "bg-white border-blue-100 text-slate-600 hover:border-blue-400";
+
+  const activeFilters = [];
+  if (sortOption) {
+    const labelMap = {
+      high: "Ordenado: Maior preço",
+      low: "Ordenado: Menor preço",
+      bestseller: "Ordenado: Mais vendidos",
+    };
+    activeFilters.push({
+      id: "sort",
+      label: labelMap[sortOption] || "Ordenação personalizada",
+      onRemove: () => setSortOption(""),
+    });
+  }
+  if (minPrice) {
+    activeFilters.push({
+      id: "minPrice",
+      label: `Mínimo R$ ${parseFloat(minPrice).toFixed(2)}`,
+      onRemove: () => setMinPrice(""),
+    });
+  }
+  if (maxPrice) {
+    activeFilters.push({
+      id: "maxPrice",
+      label: `Máximo R$ ${parseFloat(maxPrice).toFixed(2)}`,
+      onRemove: () => setMaxPrice(""),
+    });
+  }
+  if (minRating !== "") {
+    activeFilters.push({
+      id: "rating",
+      label: `${parseFloat(minRating).toFixed(1)}+ estrelas`,
+      onRemove: () => setMinRating(""),
+    });
+  }
+  if (selectedBand) {
+    activeFilters.push({
+      id: "band",
+      label: selectedBand.label,
+      onRemove: () => setSelectedPriceBand(null),
+    });
+  }
+  if (onlyAvailable) {
+    activeFilters.push({
+      id: "available",
+      label: "Somente disponíveis",
+      onRemove: () => setOnlyAvailable(false),
+    });
+  }
+  if (onlyDiscounted) {
+    activeFilters.push({
+      id: "discount",
+      label: "Com desconto",
+      onRemove: () => setOnlyDiscounted(false),
+    });
+  }
+  if (onlyFreeShipping) {
+    activeFilters.push({
+      id: "freight",
+      label: "Frete grátis",
+      onRemove: () => setOnlyFreeShipping(false),
+    });
+  }
+
   const applyFilters = () => {
     let filtered = [...baseProducts];
 
-    if (minPrice)
+    if (minPrice !== "")
       filtered = filtered.filter(
         (p) => toNumber(p.price) >= parseFloat(minPrice)
       );
-    if (maxPrice)
+    if (maxPrice !== "")
       filtered = filtered.filter(
         (p) => toNumber(p.price) <= parseFloat(maxPrice)
       );
-    if (minRating) {
+    if (selectedBand) {
+      const [min, max] = selectedBand.range;
+      filtered = filtered.filter((p) => {
+        const priceValue = toNumber(p.price);
+        if (Number.isNaN(priceValue)) return true;
+        const minOk = min === 0 ? priceValue >= 0 : priceValue >= min;
+        const maxOk = max === Infinity ? true : priceValue <= max;
+        return minOk && maxOk;
+      });
+    }
+    if (minRating !== "") {
       const min = parseFloat(minRating);
-      filtered = filtered.filter((p) => (p.avgRating || 0) >= min);
+      if (!Number.isNaN(min)) {
+        filtered = filtered.filter((p) => (p.avgRating || 0) >= min);
+      }
+    }
+    if (onlyAvailable) {
+      filtered = filtered.filter((p) => productHasStock(p));
+    }
+    if (onlyDiscounted) {
+      filtered = filtered.filter((p) => productHasDiscount(p));
+    }
+    if (onlyFreeShipping) {
+      filtered = filtered.filter((p) => productHasFreeShipping(p));
     }
     if (sortOption === "high") {
       filtered.sort((a, b) => toNumber(b.price) - toNumber(a.price));
@@ -190,6 +350,20 @@ export default function Home() {
     }
 
     setProducts(filtered);
+    setShowFilters(false);
+  };
+
+  const resetFilters = () => {
+    setSortOption("");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinRating("");
+    setSelectedPriceBand(null);
+    setOnlyAvailable(false);
+    setOnlyDiscounted(false);
+    setOnlyFreeShipping(false);
+    const targetProducts = selectedCategory === null ? allProducts : baseProducts;
+    setProducts(targetProducts);
     setShowFilters(false);
   };
 
@@ -222,7 +396,7 @@ export default function Home() {
 
       {/* Comércios */}
       <section className="px-4 md:px-6 py-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-bold gradient-text">🏬 Comércios</h2>
             <Link
@@ -296,104 +470,246 @@ export default function Home() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className={`${currentTheme.card} border rounded-2xl shadow-lg p-6 mb-6 glass`}
+              className={`${currentTheme.card} relative overflow-hidden border rounded-2xl shadow-xl p-6 mb-6 glass`}
             >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className={`text-xl font-semibold ${currentTheme.textPrimary}`}>
-                  🎯 Filtros Avançados
-                </h3>
-                <button
-                  onClick={toggleFilters}
-                  className={`${currentTheme.text} hover:text-blue-400 transition-colors focus-ring rounded`}
-                >
-                  <FiXCircle size={20} />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="flex flex-col">
-                  <label className={`mb-1 text-sm font-medium ${currentTheme.text}`}>
-                    Ordenar por
-                  </label>
-                  <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value)}
-                    className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
-                  >
-                    <option value="">Selecione</option>
-                    <option value="high">Mais caro</option>
-                    <option value="low">Mais barato</option>
-                    <option value="bestseller">Mais vendidos</option>
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
-                    <FiDollarSign /> Preço mínimo
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="R$ 0,00"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
-                    <FiDollarSign /> Preço máximo
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="R$ 0,00"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
-                  />
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/15 via-purple-500/10 to-pink-500/15 blur-xl"
+                aria-hidden
+              />
+              <div className="relative z-10 space-y-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <h3 className={`text-xl font-semibold ${currentTheme.textPrimary}`}>
+                      🎯 Filtros Avançados
+                    </h3>
+                    <p className={`text-sm ${currentTheme.textSecondary}`}>
+                      Combine múltiplos critérios para encontrar o produto ideal.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${currentTheme.secondary}`}>
+                      {filteredCount} de {totalCount || 0} itens visíveis
+                    </span>
+                    <button
+                      onClick={toggleFilters}
+                      className={`${currentTheme.text} hover:text-blue-400 transition-colors focus-ring rounded-full p-2`}
+                      aria-label="Fechar filtros"
+                    >
+                      <FiXCircle size={18} />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex flex-col">
-                  <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
-                    <FiStar /> Estrelas mínimas
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="5"
-                    placeholder="0-5"
-                    value={minRating}
-                    onChange={(e) => setMinRating(e.target.value)}
-                    className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
-                  />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
+                    <p className="text-xs uppercase tracking-wide opacity-70">🎯 Em destaque agora</p>
+                    <p className="text-lg font-semibold">{filteredCount}</p>
+                  </div>
+                  <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
+                    <p className="text-xs uppercase tracking-wide opacity-70">📦 Com estoque</p>
+                    <p className="text-lg font-semibold">{availableCount}</p>
+                  </div>
+                  <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
+                    <p className="text-xs uppercase tracking-wide opacity-70">🗂️ Categorias mapeadas</p>
+                    <p className="text-lg font-semibold">{categoryCount}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-end mt-6 gap-4">
-                <button
-                  onClick={() => {
-                    setSortOption("");
-                    setMinPrice("");
-                    setMaxPrice("");
-                    setMinRating("");
-                    setProducts(allProducts);
-                    setShowFilters(false);
-                  }}
-                  className={`px-5 py-2 ${currentTheme.secondary} ${currentTheme.text} rounded-lg transition-all duration-200 btn-primary focus-ring`}
-                >
-                  Limpar
-                </button>
-                <button
-                  onClick={applyFilters}
-                  className={`px-5 py-2 ${currentTheme.button} text-white rounded-lg transition-all duration-200 btn-primary focus-ring`}
-                >
-                  Aplicar
-                </button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex flex-col">
+                    <label className={`mb-1 text-sm font-medium ${currentTheme.text}`}>
+                      Ordenar por
+                    </label>
+                    <select
+                      value={sortOption}
+                      onChange={(e) => setSortOption(e.target.value)}
+                      className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
+                    >
+                      <option value="">Selecione</option>
+                      <option value="high">Mais caro</option>
+                      <option value="low">Mais barato</option>
+                      <option value="bestseller">Mais vendidos</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
+                      <FiDollarSign /> Preço mínimo
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs opacity-70">R$</span>
+                      <input
+                        type="number"
+                        placeholder="0,00"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        className={`w-full pl-8 pr-3 py-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
+                      <FiDollarSign /> Preço máximo
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs opacity-70">R$</span>
+                      <input
+                        type="number"
+                        placeholder="0,00"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        className={`w-full pl-8 pr-3 py-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
+                      <FiStar /> Estrelas mínimas
+                    </label>
+                    <div className={`border rounded-lg p-3 ${currentTheme.card}`}>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          min="0"
+                          max="5"
+                          step="0.5"
+                          placeholder="0-5"
+                          value={minRating}
+                          onChange={(e) => setMinRating(e.target.value)}
+                          className={`w-20 rounded-md border px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? "bg-slate-900/60 border-slate-700 text-white" : "bg-white border-blue-200 text-gray-900"}`}
+                        />
+                        <span className="text-xs font-semibold uppercase tracking-wide">
+                          {(minRating === "" ? 0 : parseFloat(minRating).toFixed(1))} ⭐
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="5"
+                        step="0.5"
+                        value={minRating === "" ? 0 : Number(minRating)}
+                        onChange={(e) => setMinRating(e.target.value)}
+                        className="mt-3 w-full accent-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {[
+                    {
+                      id: "available",
+                      label: "Somente em estoque",
+                      description: "Oculta itens indisponíveis",
+                      value: onlyAvailable,
+                      setter: setOnlyAvailable,
+                      icon: "📦",
+                    },
+                    {
+                      id: "discount",
+                      label: "Com desconto",
+                      description: "Prioriza ofertas com preço reduzido",
+                      value: onlyDiscounted,
+                      setter: setOnlyDiscounted,
+                      icon: "🔥",
+                    },
+                    {
+                      id: "shipping",
+                      label: "Frete grátis",
+                      description: "Mostra apenas opções sem frete",
+                      value: onlyFreeShipping,
+                      setter: setOnlyFreeShipping,
+                      icon: "🚚",
+                    },
+                  ].map((item) => (
+                    <motion.button
+                      key={item.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => item.setter((prev) => !prev)}
+                      className={`rounded-xl border px-4 py-3 text-left transition ${item.value ? toggleActive : toggleInactive}`}
+                    >
+                      <div className="flex items-center justify-between text-sm font-semibold">
+                        <span>
+                          <span className="mr-2" aria-hidden>{item.icon}</span>
+                          {item.label}
+                        </span>
+                        <span className={`text-xs uppercase ${item.value ? "opacity-100" : "opacity-60"}`}>
+                          {item.value ? "Ativo" : "Desligado"}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-xs opacity-75">{item.description}</p>
+                    </motion.button>
+                  ))}
+                </div>
+
+                <div>
+                  <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${currentTheme.textSecondary}`}>
+                    Faixas de preço rápidas
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {PRICE_BANDS.map((band) => {
+                      const active = selectedPriceBand === band.id;
+                      return (
+                        <button
+                          key={band.id}
+                          onClick={() =>
+                            setSelectedPriceBand((prev) =>
+                              prev === band.id ? null : band.id
+                            )
+                          }
+                          className={`px-3 py-1.5 rounded-full text-sm border transition ${active ? "bg-blue-500 text-white border-blue-500 shadow" : isDarkMode ? "bg-slate-900/40 border-slate-700 text-slate-200 hover:border-blue-400" : "bg-white border-blue-100 text-slate-600 hover:border-blue-400"}`}
+                        >
+                          {band.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {!!activeFilters.length && (
+                  <div>
+                    <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${currentTheme.textSecondary}`}>
+                      Filtros ativos
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {activeFilters.map((chip) => (
+                        <button
+                          key={chip.id}
+                          onClick={chip.onRemove}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs border transition ${isDarkMode ? "bg-slate-900/40 border-slate-700 hover:border-blue-400" : "bg-white border-blue-100 hover:border-blue-400"}`}
+                        >
+                          <span>{chip.label}</span>
+                          <FiXCircle size={14} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-4">
+                  <button
+                    onClick={resetFilters}
+                    className={`px-5 py-2 ${currentTheme.secondary} ${currentTheme.text} rounded-lg transition-all duration-200 btn-primary focus-ring`}
+                  >
+                    Limpar
+                  </button>
+                  <button
+                    onClick={applyFilters}
+                    className={`px-5 py-2 ${currentTheme.button} text-white rounded-lg transition-all duration-200 btn-primary focus-ring`}
+                  >
+                    Aplicar
+                  </button>
+                </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
         {/* Categoria como filtro central — combobox moderno */}
-    <div className="my-6 flex justify-center">
+        <div className="my-6">
           <div
             ref={catBoxRef}
-      className={`w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg ${catOpen ? 'relative z-[60]' : ''}`}
+            className={`w-full ${currentTheme.card} border rounded-2xl p-4 shadow-lg ${catOpen ? 'relative z-[60]' : ''}`}
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-semibold ${currentTheme.textPrimary}`}>Filtrar por categoria</h3>
@@ -515,7 +831,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-  <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${catOpen ? 'pointer-events-none select-none' : ''}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${catOpen ? 'pointer-events-none select-none' : ''}`}>
           {products.slice(0, 10).map((product) => (
             <motion.div
               key={product.id}
