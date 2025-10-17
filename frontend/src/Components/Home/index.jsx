@@ -200,6 +200,14 @@ export default function Home() {
 
   return (
     <div className={`min-h-screen font-sans ${currentTheme.textPrimary} ${currentTheme.background} animate-fadeInUp`}>
+      {/* Scrim to block clicks behind category dropdown */}
+      {catOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-transparent"
+          onClick={() => setCatOpen(false)}
+          aria-hidden
+        />
+      )}
       {/* Hero Image */}
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
@@ -383,7 +391,10 @@ export default function Home() {
         </AnimatePresence>
         {/* Categoria como filtro central — combobox moderno */}
         <div className="my-6 flex justify-center">
-          <div ref={catBoxRef} className={`w-full max-w-2xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg`}>
+          <div
+            ref={catBoxRef}
+            className={`w-full max-w-2xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg ${catOpen ? 'relative z-[60]' : ''}`}
+          >
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-semibold ${currentTheme.textPrimary}`}>Filtrar por categoria</h3>
               {selectedCategory !== null && (
@@ -437,12 +448,12 @@ export default function Home() {
               </div>
 
               {/* Dropdown de sugestões */}
-              {catOpen && (
+        {catOpen && (
                 <motion.ul
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
-                  className={`absolute z-50 mt-2 w-full max-h-64 overflow-auto rounded-xl shadow-xl border ${isDarkMode ? 'bg-slate-900/95 border-slate-700' : 'bg-white border-blue-200'}`}
+          className={`absolute z-[60] mt-2 w-full max-h-64 overflow-auto rounded-xl shadow-xl border ${isDarkMode ? 'bg-slate-900/95 border-slate-700' : 'bg-white border-blue-200'}`}
                   role="listbox"
                 >
                   <li
@@ -504,7 +515,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${catOpen ? 'pointer-events-none select-none' : ''}`}>
           {products.slice(0, 10).map((product) => (
             <motion.div
               key={product.id}
