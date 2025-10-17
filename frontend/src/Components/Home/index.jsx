@@ -50,7 +50,6 @@ export default function Home() {
   const [selectedPriceBand, setSelectedPriceBand] = useState(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
-  const [onlyFreeShipping, setOnlyFreeShipping] = useState(false);
 
   const toggleLike = (id) => {
     setLiked((prev) =>
@@ -213,20 +212,6 @@ export default function Home() {
     return false;
   };
 
-  const productHasFreeShipping = (prod) => {
-    if (!prod || typeof prod !== "object") return false;
-    const freeShipFields = ["freeShipping", "hasFreeShipping", "freteGratis"];
-    if (freeShipFields.some((field) => prod[field])) return true;
-    const shippingFields = ["shippingCost", "freight", "frete"];
-    return shippingFields.some((field) => {
-      const value = prod[field];
-      if (value == null) return false;
-      const cost = toNumber(value);
-      if (!Number.isNaN(cost)) return cost === 0;
-      return value === 0;
-    });
-  };
-
   const selectedBand = PRICE_BANDS.find((band) => band.id === selectedPriceBand);
   const totalCount = baseProducts.length;
   const filteredCount = products.length;
@@ -297,13 +282,6 @@ export default function Home() {
       onRemove: () => setOnlyDiscounted(false),
     });
   }
-  if (onlyFreeShipping) {
-    activeFilters.push({
-      id: "freight",
-      label: "Frete grátis",
-      onRemove: () => setOnlyFreeShipping(false),
-    });
-  }
 
   const applyFilters = () => {
     let filtered = [...baseProducts];
@@ -338,9 +316,6 @@ export default function Home() {
     if (onlyDiscounted) {
       filtered = filtered.filter((p) => productHasDiscount(p));
     }
-    if (onlyFreeShipping) {
-      filtered = filtered.filter((p) => productHasFreeShipping(p));
-    }
     if (sortOption === "high") {
       filtered.sort((a, b) => toNumber(b.price) - toNumber(a.price));
     } else if (sortOption === "low") {
@@ -361,7 +336,6 @@ export default function Home() {
     setSelectedPriceBand(null);
     setOnlyAvailable(false);
     setOnlyDiscounted(false);
-    setOnlyFreeShipping(false);
     const targetProducts = selectedCategory === null ? allProducts : baseProducts;
     setProducts(targetProducts);
     setShowFilters(false);
@@ -386,8 +360,8 @@ export default function Home() {
       <section className="w-full">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
           <img
-            src="https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D"
-            alt="Banner"
+            src="https://web.whatsapp.com/4f123d19-7f29-4d2d-8baa-3f7360283603"
+            alt="Banner principal"
             className="w-full h-48 md:h-72 object-cover rounded-2xl shadow"
             loading="lazy"
           />
@@ -566,36 +540,20 @@ export default function Home() {
                     <label className={`mb-1 text-sm font-medium ${currentTheme.text} flex items-center gap-1`}>
                       <FiStar /> Estrelas mínimas
                     </label>
-                    <div className={`border rounded-lg p-3 ${currentTheme.card}`}>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="number"
-                          min="0"
-                          max="5"
-                          step="0.5"
-                          placeholder="0-5"
-                          value={minRating}
-                          onChange={(e) => setMinRating(e.target.value)}
-                          className={`w-20 rounded-md border px-2 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? "bg-slate-900/60 border-slate-700 text-white" : "bg-white border-blue-200 text-gray-900"}`}
-                        />
-                        <span className="text-xs font-semibold uppercase tracking-wide">
-                          {(minRating === "" ? 0 : parseFloat(minRating).toFixed(1))} ⭐
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="5"
-                        step="0.5"
-                        value={minRating === "" ? 0 : Number(minRating)}
-                        onChange={(e) => setMinRating(e.target.value)}
-                        className="mt-3 w-full accent-blue-500"
-                      />
-                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      max="5"
+                      step="0.5"
+                      placeholder="0-5"
+                      value={minRating}
+                      onChange={(e) => setMinRating(e.target.value)}
+                      className={`p-3 border rounded-lg focus-ring transition-colors ${currentTheme.card} ${currentTheme.text}`}
+                    />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {[
                     {
                       id: "available",
@@ -612,14 +570,6 @@ export default function Home() {
                       value: onlyDiscounted,
                       setter: setOnlyDiscounted,
                       icon: "🔥",
-                    },
-                    {
-                      id: "shipping",
-                      label: "Frete grátis",
-                      description: "Mostra apenas opções sem frete",
-                      value: onlyFreeShipping,
-                      setter: setOnlyFreeShipping,
-                      icon: "🚚",
                     },
                   ].map((item) => (
                     <motion.button
