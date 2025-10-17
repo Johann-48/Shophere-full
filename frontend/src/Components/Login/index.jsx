@@ -65,10 +65,10 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
           className="hidden md:block"
         >
           <img
-            src="https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D"
+            src="/login-illustration.svg"
             alt="Login Visual"
-            className="w-full rounded-3xl shadow-lg object-cover"
-            style={{ borderRadius: "1.5rem", maxHeight: 520 }}
+            className="w-full h-[520px] rounded-3xl shadow-lg object-cover"
+            style={{ borderRadius: "1.5rem" }}
           />
         </motion.div>
 
