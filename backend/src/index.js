@@ -11,6 +11,13 @@ const {
   uploadBufferToBlob,
 } = require("./config/storage");
 
+const HERO_BANNER_URL =
+  process.env.HERO_BANNER_URL ||
+  "https://web.whatsapp.com/4f123d19-7f29-4d2d-8baa-3f7360283603";
+const HERO_BANNER_FALLBACK =
+  process.env.HERO_BANNER_FALLBACK ||
+  "https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D";
+
 dotenv.config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -83,6 +90,40 @@ app.use("/api/upload", uploadRoutes); // Inclui upload de áudio
 // src/index.js — logo abaixo de app.use("/api/upload", uploadRoutes);
 app.use("/api/upload/image", require("./routes/imageUploadRoutes"));
 app.use("/api", productImagesRoutes);
+
+app.get("/api/assets/hero-banner", async (req, res) => {
+  try {
+    const response = await fetch(HERO_BANNER_URL, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status} ao buscar banner`);
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader(
+      "Cache-Control",
+      "public, max-age=1800, s-maxage=3600, stale-while-revalidate=86400"
+    );
+    return res.send(buffer);
+  } catch (error) {
+    console.error("Erro ao fazer proxy do hero banner:", error.message);
+    if (HERO_BANNER_FALLBACK) {
+      res.setHeader("Cache-Control", "public, max-age=600");
+      return res.redirect(302, HERO_BANNER_FALLBACK);
+    }
+    return res.status(502).json({ error: "Não foi possível carregar o banner" });
+  }
+});
 
 // 5) Upload de imagem de produto (suporta S3/Vercel Blob quando configurado)
 if (DRIVER === "s3" || DRIVER === "vercel-blob") {
