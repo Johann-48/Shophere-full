@@ -390,10 +390,10 @@ export default function Home() {
           )}
         </AnimatePresence>
         {/* Categoria como filtro central — combobox moderno */}
-        <div className="my-6 flex justify-center">
+    <div className="my-6 flex justify-center">
           <div
             ref={catBoxRef}
-            className={`w-full max-w-2xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg ${catOpen ? 'relative z-[60]' : ''}`}
+      className={`w-full max-w-4xl sm:max-w-5xl lg:max-w-6xl ${currentTheme.card} border rounded-2xl p-4 shadow-lg ${catOpen ? 'relative z-[60]' : ''}`}
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className={`text-sm font-semibold ${currentTheme.textPrimary}`}>Filtrar por categoria</h3>
