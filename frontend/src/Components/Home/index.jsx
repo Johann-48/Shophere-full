@@ -7,7 +7,19 @@ import {
   FiDollarSign,
   FiStar,
   FiXCircle,
+  FiSearch,
+  FiShoppingBag,
+  FiTrendingUp,
+  FiGrid,
+  FiCpu,
+  FiHome,
+  FiBook,
+  FiHeart,
+  FiGlobe,
+  FiShoppingCart,
 } from "react-icons/fi";
+import { GiRunningShoe, GiLipstick, GiGamepad } from "react-icons/gi";
+import { MdDevices } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "../ProductCard";
 import CommerceCard from "../CommerceCard";
@@ -153,22 +165,22 @@ export default function Home() {
   }, []);
 
   const iconByName = {
-    "Eletrônicos": "🔌",
-    "Moda": "👗",
-    "Esportes": "🏀",
-    "Mercado": "🛒",
-    "Beleza": "💄",
-    "Casa": "🏠",
-    "Livros": "📚",
-    "Jogos": "🎮",
-    "Outros": "✨",
-    "Todos": "🌐",
+    "Eletrônicos": <MdDevices className="w-5 h-5" />,
+    "Moda": <FiHeart className="w-5 h-5" />,
+    "Esportes": <GiRunningShoe className="w-5 h-5" />,
+    "Mercado": <FiShoppingCart className="w-5 h-5" />,
+    "Beleza": <GiLipstick className="w-5 h-5" />,
+    "Casa": <FiHome className="w-5 h-5" />,
+    "Livros": <FiBook className="w-5 h-5" />,
+    "Jogos": <GiGamepad className="w-5 h-5" />,
+    "Outros": <FiStar className="w-5 h-5" />,
+    "Todos": <FiGlobe className="w-5 h-5" />,
   };
 
   const normalizedCategories = categories.map((c) => ({
     id: c.id,
     nome: c.nome,
-    icon: iconByName[c.nome] || "✨",
+    icon: iconByName[c.nome] || <FiStar className="w-5 h-5" />,
   }));
   const filteredCats = normalizedCategories.filter((c) =>
     (catQuery || "").length === 0
@@ -383,12 +395,22 @@ export default function Home() {
       <section className="px-4 md:px-6 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold gradient-text">🏬 Comércios</h2>
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100'}`}>
+                <FiShoppingBag className={`w-6 h-6 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold gradient-text">Comércios</h2>
+            </div>
             <Link
               to="/commerces/search"
-              className={`text-sm text-white ${currentTheme.button} px-4 py-2 rounded-lg transition-all duration-200 btn-primary focus-ring`}
+              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-500 hover:to-blue-600' 
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+              }`}
             >
-              Pesquisar Comércio
+              <FiSearch className="w-4 h-4" />
+              Pesquisar Comércios
             </Link>
           </div>
         </div>
@@ -413,11 +435,16 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowAllCommerces((prev) => !prev)}
-              className={`px-6 py-3 ${currentTheme.button} text-white rounded-lg shadow-lg transition-all duration-300 font-semibold btn-primary`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 ${
+                isDarkMode 
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-500 hover:to-blue-600' 
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'
+              }`}
             >
+              <FiGrid className="w-5 h-5" />
               {showAllCommerces
-                ? "🔼 Mostrar Menos"
-                : "🔽 Ver Todos os Comércios"}
+                ? "Mostrar Menos"
+                : "Ver Todos os Comércios"}
             </motion.button>
           </div>
         )}
@@ -429,21 +456,36 @@ export default function Home() {
       <section className="px-4 md:px-6 py-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold gradient-text">
-              ✨ Produtos em Destaque
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100'}`}>
+                <FiTrendingUp className={`w-6 h-6 ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold gradient-text">
+                Produtos em Destaque
+              </h2>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={toggleFilters}
-                className={`flex items-center gap-2 text-sm text-white ${currentTheme.secondary} px-4 py-2 rounded-lg transition-all duration-200 btn-primary focus-ring`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-500 hover:to-purple-600' 
+                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                }`}
               >
-                <FiFilter /> Filtrar
+                <FiFilter className="w-4 h-4" />
+                {showCategories ? 'Ocultar Filtros' : 'Filtrar'}
               </button>
               <Link
                 to="/search"
-                className={`text-sm text-white ${currentTheme.button} px-4 py-2 rounded-lg transition-all duration-200 btn-primary focus-ring`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                  isDarkMode 
+                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-500 hover:to-green-600' 
+                    : 'bg-gradient-to-r from-green-600 to-teal-600 text-white hover:from-green-700 hover:to-teal-700'
+                }`}
               >
-                🔍 Pesquisar
+                <FiSearch className="w-4 h-4" />
+                Pesquisar Produtos
               </Link>
             </div>
           </div>
@@ -464,8 +506,8 @@ export default function Home() {
               <div className="relative z-10 space-y-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
-                    <h3 className={`text-xl font-semibold ${currentTheme.textPrimary}`}>
-                      🎯 Filtros Avançados
+                    <h3 className={`text-xl font-semibold ${currentTheme.textPrimary} flex items-center gap-2`}>
+                      <FiFilter className="w-5 h-5" /> Filtros Avançados
                     </h3>
                     <p className={`text-sm ${currentTheme.textSecondary}`}>
                       Combine múltiplos critérios para encontrar o produto ideal.
@@ -487,15 +529,21 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">🎯 Em destaque agora</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70 flex items-center gap-2">
+                      <FiTrendingUp className="w-4 h-4" /> Em destaque agora
+                    </p>
                     <p className="text-lg font-semibold">{filteredCount}</p>
                   </div>
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">📦 Com estoque</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70 flex items-center gap-2">
+                      <FiShoppingBag className="w-4 h-4" /> Com estoque
+                    </p>
                     <p className="text-lg font-semibold">{availableCount}</p>
                   </div>
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">🗂️ Categorias mapeadas</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70 flex items-center gap-2">
+                      <FiGrid className="w-4 h-4" /> Categorias mapeadas
+                    </p>
                     <p className="text-lg font-semibold">{categoryCount}</p>
                   </div>
                 </div>
@@ -572,7 +620,7 @@ export default function Home() {
                       description: "Oculta itens indisponíveis",
                       value: onlyAvailable,
                       setter: setOnlyAvailable,
-                      icon: "📦",
+                      icon: <FiShoppingBag className="w-5 h-5" />,
                     },
                     {
                       id: "discount",
@@ -580,7 +628,7 @@ export default function Home() {
                       description: "Prioriza ofertas com preço reduzido",
                       value: onlyDiscounted,
                       setter: setOnlyDiscounted,
-                      icon: "🔥",
+                      icon: <FiTrendingUp className="w-5 h-5" />,
                     },
                   ].map((item) => (
                     <motion.button
@@ -591,8 +639,8 @@ export default function Home() {
                       className={`rounded-xl border px-4 py-3 text-left transition ${item.value ? toggleActive : toggleInactive}`}
                     >
                       <div className="flex items-center justify-between text-sm font-semibold">
-                        <span>
-                          <span className="mr-2" aria-hidden>{item.icon}</span>
+                        <span className="flex items-center gap-2">
+                          {item.icon}
                           {item.label}
                         </span>
                         <span className={`text-xs uppercase ${item.value ? "opacity-100" : "opacity-60"}`}>
@@ -740,7 +788,7 @@ export default function Home() {
                     role="option"
                     aria-selected={catHighlight === 0}
                   >
-                    <span className="text-xl">🌐</span>
+                    <FiGlobe className="w-5 h-5" />
                     <span>Todos</span>
                   </li>
                   {filteredCats
@@ -758,7 +806,7 @@ export default function Home() {
                           role="option"
                           aria-selected={active}
                         >
-                          <span className="text-xl">{c.icon}</span>
+                          {c.icon}
                           <span>{c.nome}</span>
                         </li>
                       );
@@ -776,7 +824,7 @@ export default function Home() {
                   <button
                     key={`chip-${c.id}`}
                     onClick={() => handleCategorySelect(c.id)}
-                    className={`px-3 py-1.5 rounded-full text-sm border transition ${
+                    className={`px-3 py-1.5 rounded-full text-sm border transition flex items-center gap-1.5 ${
                       selectedCategory === c.id
                         ? 'border-blue-400 bg-blue-500/20'
                         : isDarkMode
@@ -785,7 +833,7 @@ export default function Home() {
                     }`}
                     title={c.nome}
                   >
-                    <span className="mr-1" aria-hidden>{c.icon}</span>
+                    {c.icon}
                     {c.nome}
                   </button>
                 ))}
