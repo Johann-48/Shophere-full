@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { useTheme } from "../../contexts/ThemeContext";
 import BackButton from "../BackButton";
 import { FaRocket, FaGlobe, FaHeart, FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -8,7 +8,17 @@ const About = () => {
   const { isDarkMode, dark, light } = useTheme();
   const currentTheme = isDarkMode ? dark : light;
   
-  const cards = [
+  const [expandedCards, setExpandedCards] = useState([]);
+
+  const toggleCard = (index) => {
+    setExpandedCards(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const cards = useMemo(() => [
     {
       title: "Missão",
       text: "Conectar pessoas aos produtos do mercado em sua região, com uma experiência de busca ágil.",
@@ -33,9 +43,9 @@ const About = () => {
       detail:
         "Acreditamos que confiança e ética são a base para relacionamentos duradouros com nossos clientes e parceiros. Cada decisão é tomada pensando no bem-estar da comunidade.",
     },
-  ];
+  ], []);
 
-  const equipe = [
+  const equipe = useMemo(() => [
     {
       nome: "Johann Bauermann",
       cargo: "Back-End e Banco de Dados",
@@ -59,17 +69,7 @@ const About = () => {
       bio: "Auxiliar em desenvolvimento Front-End e UX/UI",
       instagram: "https://www.instagram.com/leozeraaa2807",
     },
-  ];
-
-  const [expandedCards, setExpandedCards] = useState([]);
-
-  const toggleCard = (index) => {
-    setExpandedCards(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    );
-  };
+  ], []);
 
   return (
     <div className={`min-h-screen py-16 px-4 sm:px-6 lg:px-8 ${currentTheme.background} transition-colors duration-300`}>
@@ -81,9 +81,9 @@ const About = () => {
 
         {/* Título principal */}
         <motion.div
-          initial={{ opacity: 0, y: -30 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
           <h1 className={`text-5xl sm:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent`}>
@@ -97,9 +97,9 @@ const About = () => {
         {/* Descrição da empresa */}
         <motion.div
           className={`max-w-4xl mx-auto text-center mb-20 ${currentTheme.card} rounded-3xl p-8 shadow-xl border ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
         >
           <p className={`text-lg sm:text-xl leading-relaxed ${currentTheme.text}`}>
             Bem-vindo ao{" "}
@@ -112,23 +112,18 @@ const About = () => {
           </p>
         </motion.div>
 
-        {/* Cards Missão, Visão, Valores - MELHORADOS */}
+        {/* Cards Missão, Visão, Valores - OTIMIZADOS */}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 mb-28">
           {cards.map((card, index) => {
             const isExpanded = expandedCards.includes(index);
             return (
-              <motion.div
+              <div
                 key={index}
-                className={`relative rounded-3xl shadow-lg overflow-hidden transition-all duration-300 ${currentTheme.card} border-2 ${
+                className={`relative rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-2 ${currentTheme.card} border-2 ${
                   isExpanded 
                     ? 'border-blue-500 shadow-2xl' 
                     : isDarkMode ? 'border-slate-700' : 'border-gray-200'
                 }`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -8 }}
               >
                 {/* Gradiente de fundo */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-5`}></div>
@@ -151,22 +146,18 @@ const About = () => {
                     {card.text}
                   </p>
 
-                  {/* Detalhes expansíveis */}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className={`mb-4 p-4 rounded-xl ${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'}`}
-                      >
-                        <p className={`text-sm leading-relaxed ${currentTheme.text}`}>
-                          {card.detail}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Detalhes expansíveis - SEM AnimatePresence */}
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ${
+                      isExpanded ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className={`p-4 rounded-xl ${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'}`}>
+                      <p className={`text-sm leading-relaxed ${currentTheme.text}`}>
+                        {card.detail}
+                      </p>
+                    </div>
+                  </div>
 
                   {/* Botão expandir */}
                   <button
@@ -190,17 +181,16 @@ const About = () => {
                     )}
                   </button>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
         {/* Título da equipe */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
           className="text-center mb-16"
         >
           <h2 className={`text-4xl sm:text-5xl font-extrabold mb-4 ${currentTheme.textPrimary}`}>
@@ -214,28 +204,24 @@ const About = () => {
           </div>
         </motion.div>
 
-        {/* Cards da equipe - MELHORADOS */}
+        {/* Cards da equipe - OTIMIZADOS */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {equipe.map((membro, index) => (
-            <motion.div
+            <div
               key={index}
-              className={`relative rounded-3xl overflow-hidden shadow-xl group ${currentTheme.card} border-2 ${
+              className={`relative rounded-3xl overflow-hidden shadow-xl group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${currentTheme.card} border-2 ${
                 isDarkMode ? 'border-slate-700' : 'border-gray-200'
               }`}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.15, duration: 0.6 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -10, scale: 1.02 }}
             >
               {/* Card principal */}
               <div className="p-8 text-center">
                 <div className="relative inline-block mb-6">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
                   <img
                     src={membro.imagem}
                     alt={membro.nome}
-                    className="relative w-32 h-32 rounded-full mx-auto object-cover ring-4 ring-white dark:ring-slate-700 shadow-xl transition-transform duration-500 group-hover:scale-110"
+                    className="relative w-32 h-32 rounded-full mx-auto object-cover ring-4 ring-white dark:ring-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
                   />
                 </div>
                 
@@ -275,9 +261,9 @@ const About = () => {
                 </a>
               </div>
 
-              {/* Efeito de brilho ao hover */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/5 group-hover:via-purple-500/5 group-hover:to-pink-500/5 transition-all duration-500 pointer-events-none"></div>
-            </motion.div>
+              {/* Efeito de brilho ao hover - REDUZIDO */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-300 pointer-events-none"></div>
+            </div>
           ))}
         </div>
       </div>
