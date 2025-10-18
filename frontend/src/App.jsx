@@ -19,6 +19,7 @@ import LojaDashboardPage from "./Pages/LojaDashboardPage";
 import NotFoundPage from "./Pages/NotFoundPage";
 import ReviewPage from "./Pages/ReviewPage";
 import ResetPasswordPage from "./Pages/ResetPasswordPage";
+import PrivacyPolicyPage from "./Pages/PrivacyPolicyPage";
 
 import ProtectedRoute from "./Components/ProtectedRoute";
 
@@ -40,8 +41,9 @@ function App() {
       <Route path="/search" element={<ProductSearchPage />} />
       <Route path="/commerce/:id" element={<CommercePage />} />
       <Route path="/commerces/search" element={<CommerceSearchPage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
-      {/* rota só para usuários “user” */}
+      {/* rota só para usuários "user" */}
       <Route element={<ProtectedRoute requiredRole="user" />}>
         <Route path="/review/:id" element={<ReviewPage />} />
       </Route>

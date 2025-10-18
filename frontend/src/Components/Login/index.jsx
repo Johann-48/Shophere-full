@@ -55,133 +55,154 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
   // Social logins removidos a pedido (Google / Apple)
 
   return (
-    <main className={`flex-1 ${currentTheme.background} py-16 px-6 min-h-screen`}>
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Imagem lateral */}
+    <main className={`flex-1 ${currentTheme.background} py-8 px-4 min-h-screen flex items-center justify-center`}>
+      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Imagem lateral - Melhorada */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
-          className="hidden md:block"
+          className="hidden lg:flex items-center justify-center"
         >
-          <img
-            src="https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-18T16%3A25%3A28Z&sp=r&sv=2024-08-04&sr=b&scid=8563d2b5-c234-4a31-ab83-d398212af996&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-18T12%3A28%3A50Z&ske=2025-10-19T12%3A28%3A50Z&sks=b&skv=2024-08-04&sig=3Fibq%2BuyCpMvQF014E0BRjZihZpcGGz9ZMTJYZdMkF4%3D"
-            alt="Login Visual"
-            className="w-full h-[520px] rounded-3xl shadow-lg object-cover"
-            style={{ borderRadius: "1.5rem" }}
-          />
+          <div className="relative w-full max-w-lg">
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-2xl opacity-20 animate-pulse"></div>
+            <img
+              src="https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-18T16%3A25%3A28Z&sp=r&sv=2024-08-04&sr=b&scid=8563d2b5-c234-4a31-ab83-d398212af996&skoid=33096a49-a96b-4506-9fc4-04a7517f8175&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-18T12%3A28%3A50Z&ske=2025-10-19T12%3A28%3A50Z&sks=b&skv=2024-08-04&sig=3Fibq%2BuyCpMvQF014E0BRjZihZpcGGz9ZMTJYZdMkF4%3D"
+              alt="Login Visual"
+              className="relative w-full h-auto max-h-[600px] rounded-3xl shadow-2xl object-contain transform hover:scale-105 transition-transform duration-500"
+            />
+          </div>
         </motion.div>
 
-        {/* Formulário */}
+        {/* Formulário - Melhorado */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className={`${currentTheme.card} p-12 rounded-3xl shadow-lg transition-all`}
+          className="w-full max-w-md mx-auto"
         >
-          <h2 className={`text-4xl font-bold ${currentTheme.textPrimary} mb-6 text-center`}>
-            Bem-vindo de volta!
-          </h2>
-          <p className={`${currentTheme.text} text-center mb-8`}>
-            Insira seus dados para acessar sua conta
-          </p>
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="email"
-                className={`block ${currentTheme.text} mb-1 font-semibold`}
-              >
-                Email ou Celular
-              </label>
-              <div className="relative">
-                <FaEnvelope className={`absolute left-3 top-3.5 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`} />
-                <input
-                  id="email"
-                  type="text"
-                  value={emailOrPhone}
-                  onChange={(e) => setEmailOrPhone(e.target.value)}
-                  required
-                  placeholder="seuemail@exemplo.com"
-                  className={`w-full pl-10 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
-                />
-              </div>
+          <div className={`${currentTheme.card} p-8 md:p-10 rounded-3xl shadow-2xl transition-all border ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h2 className={`text-3xl md:text-4xl font-bold ${currentTheme.textPrimary} mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
+                Bem-vindo de volta! 👋
+              </h2>
+              <p className={`${currentTheme.text} text-sm md:text-base`}>
+                Faça login para continuar sua jornada
+              </p>
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className={`block ${currentTheme.text} mb-1 font-semibold`}
-              >
-                Senha
-              </label>
-              <div className="relative">
-                <FaLock className="absolute left-3 top-3.5 text-gray-400" />
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="********"
-                  className={`w-full pl-10 pr-10 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700' : 'bg-white text-gray-900 placeholder-gray-500 border-blue-200'}`}
-                />
-                <button
-                  type="button"
-                  className={`absolute right-3 top-3.5 ${isDarkMode ? 'text-slate-300' : 'text-gray-500'}`}
-                  onClick={() => setShowPassword((prev) => !prev)}
+            <form className="space-y-5" onSubmit={handleSubmit}>
+              <div>
+                <label
+                  htmlFor="email"
+                  className={`block ${currentTheme.text} mb-2 font-semibold text-sm`}
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                  Email ou Celular
+                </label>
+                <div className="relative">
+                  <FaEnvelope className={`absolute left-4 top-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`} />
+                  <input
+                    id="email"
+                    type="text"
+                    value={emailOrPhone}
+                    onChange={(e) => setEmailOrPhone(e.target.value)}
+                    required
+                    placeholder="seuemail@exemplo.com"
+                    className={`w-full pl-12 pr-4 py-3.5 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700 hover:border-slate-600' : 'bg-white text-gray-900 placeholder-gray-400 border-gray-200 hover:border-gray-300'}`}
+                  />
+                </div>
               </div>
 
-              <span
-                onClick={() => navigate("/forgotpassword")}
-                className={`text-sm ${isDarkMode ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'} hover:underline float-right mt-1 cursor-pointer`}
-              >
-                Esqueceu sua senha?
-              </span>
-            </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className={`block ${currentTheme.text} mb-2 font-semibold text-sm`}
+                >
+                  Senha
+                </label>
+                <div className="relative">
+                  <FaLock className={`absolute left-4 top-4 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`} />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className={`w-full pl-12 pr-12 py-3.5 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${isDarkMode ? 'bg-slate-800 text-white placeholder-slate-400 border-slate-700 hover:border-slate-600' : 'bg-white text-gray-900 placeholder-gray-400 border-gray-200 hover:border-gray-300'}`}
+                  />
+                  <button
+                    type="button"
+                    className={`absolute right-4 top-4 ${isDarkMode ? 'text-slate-300 hover:text-white' : 'text-gray-500 hover:text-gray-700'} transition`}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
+                </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full text-white py-3 rounded-lg transition text-lg font-semibold ${isDarkMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-600 hover:bg-blue-700'} ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
+                <div className="flex justify-end mt-2">
+                  <span
+                    onClick={() => navigate("/forgotpassword")}
+                    className={`text-sm ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} hover:underline cursor-pointer font-medium transition`}
+                  >
+                    Esqueceu sua senha?
+                  </span>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl transition-all text-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-[1.02] ${
+                  loading ? "opacity-50 cursor-not-allowed" : "hover:from-blue-700 hover:to-purple-700"
                 }`}
-            >
-              {loading ? "Entrando..." : "Entrar"}
-            </button>
-          </form>
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Entrando...
+                  </span>
+                ) : (
+                  "Entrar"
+                )}
+              </button>
+            </form>
 
             {msg && (
-              <p className={`text-center mt-4 font-medium animate-pulse ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>
-              {msg}
-            </p>
-          )}
+              <div className="mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-lg animate-fadeIn">
+                <p className="text-sm font-medium">{msg}</p>
+              </div>
+            )}
 
-          {/* Opções de login social removidas */}
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className={`absolute inset-0 flex items-center`}>
+                <div className={`w-full border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className={`px-4 ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-white text-gray-500'}`}>
+                  Não tem uma conta?
+                </span>
+              </div>
+            </div>
 
-          {/* Links para cadastro */}
-          <p className={`text-center ${currentTheme.text} mt-6 font-medium`}>
-            Não possui uma conta?{" "}
-            <span
-              onClick={() => navigate("/signup")}
-              className="text-blue-600 hover:underline hover:text-blue-700 font-semibold cursor-pointer"
-            >
-              Cadastre-se
-            </span>
-          </p>
-
-          <p className={`text-center ${currentTheme.text} mt-2 font-medium`}>
-            É vendedor?{" "}
-            <span
-              onClick={() => navigate("/seller")}
-              className="text-red-600 hover:underline hover:text-red-700 font-semibold cursor-pointer"
-            >
-              Criar conta
-            </span>
-          </p>
+            {/* Links para cadastro */}
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate("/signup")}
+                className={`w-full py-3 rounded-xl font-semibold transition-all border-2 ${isDarkMode ? 'border-slate-600 text-slate-200 hover:bg-slate-700' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+              >
+                Criar conta como Cliente
+              </button>
+              <button
+                onClick={() => navigate("/seller")}
+                className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              >
+                Sou Vendedor 🏪
+              </button>
+            </div>
+          </div>
         </motion.div>
       </div>
     </main>

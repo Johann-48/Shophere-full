@@ -87,9 +87,8 @@ text-lg`}
           <ul className="space-y-2 text-sm">
             <li>
               <Link
-                to="/privacidade"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
+                to="/privacy-policy"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'} transition`}
               >
                 Política de Privacidade
               </Link>
