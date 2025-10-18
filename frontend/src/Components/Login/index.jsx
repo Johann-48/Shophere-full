@@ -56,7 +56,7 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
 
   return (
     <main className={`flex-1 ${currentTheme.background} py-8 px-4 min-h-screen flex items-center justify-center`}>
-      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <div className="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         {/* Imagem lateral - Melhorada */}
         <motion.div
           initial={{ opacity: 0, x: -50 }}
@@ -74,14 +74,14 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
           </div>
         </motion.div>
 
-        {/* Formulário - Melhorado */}
+        {/* Formulário - Melhorado e mais largo */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="w-full max-w-md mx-auto"
+          className="w-full max-w-xl mx-auto"
         >
-          <div className={`${currentTheme.card} p-8 md:p-10 rounded-3xl shadow-2xl transition-all border ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+          <div className={`${currentTheme.card} p-10 md:p-12 rounded-3xl shadow-2xl transition-all border ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
             {/* Header */}
             <div className="text-center mb-8">
               <h2 className={`text-3xl md:text-4xl font-bold ${currentTheme.textPrimary} mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>

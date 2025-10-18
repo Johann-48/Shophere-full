@@ -20,6 +20,7 @@ import NotFoundPage from "./Pages/NotFoundPage";
 import ReviewPage from "./Pages/ReviewPage";
 import ResetPasswordPage from "./Pages/ResetPasswordPage";
 import PrivacyPolicyPage from "./Pages/PrivacyPolicyPage";
+import TermsOfServicePage from "./Pages/TermsOfServicePage";
 
 import ProtectedRoute from "./Components/ProtectedRoute";
 
@@ -42,6 +43,7 @@ function App() {
       <Route path="/commerce/:id" element={<CommercePage />} />
       <Route path="/commerces/search" element={<CommerceSearchPage />} />
       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
 
       {/* rota só para usuários "user" */}
       <Route element={<ProtectedRoute requiredRole="user" />}>

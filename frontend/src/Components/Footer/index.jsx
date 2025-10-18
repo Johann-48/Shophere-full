@@ -95,9 +95,8 @@ text-lg`}
             </li>
             <li>
               <Link
-                to="/termos"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
+                to="/terms-of-service"
+                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'} transition`}
               >
                 Termos de Uso
               </Link>
