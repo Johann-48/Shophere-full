@@ -165,22 +165,22 @@ export default function Home() {
   }, []);
 
   const iconByName = {
-    "Eletrônicos": "🔌",
-    "Moda": "👗",
-    "Esportes": "🏀",
+    "Eletrônicos": "⚡",
+    "Moda": "�",
+    "Esportes": "⚽",
     "Mercado": "🛒",
-    "Beleza": "💄",
-    "Casa": "🏠",
-    "Livros": "📚",
-    "Jogos": "🎮",
-    "Outros": "✨",
-    "Todos": "🌐",
+    "Beleza": "�",
+    "Casa": "�",
+    "Livros": "�",
+    "Jogos": "�",
+    "Outros": "⭐",
+    "Todos": "🔷",
   };
 
   const normalizedCategories = categories.map((c) => ({
     id: c.id,
     nome: c.nome,
-    icon: iconByName[c.nome] || "✨",
+    icon: iconByName[c.nome] || "⭐",
   }));
   const filteredCats = normalizedCategories.filter((c) =>
     (catQuery || "").length === 0
@@ -395,7 +395,7 @@ export default function Home() {
       <section className="px-4 md:px-6 py-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold gradient-text">🏬 Comércios</h2>
+            <h2 className="text-2xl md:text-3xl font-bold gradient-text">Comércios</h2>
             <Link
               to="/commerces/search"
               className={`text-sm text-white ${currentTheme.button} px-4 py-2 rounded-lg transition-all duration-200 btn-primary focus-ring`}
@@ -428,8 +428,8 @@ export default function Home() {
               className={`px-6 py-3 ${currentTheme.button} text-white rounded-lg shadow-lg transition-all duration-300 font-semibold btn-primary`}
             >
               {showAllCommerces
-                ? "🔼 Mostrar Menos"
-                : "🔽 Ver Todos os Comércios"}
+                ? "Mostrar Menos"
+                : "Ver Todos os Comércios"}
             </motion.button>
           </div>
         )}
@@ -442,7 +442,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
             <h2 className="text-2xl md:text-3xl font-bold gradient-text">
-              ✨ Produtos em Destaque
+              Produtos em Destaque
             </h2>
             <div className="flex gap-2">
               <button
@@ -455,7 +455,7 @@ export default function Home() {
                 to="/search"
                 className={`text-sm text-white ${currentTheme.button} px-4 py-2 rounded-lg transition-all duration-200 btn-primary focus-ring`}
               >
-                🔍 Pesquisar
+                Pesquisar
               </Link>
             </div>
           </div>
@@ -477,7 +477,7 @@ export default function Home() {
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
                     <h3 className={`text-xl font-semibold ${currentTheme.textPrimary}`}>
-                      🎯 Filtros Avançados
+                      Filtros Avançados
                     </h3>
                     <p className={`text-sm ${currentTheme.textSecondary}`}>
                       Combine múltiplos critérios para encontrar o produto ideal.
@@ -499,15 +499,15 @@ export default function Home() {
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">🎯 Em destaque agora</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70">Em destaque agora</p>
                     <p className="text-lg font-semibold">{filteredCount}</p>
                   </div>
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">📦 Com estoque</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70">Com estoque</p>
                     <p className="text-lg font-semibold">{availableCount}</p>
                   </div>
                   <div className={`rounded-xl border px-4 py-3 ${softSurface}`}>
-                    <p className="text-xs uppercase tracking-wide opacity-70">🗂️ Categorias mapeadas</p>
+                    <p className="text-xs uppercase tracking-wide opacity-70">Categorias mapeadas</p>
                     <p className="text-lg font-semibold">{categoryCount}</p>
                   </div>
                 </div>
@@ -752,7 +752,7 @@ export default function Home() {
                     role="option"
                     aria-selected={catHighlight === 0}
                   >
-                    <span className="text-xl">🌐</span>
+                    <span className="text-xl">🔷</span>
                     <span>Todos</span>
                   </li>
                   {filteredCats
