@@ -202,7 +202,7 @@ export default function LojaDashboard() {
 
         {/* Content Area */}
         <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 min-h-[400px] transform transition-all duration-300">
-          {abaSelecionada === "dashboard" && <DashboardHome stats={stats} />}
+          {abaSelecionada === "dashboard" && <DashboardHome stats={stats} setAbaSelecionada={setAbaSelecionada} />}
           {abaSelecionada === "adicionarproduto" && <AdicionarProduto />}
           {abaSelecionada === "meusprodutos" && <MeusProdutos />}
           {abaSelecionada === "editarloja" && <EditarLoja />}
@@ -214,7 +214,7 @@ export default function LojaDashboard() {
 }
 
 // Novo componente: Dashboard Home
-function DashboardHome({ stats }) {
+function DashboardHome({ stats, setAbaSelecionada }) {
   return (
     <div className="space-y-8">
       <div className="text-center py-12">
@@ -232,18 +232,21 @@ function DashboardHome({ stats }) {
             title="Adicionar Produto"
             description="Cadastre novos produtos rapidamente"
             color="from-blue-500 to-cyan-500"
+            onClick={() => setAbaSelecionada("adicionarproduto")}
           />
           <QuickActionCard
             icon={<FiEdit className="w-12 h-12" />}
             title="Gerenciar Produtos"
             description="Edite e organize seu catálogo"
             color="from-green-500 to-emerald-500"
+            onClick={() => setAbaSelecionada("meusprodutos")}
           />
           <QuickActionCard
             icon={<FiMessageSquare className="w-12 h-12" />}
             title="Atender Clientes"
             description="Responda mensagens e dúvidas"
             color="from-purple-500 to-pink-500"
+            onClick={() => setAbaSelecionada("batepapo")}
           />
         </div>
 
@@ -274,17 +277,25 @@ function TipItem({ text }) {
   );
 }
 
-function QuickActionCard({ icon, title, description, color }) {
+function QuickActionCard({ icon, title, description, color, onClick }) {
   return (
-    <div className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer">
+    <div 
+      onClick={onClick}
+      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95"
+    >
       <div
         className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
       ></div>
-      <div className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto`}>
+      <div className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">{title}</h3>
+      <p className="text-gray-600 group-hover:text-gray-700">{description}</p>
+      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
     </div>
   );
 }
