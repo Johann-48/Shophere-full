@@ -3,6 +3,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { FaFileContract, FaShoppingCart, FaStore, FaGavel, FaExclamationTriangle, FaMoneyBillWave, FaUndo, FaUserCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
 import BackButton from "../BackButton";
+import BackButton from "../BackButton";
 
 export default function TermsOfService() {
   const { isDarkMode, dark, light } = useTheme();
