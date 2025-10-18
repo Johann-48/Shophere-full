@@ -534,6 +534,8 @@ function AdicionarProduto() {
           label="Quantidade em Estoque"
           icon={<FiPackage />}
           type="number"
+          min="0"
+          step="1"
           placeholder="0"
           value={quantidade}
           onChange={(e) => setQuantidade(e.target.value)}
@@ -631,7 +633,7 @@ function AdicionarProduto() {
   );
 }
 
-function ModernInput({ label, icon, type = "text", placeholder, value, onChange, required = false }) {
+function ModernInput({ label, icon, type = "text", placeholder, value, onChange, required = false, min, step }) {
   return (
     <div className="space-y-2">
       <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -644,7 +646,8 @@ function ModernInput({ label, icon, type = "text", placeholder, value, onChange,
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        step={type === "number" ? "0.01" : undefined}
+        min={min}
+        step={step || (type === "number" ? "0.01" : undefined)}
         className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
       />
     </div>
@@ -948,6 +951,7 @@ function MeusProdutos() {
                       name="quantidade"
                       type="number"
                       min="0"
+                      step="1"
                       value={produtoEditando.quantidade || ""}
                       onChange={handleEditChange}
                       placeholder="Quantidade"
