@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { FaShieldAlt, FaLock, FaUserShield, FaEnvelope, FaCookie, FaDatabase } from "react-icons/fa";
 import { motion } from "framer-motion";
@@ -7,6 +7,10 @@ import BackButton from "../BackButton";
 export default function PrivacyPolicy() {
   const { isDarkMode, dark, light } = useTheme();
   const currentTheme = isDarkMode ? dark : light;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const sections = [
     {

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   FiPlusCircle,
   FiEdit,
@@ -427,6 +428,14 @@ function AdicionarProduto() {
       }
 
       setMensagem("✅ Produto cadastrado com sucesso!");
+      toast.success("Produto adicionado com sucesso!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setNome("");
       setPreco("");
       setCategoria("");
@@ -440,6 +449,10 @@ function AdicionarProduto() {
     } catch (error) {
       console.error(error);
       setErro("❌ Erro ao cadastrar produto. Tente novamente.");
+      toast.error("Erro ao cadastrar produto. Tente novamente.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } finally {
       setLoading(false);
     }
@@ -824,10 +837,21 @@ function MeusProdutos() {
       setProdutos((prev) =>
         prev.map((p) => (p.id === produtoEditandoId ? produtoEditando : p))
       );
+      toast.success("Produto atualizado com sucesso!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       cancelarEdicao();
     } catch (err) {
       console.error("Erro ao salvar edição:", err);
-      alert("Erro ao salvar edição.");
+      toast.error("Erro ao salvar edição. Tente novamente.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   }
 
@@ -840,9 +864,20 @@ function MeusProdutos() {
         });
 
         setProdutos((prev) => prev.filter((p) => p.id !== id));
+        toast.success("Produto removido com sucesso!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       } catch (err) {
         console.error("Erro ao excluir produto:", err);
-        alert("Erro ao excluir produto.");
+        toast.error("Erro ao excluir produto. Tente novamente.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
     }
   }

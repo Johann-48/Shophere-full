@@ -1,6 +1,8 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import ContactSellerPage from "./Pages/ContactSellerPage";
 import HomePage from "./Pages/HomePage";
@@ -27,6 +29,7 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 function App() {
   return (
     <ThemeProvider>
+      <ToastContainer />
       <Routes>
       {/* Rotas públicas */}
       <Route path="/" element={<HomePage />} />
