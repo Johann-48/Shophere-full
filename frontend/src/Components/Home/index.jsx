@@ -20,8 +20,8 @@ const PRICE_BANDS = [
 ];
 
 // Banner images for dark and light modes
-const HERO_IMAGE_DARK = "https://images.unsplash.com/photo-1557821552-17105176677c?w=1920&h=600&fit=crop&q=80";
-const HERO_IMAGE_LIGHT = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=600&fit=crop&q=80";
+const HERO_IMAGE_DARK = "https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg";
+const HERO_IMAGE_LIGHT = "https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg";
 const HERO_FALLBACK_URL = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop&q=80";
 
 export default function Home() {
