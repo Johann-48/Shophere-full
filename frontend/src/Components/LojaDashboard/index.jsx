@@ -13,15 +13,31 @@ import {
   FiX,
   FiStar,
   FiLink,
+  FiPackage,
+  FiShoppingBag,
+  FiTrendingUp,
+  FiDollarSign,
+  FiEye,
+  FiHeart,
+  FiBarChart2,
+  FiUsers,
+  FiCheckCircle,
+  FiAlertCircle,
 } from "react-icons/fi";
 import API_CONFIG from "../../config/api";
 
 export default function LojaDashboard() {
-  const [abaSelecionada, setAbaSelecionada] = useState("adicionarproduto");
-  const [logoUrl, setLogoUrl] = useState(""); // ← estado para a logo
-  const [nomeLoja, setNomeLoja] = useState(""); // ← opcional, caso queira mostrar o nome
+  const [abaSelecionada, setAbaSelecionada] = useState("dashboard");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [nomeLoja, setNomeLoja] = useState("");
+  const [stats, setStats] = useState({
+    totalProdutos: 0,
+    produtosAtivos: 0,
+    mensagensNaoLidas: 0,
+    valorTotal: 0,
+  });
 
-  // Busca logo e nome da loja quando o componente monta
+  // Busca logo e estatísticas
   useEffect(() => {
     const fetchLoja = async () => {
       try {
@@ -29,92 +45,292 @@ export default function LojaDashboard() {
         const { data } = await axios.get("/api/commerces/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setLogoUrl(data.logoUrl); // campo retornado pelo backend
+        setLogoUrl(data.logoUrl);
         setNomeLoja(data.nome);
       } catch (err) {
         console.error("Erro ao carregar dados da loja:", err);
       }
     };
+
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("/api/products/meus", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const produtos = res.data;
+        setStats({
+          totalProdutos: produtos.length,
+          produtosAtivos: produtos.filter((p) => p.quantidade > 0).length,
+          mensagensNaoLidas: 0,
+          valorTotal: produtos.reduce(
+            (acc, p) => acc + parseFloat(p.preco || 0),
+            0
+          ),
+        });
+      } catch (err) {
+        console.error("Erro ao carregar estatísticas:", err);
+      }
+    };
+
     fetchLoja();
+    fetchStats();
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center transition-all duration-500 bg-gradient-to-br from-green-100 via-white to-green-50 p-16 px-6">
-      {/* Logo da Loja */}
-      <div className="w-full max-w-4xl relative flex items-center justify-center mb-6">
-        <div className="relative group">
-          <img
-            src={
-              logoUrl
-                ? logoUrl.startsWith("http")
-                  ? logoUrl
-                  : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
-                : "https://via.placeholder.com/240?text=Sem+Logo"
-            }
-            alt={nomeLoja || "Logo da Loja"}
-            className="rounded-2xl w-60 h-60 object-contain bg-white p-4 shadow-xl transition-transform duration-300 group-hover:scale-105"
-          />
-          <button className="absolute bottom-2 right-2 p-2 bg-white/80 rounded-full shadow hover:scale-110 transition">
-            <FiCamera className="text-zinc-700" />
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header com Logo e Info */}
+        <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transform hover:scale-[1.01] transition-all duration-300">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Logo Container */}
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
+              <div className="relative">
+                <img
+                  src={
+                    logoUrl
+                      ? logoUrl.startsWith("http")
+                        ? logoUrl
+                        : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
+                      : "https://via.placeholder.com/200?text=Sua+Logo"
+                  }
+                  alt={nomeLoja || "Logo da Loja"}
+                  className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg"
+                />
+                <button className="absolute -bottom-2 -right-2 p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full shadow-lg hover:scale-110 transition transform">
+                  <FiCamera className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Info da Loja */}
+            <div className="flex-1 text-center md:text-left">
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                {nomeLoja || "Minha Loja"}
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Gerencie sua loja de forma inteligente
+              </p>
+            </div>
+
+            {/* Botão rápido */}
+            <button
+              onClick={() => setAbaSelecionada("adicionarproduto")}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
+            >
+              <FiPlusCircle className="w-5 h-5" />
+              Novo Produto
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Título */}
-      <h1 className="text-4xl font-extrabold mb-4 text-zinc-800 text-center tracking-tight">
-        Painel da Loja {nomeLoja && `- ${nomeLoja}`}
-      </h1>
+        {/* Stats Cards - apenas para dashboard */}
+        {abaSelecionada === "dashboard" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              icon={<FiPackage className="w-8 h-8" />}
+              title="Total de Produtos"
+              value={stats.totalProdutos}
+              color="from-blue-500 to-cyan-500"
+              delay="0"
+            />
+            <StatCard
+              icon={<FiShoppingBag className="w-8 h-8" />}
+              title="Produtos Ativos"
+              value={stats.produtosAtivos}
+              color="from-green-500 to-emerald-500"
+              delay="100"
+            />
+            <StatCard
+              icon={<FiMessageSquare className="w-8 h-8" />}
+              title="Mensagens"
+              value={stats.mensagensNaoLidas}
+              color="from-purple-500 to-pink-500"
+              delay="200"
+            />
+            <StatCard
+              icon={<FiDollarSign className="w-8 h-8" />}
+              title="Valor em Estoque"
+              value={`R$ ${stats.valorTotal.toFixed(2)}`}
+              color="from-orange-500 to-red-500"
+              delay="300"
+            />
+          </div>
+        )}
 
-      {/* Abas com animação */}
-      <div className="flex justify-center mb-6 gap-3 flex-wrap">
-        <AbaBotao
-          ativa={abaSelecionada === "adicionarproduto"}
-          onClick={() => setAbaSelecionada("adicionarproduto")}
-          icon={<FiPlusCircle />}
-          texto="Adicionar Produto"
-        />
-        <AbaBotao
-          ativa={abaSelecionada === "meusprodutos"}
-          onClick={() => setAbaSelecionada("meusprodutos")}
-          icon={<FiEdit />}
-          texto="Meus Produtos"
-        />
-        <AbaBotao
-          ativa={abaSelecionada === "editarloja"}
-          onClick={() => setAbaSelecionada("editarloja")}
-          icon={<FiEdit />}
-          texto="Editar Loja"
-        />
-        <AbaBotao
-          ativa={abaSelecionada === "batepapo"}
-          onClick={() => setAbaSelecionada("batepapo")}
-          icon={<FiMessageSquare />}
-          texto="Bate-papo"
-        />
-      </div>
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-2xl shadow-lg p-2 mb-8 overflow-x-auto">
+          <div className="flex gap-2 min-w-max">
+            <TabButton
+              active={abaSelecionada === "dashboard"}
+              onClick={() => setAbaSelecionada("dashboard")}
+              icon={<FiBarChart2 />}
+              text="Dashboard"
+              color="purple"
+            />
+            <TabButton
+              active={abaSelecionada === "adicionarproduto"}
+              onClick={() => setAbaSelecionada("adicionarproduto")}
+              icon={<FiPlusCircle />}
+              text="Adicionar"
+              color="blue"
+            />
+            <TabButton
+              active={abaSelecionada === "meusprodutos"}
+              onClick={() => setAbaSelecionada("meusprodutos")}
+              icon={<FiPackage />}
+              text="Produtos"
+              color="green"
+            />
+            <TabButton
+              active={abaSelecionada === "editarloja"}
+              onClick={() => setAbaSelecionada("editarloja")}
+              icon={<FiEdit />}
+              text="Editar Loja"
+              color="orange"
+            />
+            <TabButton
+              active={abaSelecionada === "batepapo"}
+              onClick={() => setAbaSelecionada("batepapo")}
+              icon={<FiMessageSquare />}
+              text="Chat"
+              color="pink"
+            />
+          </div>
+        </div>
 
-      {/* Conteúdo da aba */}
-      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-xl transition-all duration-300 animate-fade-in">
-        {abaSelecionada === "adicionarproduto" && <AdicionarProduto />}
-        {abaSelecionada === "meusprodutos" && <MeusProdutos />}
-        {abaSelecionada === "editarloja" && <EditarLoja />}
-        {abaSelecionada === "batepapo" && <BatePapo />}
+        {/* Content Area */}
+        <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 min-h-[400px] transform transition-all duration-300">
+          {abaSelecionada === "dashboard" && <DashboardHome stats={stats} />}
+          {abaSelecionada === "adicionarproduto" && <AdicionarProduto />}
+          {abaSelecionada === "meusprodutos" && <MeusProdutos />}
+          {abaSelecionada === "editarloja" && <EditarLoja />}
+          {abaSelecionada === "batepapo" && <BatePapo />}
+        </div>
       </div>
     </div>
   );
 }
 
-function AbaBotao({ ativa, onClick, icon, texto }) {
+// Novo componente: Dashboard Home
+function DashboardHome({ stats }) {
+  return (
+    <div className="space-y-8">
+      <div className="text-center py-12">
+        <h2 className="text-4xl font-bold text-gray-800 mb-4">
+          Bem-vindo ao seu Painel! 🎉
+        </h2>
+        <p className="text-gray-600 text-lg mb-8">
+          Aqui você tem tudo para gerenciar sua loja de forma profissional
+        </p>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
+          <QuickActionCard
+            icon={<FiPlusCircle className="w-12 h-12" />}
+            title="Adicionar Produto"
+            description="Cadastre novos produtos rapidamente"
+            color="from-blue-500 to-cyan-500"
+          />
+          <QuickActionCard
+            icon={<FiEdit className="w-12 h-12" />}
+            title="Gerenciar Produtos"
+            description="Edite e organize seu catálogo"
+            color="from-green-500 to-emerald-500"
+          />
+          <QuickActionCard
+            icon={<FiMessageSquare className="w-12 h-12" />}
+            title="Atender Clientes"
+            description="Responda mensagens e dúvidas"
+            color="from-purple-500 to-pink-500"
+          />
+        </div>
+
+        {/* Tips Section */}
+        <div className="mt-16 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+            <FiAlertCircle className="text-purple-600" />
+            Dicas para Vender Mais
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left max-w-3xl mx-auto">
+            <TipItem text="Adicione fotos de qualidade aos seus produtos" />
+            <TipItem text="Mantenha descrições detalhadas e precisas" />
+            <TipItem text="Responda mensagens dos clientes rapidamente" />
+            <TipItem text="Mantenha seu estoque sempre atualizado" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TipItem({ text }) {
+  return (
+    <div className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+      <FiCheckCircle className="text-green-500 flex-shrink-0 mt-1" />
+      <span className="text-gray-700">{text}</span>
+    </div>
+  );
+}
+
+function QuickActionCard({ icon, title, description, color }) {
+  return (
+    <div className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer">
+      <div
+        className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+      ></div>
+      <div className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto`}>
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-gray-800 mb-2">{title}</h3>
+      <p className="text-gray-600">{description}</p>
+    </div>
+  );
+}
+
+function StatCard({ icon, title, value, color, delay }) {
+  return (
+    <div
+      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-800">{value}</p>
+        </div>
+        <div
+          className={`bg-gradient-to-r ${color} w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg`}
+        >
+          {icon}
+        </div>
+      </div>
+      <div className={`mt-4 h-1 bg-gradient-to-r ${color} rounded-full`}></div>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, text, color }) {
+  const colors = {
+    purple: "from-purple-600 to-pink-600",
+    blue: "from-blue-600 to-cyan-600",
+    green: "from-green-600 to-emerald-600",
+    orange: "from-orange-600 to-red-600",
+    pink: "from-pink-600 to-rose-600",
+  };
+
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-3 rounded-xl border transition-all duration-300 shadow-sm transform hover:scale-105 ${
-        ativa
-          ? "bg-blue-600 text-white border-blue-600 shadow-md"
-          : "bg-white text-zinc-700 border-zinc-300"
+      className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+        active
+          ? `bg-gradient-to-r ${colors[color]} text-white shadow-lg`
+          : "text-gray-600 hover:bg-gray-100"
       }`}
     >
-      {icon} {texto}
+      {icon}
+      <span className="hidden sm:inline">{text}</span>
     </button>
   );
 }
@@ -128,31 +344,46 @@ function AdicionarProduto() {
   const [quantidade, setQuantidade] = useState("");
   const [codigoBarras, setCodigoBarras] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [erro, setErro] = useState("");
   const [foto, setFoto] = useState(null);
   const [imagemUrl, setImagemUrl] = useState("");
   const [categorias, setCategorias] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [previewImagem, setPreviewImagem] = useState(null);
 
   useEffect(() => {
-    // carrega opções de categoria ao montar
     axios
       .get("/api/categories")
       .then((res) => setCategorias(res.data))
       .catch((err) => console.error("Erro ao buscar categorias:", err));
   }, []);
 
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    setFoto(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImagem(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensagem("");
+    setErro("");
+    setLoading(true);
     const token = localStorage.getItem("token");
 
     try {
-      // 1) Cria o produto
       const res = await axios.post(
         API_CONFIG.getApiUrl("/api/products"),
         {
           nome,
           preco,
-          categoria_id: categoria, // envia o ID, não o nome
+          categoria_id: categoria,
           descricao,
           marca,
           quantidade,
@@ -165,9 +396,8 @@ function AdicionarProduto() {
           },
         }
       );
-      const produtoId = res.data.id; // ajuste conforme seu backend
+      const produtoId = res.data.id;
 
-      // 2) Imagem principal: prioriza URL externa se informada, senão arquivo
       if (imagemUrl && /^https?:\/\//i.test(imagemUrl)) {
         await axios.post(
           `/api/products/${produtoId}/images/url`,
@@ -175,7 +405,6 @@ function AdicionarProduto() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else if (foto) {
-        // usa rota de galeria para adicionar imagem (será principal pois é a primeira)
         const formData = new FormData();
         formData.append("file", foto);
         await axios.post(`/api/products/${produtoId}/images`, formData, {
@@ -186,8 +415,7 @@ function AdicionarProduto() {
         });
       }
 
-      setMensagem("Produto cadastrado com sucesso!");
-      // limpa campos...
+      setMensagem("✅ Produto cadastrado com sucesso!");
       setNome("");
       setPreco("");
       setCategoria("");
@@ -197,100 +425,218 @@ function AdicionarProduto() {
       setCodigoBarras("");
       setFoto(null);
       setImagemUrl("");
+      setPreviewImagem(null);
     } catch (error) {
       console.error(error);
-      setMensagem("Erro ao cadastrar produto.");
+      setErro("❌ Erro ao cadastrar produto. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-5">
-      <h2 className="text-2xl font-semibold mb-1 text-zinc-800">
-        Novo Produto
-      </h2>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+          Adicionar Novo Produto
+        </h2>
+        <p className="text-gray-600">Preencha os dados do seu produto</p>
+      </div>
 
-      <AnimatedInput
-        placeholder="Nome do Produto"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
-        required
-      />
-      <AnimatedInput
-        placeholder="Preço"
-        type="number"
-        value={preco}
-        onChange={(e) => setPreco(e.target.value)}
-        required
-      />
-      <label className="flex flex-col">
-        Categoria
-        <select
-          value={categoria}
-          onChange={(e) => setCategoria(e.target.value)}
+      {/* Preview da Imagem */}
+      {previewImagem && (
+        <div className="flex justify-center mb-6 animate-fadeIn">
+          <div className="relative group">
+            <img
+              src={previewImagem}
+              alt="Preview"
+              className="w-48 h-48 object-cover rounded-2xl shadow-lg"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setPreviewImagem(null);
+                setFoto(null);
+              }}
+              className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <FiX />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ModernInput
+          label="Nome do Produto"
+          icon={<FiPackage />}
+          placeholder="Ex: Camiseta Polo"
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
           required
-          className="p-2 border rounded"
-        >
-          <option value="" disabled>
-            — Selecione —
-          </option>
-          {categorias.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nome}
-            </option>
-          ))}
-        </select>
-      </label>
-      <AnimatedTextarea
-        placeholder="Descrição"
-        value={descricao}
-        onChange={(e) => setDescricao(e.target.value)}
-      />
-
-      {/* NOVOS CAMPOS */}
-      <AnimatedInput
-        placeholder="Marca"
-        value={marca}
-        onChange={(e) => setMarca(e.target.value)}
-      />
-      <AnimatedInput
-        placeholder="Quantidade"
-        type="number"
-        value={quantidade}
-        onChange={(e) => setQuantidade(e.target.value)}
-      />
-      <AnimatedInput
-        placeholder="Código de Barras"
-        value={codigoBarras}
-        onChange={(e) => setCodigoBarras(e.target.value)}
-      />
-      <label className="flex flex-col">
-        Foto do Produto
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFoto(e.target.files[0])}
-          className="mt-1"
         />
-      </label>
-      <AnimatedInput
-        placeholder="OU URL externa da imagem (https://...)"
-        value={imagemUrl}
-        onChange={(e) => setImagemUrl(e.target.value)}
-      />
+        <ModernInput
+          label="Preço"
+          icon={<FiDollarSign />}
+          type="number"
+          step="0.01"
+          placeholder="0.00"
+          value={preco}
+          onChange={(e) => setPreco(e.target.value)}
+          required
+        />
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+            <FiShoppingBag className="text-blue-600" />
+            Categoria
+          </label>
+          <select
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            required
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+          >
+            <option value="" disabled>
+              Selecione uma categoria
+            </option>
+            {categorias.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+        <ModernInput
+          label="Marca"
+          icon={<FiStar />}
+          placeholder="Ex: Nike"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ModernInput
+          label="Quantidade em Estoque"
+          icon={<FiPackage />}
+          type="number"
+          placeholder="0"
+          value={quantidade}
+          onChange={(e) => setQuantidade(e.target.value)}
+        />
+        <ModernInput
+          label="Código de Barras"
+          icon={<FiLink />}
+          placeholder="000000000000"
+          value={codigoBarras}
+          onChange={(e) => setCodigoBarras(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <FiEdit className="text-blue-600" />
+          Descrição
+        </label>
+        <textarea
+          value={descricao}
+          onChange={(e) => setDescricao(e.target.value)}
+          placeholder="Descreva seu produto em detalhes..."
+          rows={4}
+          className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
+        />
+      </div>
+
+      {/* Upload de Imagem */}
+      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 space-y-4">
+        <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+          <FiCamera className="text-blue-600" />
+          Imagem do Produto
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="cursor-pointer">
+            <div className="border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
+              <FiCamera className="w-12 h-12 mx-auto mb-3 text-blue-600" />
+              <p className="font-medium text-gray-700">Upload de Arquivo</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Clique para selecionar
+              </p>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              className="hidden"
+            />
+          </label>
+          <div>
+            <ModernInput
+              label="Ou URL Externa"
+              icon={<FiLink />}
+              placeholder="https://exemplo.com/imagem.jpg"
+              value={imagemUrl}
+              onChange={(e) => setImagemUrl(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Mensagens */}
+      {mensagem && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg animate-fadeIn flex items-center gap-3">
+          <FiCheckCircle className="w-6 h-6" />
+          <span className="font-medium">{mensagem}</span>
+        </div>
+      )}
+      {erro && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg animate-fadeIn flex items-center gap-3">
+          <FiAlertCircle className="w-6 h-6" />
+          <span className="font-medium">{erro}</span>
+        </div>
+      )}
+
+      {/* Botão Submit */}
       <button
         type="submit"
-        className="bg-blue-600 text-white py-3 font-medium rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+        disabled={loading}
+        className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
       >
-        Adicionar Produto
+        {loading ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Cadastrando...
+          </>
+        ) : (
+          <>
+            <FiPlusCircle className="w-5 h-5" />
+            Adicionar Produto
+          </>
+        )}
       </button>
-
-      {mensagem && (
-        <p className="text-sm text-center font-medium text-zinc-700">
-          {mensagem}
-        </p>
-      )}
     </form>
+  );
+}
+
+function ModernInput({ label, icon, type = "text", placeholder, value, onChange, required = false }) {
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+        {icon && <span className="text-blue-600">{icon}</span>}
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        step={type === "number" ? "0.01" : undefined}
+        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+      />
+    </div>
   );
 }
 
@@ -302,6 +648,7 @@ function MeusProdutos() {
   const [galeria, setGaleria] = useState([]);
   const [galeriaLoading, setGaleriaLoading] = useState(false);
   const [novaImagemUrl, setNovaImagemUrl] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
@@ -317,6 +664,8 @@ function MeusProdutos() {
         setProdutos(res.data);
       } catch (err) {
         console.error("Erro ao carregar produtos:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchProdutos();
@@ -326,7 +675,7 @@ function MeusProdutos() {
     setProdutoEditandoId(produto.id);
     setProdutoEditando({
       ...produto,
-      categoria_id: produto.categoria_id || "", // ensure the field exists
+      categoria_id: produto.categoria_id || "",
     });
     const imgs = await carregarGaleria(produto.id);
     const principal = (imgs || []).find((g) => g.principal);
@@ -484,65 +833,91 @@ function MeusProdutos() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Carregando produtos...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4 text-zinc-800">
-        Meus Produtos
-      </h2>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+          Meus Produtos
+        </h2>
+        <p className="text-gray-600">
+          {produtos.length} produto{produtos.length !== 1 ? "s" : ""} cadastrado
+          {produtos.length !== 1 ? "s" : ""}
+        </p>
+      </div>
 
-      {produtos.length === 0 && (
-        <p className="text-zinc-500">Nenhum produto cadastrado ainda.</p>
-      )}
-
-      <div className="grid gap-6">
-        {produtos.map((produto) =>
-          produtoEditandoId === produto.id ? (
-            <form
-              key={produto.id}
-              onSubmit={salvarEdicao}
-              className="bg-gray-50 rounded-lg p-5 shadow-md flex flex-col gap-4 transition-shadow hover:shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={
-                    galeria.find((g) => g.principal)?.url ||
-                    produtoEditando.imagem ||
-                    "https://via.placeholder.com/100"
-                  }
-                  alt={produtoEditando.nome}
-                  className="w-24 h-24 object-cover rounded-lg border border-gray-300"
-                />
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    name="nome"
-                    value={produtoEditando.nome}
-                    onChange={handleEditChange}
-                    placeholder="Nome do Produto"
-                    required
+      {produtos.length === 0 ? (
+        <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+          <FiPackage className="w-20 h-20 mx-auto text-gray-300 mb-4" />
+          <h3 className="text-2xl font-bold text-gray-600 mb-2">
+            Nenhum produto ainda
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Comece adicionando seu primeiro produto!
+          </p>
+          <button className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+            <FiPlusCircle className="inline mr-2" />
+            Adicionar Produto
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {produtos.map((produto) =>
+            produtoEditandoId === produto.id ? (
+              <form
+                key={produto.id}
+                onSubmit={salvarEdicao}
+                className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 shadow-lg border-2 border-blue-200"
+              >
+                <div className="flex items-start gap-6 mb-6">
+                  <img
+                    src={
+                      galeria.find((g) => g.principal)?.url ||
+                      produtoEditando.imagem ||
+                      "https://via.placeholder.com/150"
+                    }
+                    alt={produtoEditando.nome}
+                    className="w-32 h-32 object-cover rounded-xl border-4 border-white shadow-lg"
                   />
-                  <input
-                    className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    name="preco"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={produtoEditando.preco}
-                    onChange={handleEditChange}
-                    placeholder="Preço"
-                    required
-                  />
-                  <label className="flex flex-col">
-                    Categoria
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                      name="nome"
+                      value={produtoEditando.nome}
+                      onChange={handleEditChange}
+                      placeholder="Nome do Produto"
+                      required
+                    />
+                    <input
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                      name="preco"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={produtoEditando.preco}
+                      onChange={handleEditChange}
+                      placeholder="Preço"
+                      required
+                    />
                     <select
                       name="categoria_id"
                       value={produtoEditando.categoria_id || ""}
                       onChange={handleEditChange}
                       required
-                      className="p-2 border rounded"
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                     >
                       <option value="" disabled>
-                        — Selecione —
+                        Selecione categoria
                       </option>
                       {categorias.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -550,163 +925,182 @@ function MeusProdutos() {
                         </option>
                       ))}
                     </select>
-                  </label>
-
-                  <input
-                    name="marca"
-                    value={produtoEditando.marca || ""}
-                    onChange={handleEditChange}
-                    placeholder="Marca"
-                  />
-                  <input
-                    name="quantidade"
-                    type="number"
-                    min="0"
-                    value={produtoEditando.quantidade || ""}
-                    onChange={handleEditChange}
-                    placeholder="Quantidade"
-                  />
-                  <input
-                    name="codigoBarras"
-                    value={produtoEditando.codigoBarras || ""}
-                    onChange={handleEditChange}
-                    placeholder="Código de Barras"
-                  />
-                </div>
-              </div>
-              {/* Galeria de Imagens */}
-              <div className="mt-2">
-                <h4 className="font-semibold mb-2">Imagens do Produto</h4>
-                <div className="flex items-center gap-3 flex-wrap mb-3">
-                  <label className="cursor-pointer p-2 bg-gray-200 rounded hover:bg-gray-300 transition flex items-center gap-2">
-                    <FiCamera />
-                    Enviar arquivo
                     <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => uploadImagemArquivo(e.target.files[0])}
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                      name="marca"
+                      value={produtoEditando.marca || ""}
+                      onChange={handleEditChange}
+                      placeholder="Marca"
                     />
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <FiLink />
+                    <input
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                      name="quantidade"
+                      type="number"
+                      min="0"
+                      value={produtoEditando.quantidade || ""}
+                      onChange={handleEditChange}
+                      placeholder="Quantidade"
+                    />
+                    <input
+                      className="p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                      name="codigoBarras"
+                      value={produtoEditando.codigoBarras || ""}
+                      onChange={handleEditChange}
+                      placeholder="Código de Barras"
+                    />
+                  </div>
+                </div>
+
+                {/* Galeria */}
+                <div className="bg-white rounded-xl p-4 mb-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <FiCamera className="text-blue-600" />
+                    Galeria de Imagens
+                  </h4>
+                  <div className="flex items-center gap-3 flex-wrap mb-4">
+                    <label className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                      <FiCamera />
+                      Upload
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => uploadImagemArquivo(e.target.files[0])}
+                      />
+                    </label>
                     <input
                       type="url"
                       placeholder="https://imagem.externa/..."
                       value={novaImagemUrl}
                       onChange={(e) => setNovaImagemUrl(e.target.value)}
-                      className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 w-72"
+                      className="flex-1 p-2 rounded-lg border-2 border-gray-200 focus:border-blue-500 transition-all"
                     />
                     <button
                       type="button"
                       onClick={anexarImagemUrl}
-                      className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
                     >
                       Anexar URL
                     </button>
                   </div>
-                </div>
-                {galeriaLoading ? (
-                  <p>Carregando imagens…</p>
-                ) : galeria.length === 0 ? (
-                  <p className="text-sm text-zinc-500">Nenhuma imagem ainda.</p>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {galeria.map((img) => (
-                      <div
-                        key={img.id}
-                        className="relative group border rounded overflow-hidden"
-                      >
-                        <img
-                          src={img.url}
-                          alt="imagem"
-                          className="aspect-square object-cover w-full"
-                        />
-                        <div className="absolute top-1 left-1 flex items-center gap-1 bg-white/80 rounded px-2 py-1 text-xs">
-                          {img.principal ? (
-                            <>
-                              <FiStar className="text-yellow-500" /> Principal
-                            </>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => definirComoPrincipal(img.id)}
-                              className="flex items-center gap-1 hover:text-blue-700"
-                              title="Definir como principal"
-                            >
-                              <FiStar /> Tornar principal
-                            </button>
-                          )}
+                  {galeriaLoading ? (
+                    <p>Carregando...</p>
+                  ) : galeria.length === 0 ? (
+                    <p className="text-sm text-gray-500">Sem imagens</p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {galeria.map((img) => (
+                        <div
+                          key={img.id}
+                          className="relative group border-2 border-gray-200 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={img.url}
+                            alt="imagem"
+                            className="aspect-square object-cover w-full"
+                          />
+                          <div className="absolute top-2 left-2 bg-white/90 rounded-lg px-2 py-1 text-xs flex items-center gap-1">
+                            {img.principal ? (
+                              <>
+                                <FiStar className="text-yellow-500" /> Principal
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => definirComoPrincipal(img.id)}
+                                className="flex items-center gap-1 hover:text-blue-600 transition"
+                              >
+                                <FiStar /> Definir
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <textarea
+                  name="descricao"
+                  value={produtoEditando.descricao}
+                  onChange={handleEditChange}
+                  placeholder="Descrição"
+                  rows={3}
+                  className="w-full p-3 rounded-xl border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none mb-4"
+                />
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={cancelarEdicao}
+                    className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition transform hover:scale-105 shadow-lg"
+                  >
+                    <FiXCircle /> Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition transform hover:scale-105 shadow-lg"
+                  >
+                    <FiSave /> Salvar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div
+                key={produto.id}
+                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                    <img
+                      src={produto.imagem || "https://via.placeholder.com/200"}
+                      alt={produto.nome}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-green-600">
+                      {produto.quantidade > 0 ? `${produto.quantidade} un.` : "Esgotado"}
+                    </div>
                   </div>
-                )}
+                  <div className="flex-1 p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                          {produto.nome}
+                        </h3>
+                        <p className="text-sm text-gray-500 italic">
+                          {produto.categoria || "Sem categoria"} • {produto.marca || "Sem marca"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                          R$ {parseFloat(produto.preco || 0).toFixed(2).replace(".", ",")}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 mb-4 line-clamp-2">
+                      {produto.descricao || "Sem descrição"}
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => iniciarEdicao(produto)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105"
+                      >
+                        <FiEdit /> Editar
+                      </button>
+                      <button
+                        onClick={() => excluirProduto(produto.id)}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition transform hover:scale-105"
+                      >
+                        <FiTrash2 /> Excluir
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <textarea
-                name="descricao"
-                value={produtoEditando.descricao}
-                onChange={handleEditChange}
-                placeholder="Descrição"
-                rows={3}
-                className="p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-              />
-              <div className="flex gap-4 justify-end">
-                <button
-                  type="button"
-                  onClick={cancelarEdicao}
-                  className="flex items-center gap-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                >
-                  <FiXCircle /> Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                >
-                  <FiSave /> Salvar
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div
-              key={produto.id}
-              className="bg-gray-50 rounded-lg p-5 shadow-md flex items-center gap-6 transition-shadow hover:shadow-lg"
-            >
-              <img
-                src={produto.imagem || "https://via.placeholder.com/100"}
-                alt={produto.nome}
-                className="w-24 h-24 object-cover rounded-lg border border-gray-300"
-              />
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold">{produto.nome}</h3>
-                <p className="text-blue-600 font-bold text-lg">
-                  R$ {produto.preco.toFixed(2).replace(".", ",")}
-                </p>
-                <p className="text-sm text-zinc-600 italic">
-                  {produto.categoria || "Sem categoria"}
-                </p>
-                <p className="mt-2 text-zinc-700">{produto.descricao}</p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => iniciarEdicao(produto)}
-                  className="flex items-center gap-1 px-3 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
-                  title="Editar Produto"
-                >
-                  <FiEdit />
-                </button>
-                <button
-                  onClick={() => excluirProduto(produto.id)}
-                  className="flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                  title="Excluir Produto"
-                >
-                  <FiTrash2 />
-                </button>
-              </div>
-            </div>
-          )
-        )}
-      </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -714,7 +1108,6 @@ function MeusProdutos() {
 function EditarLoja() {
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
-
   const [form, setForm] = useState({
     nome: "",
     endereco: "",
@@ -722,8 +1115,9 @@ function EditarLoja() {
     descricao: "",
   });
   const [loading, setLoading] = useState(true);
+  const [mensagem, setMensagem] = useState("");
+  const [erro, setErro] = useState("");
 
-  // 1) buscar dados ao montar
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -746,14 +1140,14 @@ function EditarLoja() {
     fetchData();
   }, []);
 
-  // 2) handler genérico de inputs
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  // 3) enviar PUT
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMensagem("");
+    setErro("");
     try {
       const token = localStorage.getItem("token");
       await axios.put(
@@ -766,18 +1160,20 @@ function EditarLoja() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Loja atualizada com sucesso!");
+      setMensagem("✅ Loja atualizada com sucesso!");
     } catch (err) {
       console.error("Erro ao salvar alterações:", err);
-      alert("Erro ao salvar. Tente novamente.");
+      setErro("❌ Erro ao salvar. Tente novamente.");
     }
   };
 
   const handleChangePassword = async () => {
     if (!senhaAtual || !novaSenha) {
-      alert("Preencha ambos os campos de senha.");
+      setErro("❌ Preencha ambos os campos de senha.");
       return;
     }
+    setMensagem("");
+    setErro("");
 
     try {
       const token = localStorage.getItem("token");
@@ -786,86 +1182,143 @@ function EditarLoja() {
         { senhaAtual, novaSenha },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Senha alterada com sucesso!");
+      setMensagem("✅ Senha alterada com sucesso!");
       setSenhaAtual("");
       setNovaSenha("");
     } catch (err) {
       console.error("Erro ao alterar senha:", err);
-      alert(
-        err.response?.data?.message || "Erro ao alterar senha. Tente novamente."
+      setErro(
+        err.response?.data?.message || "❌ Erro ao alterar senha. Tente novamente."
       );
     }
   };
 
-  if (loading) return <p>Carregando dados...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <form className="grid gap-5" onSubmit={handleSubmit}>
-      <h2 className="text-2xl font-semibold mb-1 text-zinc-800">
-        Editar Informações da Loja
-      </h2>
-
-      <AnimatedInput
-        name="nome"
-        value={form.nome}
-        onChange={handleChange}
-        placeholder="Nome da Loja"
-      />
-      <AnimatedInput
-        name="endereco"
-        value={form.endereco}
-        onChange={handleChange}
-        placeholder="Endereço"
-      />
-      <AnimatedInput
-        name="logoUrl"
-        value={form.logoUrl}
-        onChange={handleChange}
-        placeholder="Link da Logo"
-      />
-      <AnimatedTextarea
-        name="descricao"
-        value={form.descricao}
-        onChange={handleChange}
-        placeholder="Descrição da Loja"
-      />
-
-      <div className="mt-8 border-t pt-6">
-        <h3 className="text-xl font-semibold text-zinc-800 mb-3">
-          Alterar Senha
-        </h3>
-
-        <AnimatedInput
-          type="password"
-          name="senhaAtual"
-          value={senhaAtual}
-          onChange={(e) => setSenhaAtual(e.target.value)}
-          placeholder="Senha Atual"
-        />
-        <AnimatedInput
-          type="password"
-          name="novaSenha"
-          value={novaSenha}
-          onChange={(e) => setNovaSenha(e.target.value)}
-          placeholder="Nova Senha"
-        />
-
-        <button
-          type="button"
-          onClick={handleChangePassword}
-          className="bg-blue-600 text-white py-3 mt-2 font-medium rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg"
-        >
-          Alterar Senha
-        </button>
+    <div className="space-y-8">
+      <div className="text-center mb-8">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+          Editar Loja
+        </h2>
+        <p className="text-gray-600">Atualize as informações da sua loja</p>
       </div>
 
-      <button
-        type="submit"
-        className="bg-green-600 text-white py-3 font-medium rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg"
-      >
-        Salvar Alterações
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl p-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <FiShoppingBag className="text-orange-600" />
+            Informações da Loja
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ModernInput
+              label="Nome da Loja"
+              icon={<FiShoppingBag />}
+              name="nome"
+              value={form.nome}
+              onChange={handleChange}
+              placeholder="Nome da Loja"
+            />
+            <ModernInput
+              label="Endereço"
+              icon={<FiPackage />}
+              name="endereco"
+              value={form.endereco}
+              onChange={handleChange}
+              placeholder="Rua, Número, Cidade"
+            />
+          </div>
+          <div className="mt-6">
+            <ModernInput
+              label="URL da Logo"
+              icon={<FiCamera />}
+              name="logoUrl"
+              value={form.logoUrl}
+              onChange={handleChange}
+              placeholder="https://exemplo.com/logo.png"
+            />
+          </div>
+          <div className="mt-6 space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <FiEdit className="text-orange-600" />
+              Descrição da Loja
+            </label>
+            <textarea
+              name="descricao"
+              value={form.descricao}
+              onChange={handleChange}
+              placeholder="Conte aos clientes sobre sua loja..."
+              rows={4}
+              className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all resize-none"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full mt-6 bg-gradient-to-r from-orange-600 to-red-600 text-white py-4 font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
+          >
+            <FiSave className="w-5 h-5" />
+            Salvar Alterações
+          </button>
+        </div>
+      </form>
+
+      {/* Alterar Senha */}
+      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <FiEdit className="text-purple-600" />
+          Alterar Senha
+        </h3>
+        <div className="space-y-4">
+          <ModernInput
+            label="Senha Atual"
+            icon={<FiEdit />}
+            type="password"
+            value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)}
+            placeholder="Digite sua senha atual"
+          />
+          <ModernInput
+            label="Nova Senha"
+            icon={<FiEdit />}
+            type="password"
+            value={novaSenha}
+            onChange={(e) => setNovaSenha(e.target.value)}
+            placeholder="Digite a nova senha"
+          />
+          <button
+            type="button"
+            onClick={handleChangePassword}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
+          >
+            <FiCheckCircle className="w-5 h-5" />
+            Alterar Senha
+          </button>
+        </div>
+      </div>
+
+      {/* Mensagens */}
+      {mensagem && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg animate-fadeIn flex items-center gap-3">
+          <FiCheckCircle className="w-6 h-6" />
+          <span className="font-medium">{mensagem}</span>
+        </div>
+      )}
+      {erro && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg animate-fadeIn flex items-center gap-3">
+          <FiAlertCircle className="w-6 h-6" />
+          <span className="font-medium">{erro}</span>
+        </div>
+      )}
+    </div>
   );
 }
 
