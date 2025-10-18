@@ -4,10 +4,10 @@ import {
   FaEnvelope,
   FaPhone,
   FaLock,
-  FaArrowLeft,
 } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
 import API_CONFIG from "../../config/api";
 
@@ -78,16 +78,9 @@ const Seller = ({ goBackToLogin }) => {
             : "bg-white border-[#43444F]"
         }`}
       >
-        <button
-          onClick={() => navigate("/login")}
-          className={`absolute top-5 left-5 text-sm flex items-center transition ${
-            isDarkMode
-              ? "text-gray-300 hover:text-gray-100"
-              : "text-[#282933] hover:text-[#43444F]"
-          }`}
-        >
-          <FaArrowLeft className="mr-2" /> Voltar para login
-        </button>
+        <div className="absolute top-5 left-5">
+          <BackButton to="/login" label="Voltar para login" variant="minimal" />
+        </div>
         <h2
           className={`text-4xl font-bold mb-2 text-center ${
             isDarkMode ? "text-red-400" : "text-red-600"

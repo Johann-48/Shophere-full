@@ -2,6 +2,7 @@ import React from "react";
 import { useTheme } from "../../contexts/ThemeContext";
 import { FaFileContract, FaShoppingCart, FaStore, FaGavel, FaExclamationTriangle, FaMoneyBillWave, FaUndo, FaUserCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
+import BackButton from "../BackButton";
 
 export default function TermsOfService() {
   const { isDarkMode, dark, light } = useTheme();
@@ -160,6 +161,11 @@ export default function TermsOfService() {
   return (
     <main className={`${currentTheme.background} min-h-screen py-12 px-4 sm:px-6 lg:px-8`}>
       <div className="max-w-5xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-8">
+          <BackButton to="/" />
+        </div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

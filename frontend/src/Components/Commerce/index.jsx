@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import {
-  FiArrowLeft,
   FiHeart,
   FiTrendingUp,
   FiTrendingDown,
@@ -11,6 +10,7 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import ProductCard from "../ProductCard";
+import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
 
 export default function Commerce() {
@@ -67,16 +67,9 @@ export default function Commerce() {
     }`}>
       <div className="px-4 py-8 max-w-7xl mx-auto">
       {/* Navegação de volta */}
-      <Link
-        to="/"
-        className={`inline-flex items-center mb-6 transition ${
-          isDarkMode 
-            ? 'text-gray-300 hover:text-gray-100' 
-            : 'text-gray-600 hover:text-gray-800'
-        }`}
-      >
-        <FiArrowLeft className="mr-2" /> Voltar
-      </Link>
+      <div className="mb-6">
+        <BackButton to="/" />
+      </div>
 
       {/* Info do Comércio */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">

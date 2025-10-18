@@ -20,9 +20,9 @@ const PRICE_BANDS = [
 ];
 
 // Banner images for dark and light modes
-const HERO_IMAGE_DARK = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000cf0861f59a5827e9f0f40767&ts=489111&p=fs&cid=1&sig=40a80a0d33f4f6785969546017f97f48098c7f28226e83a3e660b4b2ccad4e46&v=0";
-const HERO_IMAGE_LIGHT = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000b35861f5aa3137eda347ca94&ts=489111&p=fs&cid=1&sig=96567b472d431cbe7cf871f2418118617d85df8f76c344b7832e50049d0217ad&v=0";
-const HERO_FALLBACK_URL = "https://sdmntprcentralus.oaiusercontent.com/files/00000000-06fc-61f5-9330-588a0ff01748/raw?se=2025-10-16T15%3A29%3A27Z&sp=r&sv=2024-08-04&sr=b&scid=dc0388f7-91a8-4765-9b5f-8636d0750ae5&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-10-16T11%3A13%3A18Z&ske=2025-10-17T11%3A13%3A18Z&sks=b&skv=2024-08-04&sig=H9/rGyJY8PppXQTyxXlqAGKimIFGF9oY75Q/AQl0q0g%3D";
+const HERO_IMAGE_DARK = "https://images.unsplash.com/photo-1557821552-17105176677c?w=1920&h=600&fit=crop&q=80";
+const HERO_IMAGE_LIGHT = "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&h=600&fit=crop&q=80";
+const HERO_FALLBACK_URL = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop&q=80";
 
 export default function Home() {
   const navigate = useNavigate();

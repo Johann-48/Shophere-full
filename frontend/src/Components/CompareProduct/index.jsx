@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { FiArrowLeft } from "react-icons/fi";
+import BackButton from "../BackButton";
 import ProductCard from "../ProductCard"; // ajuste o caminho conforme seu projeto
 
 const CompareProduct = () => {
@@ -45,12 +45,9 @@ const CompareProduct = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-green-50 text-gray-900 font-inter px-6 py-10">
       <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-yellow-600 hover:text-yellow-700 transition font-semibold mb-8"
-        >
-          <FiArrowLeft className="mr-2" size={20} /> Voltar
-        </button>
+        <div className="mb-8">
+          <BackButton />
+        </div>
 
         {produtoPrincipal && (
           <div className="…">

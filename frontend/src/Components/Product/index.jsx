@@ -9,10 +9,10 @@ import {
   FaRegHeart,
   FaStar,
   FaRegStar,
-  FaArrowLeft,
 } from "react-icons/fa";
 
 import ProductCard from "../ProductCard";
+import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
 
 export default function ProductPage() {
@@ -107,16 +107,9 @@ export default function ProductPage() {
         isDarkMode ? 'text-red-400' : 'text-red-500'
       }`}>
         {error}
-        <button
-          onClick={() => window.history.back()}
-          className={`mt-4 inline-flex items-center gap-2 transition ${
-            isDarkMode 
-              ? 'text-gray-300 hover:text-gray-100' 
-              : 'text-gray-700 hover:text-gray-900'
-          }`}
-        >
-          <FaArrowLeft /> Voltar
-        </button>
+        <div className="mt-4">
+          <BackButton variant="secondary" />
+        </div>
       </div>
     );
   }
@@ -130,18 +123,8 @@ export default function ProductPage() {
       <div className={`p-6 max-w-7xl mx-auto font-sans ${
         isDarkMode ? 'text-gray-100' : 'text-gray-900'
       }`}>
-      <div className="flex items-center mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className={`inline-flex items-center gap-2 transition ${
-            isDarkMode 
-              ? 'text-gray-300 hover:text-gray-100' 
-              : 'text-gray-700 hover:text-gray-900'
-          }`}
-          type="button"
-        >
-          <FaArrowLeft /> Voltar
-        </button>
+      <div className="mb-6">
+        <BackButton />
       </div>
 
       {/* Loja clicável */}

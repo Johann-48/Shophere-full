@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FaEnvelope, FaCheckCircle } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { LuArrowLeft } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
 import API_CONFIG from "../../config/api";
 
@@ -124,14 +124,7 @@ export default function ForgotPassword({ goBackToLogin }) {
         )}
 
         <div className="text-center mt-6">
-          <motion.button
-            whileHover={{ scale: 1.05, x: -3 }}
-            onClick={() => navigate("/login")}
-            className={`inline-flex items-center gap-2 transition font-medium ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-700 hover:text-blue-800'}`}
-          >
-            <LuArrowLeft className="text-lg" />
-            Voltar para o login
-          </motion.button>
+          <BackButton to="/login" label="Voltar para o login" variant="minimal" />
         </div>
       </motion.div>
     </main>

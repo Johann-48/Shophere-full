@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaLock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import { LuArrowLeft } from "react-icons/lu";
+import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
 import API_CONFIG from "../../config/api";
 
@@ -87,15 +87,10 @@ export default function ResetPassword() {
 
         {!token && (
           <div className="text-center mb-6">
-            <p className={`${isDarkMode ? "text-red-300" : "text-red-600"} flex items-center justify-center gap-2`}>
+            <p className={`${isDarkMode ? "text-red-300" : "text-red-600"} flex items-center justify-center gap-2 mb-4`}>
               <FaTimesCircle /> {error}
             </p>
-            <button
-              onClick={() => navigate("/forgotpassword")}
-              className={`mt-4 inline-flex items-center gap-2 font-medium ${isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-700 hover:text-blue-800"}`}
-            >
-              <LuArrowLeft /> Voltar para recuperar senha
-            </button>
+            <BackButton to="/forgotpassword" label="Voltar para recuperar senha" variant="minimal" />
           </div>
         )}
 
@@ -162,16 +157,7 @@ export default function ResetPassword() {
         )}
 
         <div className="text-center mt-6">
-          <motion.button
-            whileHover={{ scale: 1.05, x: -3 }}
-            onClick={() => navigate("/login")}
-            className={`inline-flex items-center gap-2 transition font-medium ${
-              isDarkMode ? "text-blue-400 hover:text-blue-300" : "text-blue-700 hover:text-blue-800"
-            }`}
-          >
-            <LuArrowLeft className="text-lg" />
-            Voltar para o login
-          </motion.button>
+          <BackButton to="/login" label="Voltar para o login" variant="minimal" />
         </div>
       </motion.div>
     </main>
