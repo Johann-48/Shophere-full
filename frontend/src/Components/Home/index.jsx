@@ -17,9 +17,9 @@ import {
   FiHeart,
   FiGlobe,
   FiShoppingCart,
+  FiPackage,
+  FiMonitor,
 } from "react-icons/fi";
-import { GiRunningShoe, GiLipstick, GiGamepad } from "react-icons/gi";
-import { MdDevices } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "../ProductCard";
 import CommerceCard from "../CommerceCard";
@@ -32,8 +32,8 @@ const PRICE_BANDS = [
 ];
 
 // Banner images for dark and light modes
-const HERO_IMAGE_DARK = "https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg";
-const HERO_IMAGE_LIGHT = "https://t4.ftcdn.net/jpg/03/39/60/67/360_F_339606710_pFQOII8MwyEVqXK5vb4XsIaJr13cipWO.jpg";
+const HERO_IMAGE_DARK = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000c530620eb61d4d882099de69&ts=489112&p=fs&cid=1&sig=e8abf4ccf20c54f271c04e979895a63993248f5734c8919afbc652f1504f289c&v=0";
+const HERO_IMAGE_LIGHT = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000c530620eb61d4d882099de69&ts=489112&p=fs&cid=1&sig=e8abf4ccf20c54f271c04e979895a63993248f5734c8919afbc652f1504f289c&v=0";
 const HERO_FALLBACK_URL = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop&q=80";
 
 export default function Home() {
@@ -164,23 +164,26 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  const iconByName = {
-    "Eletrônicos": <MdDevices className="w-5 h-5" />,
-    "Moda": <FiHeart className="w-5 h-5" />,
-    "Esportes": <GiRunningShoe className="w-5 h-5" />,
-    "Mercado": <FiShoppingCart className="w-5 h-5" />,
-    "Beleza": <GiLipstick className="w-5 h-5" />,
-    "Casa": <FiHome className="w-5 h-5" />,
-    "Livros": <FiBook className="w-5 h-5" />,
-    "Jogos": <GiGamepad className="w-5 h-5" />,
-    "Outros": <FiStar className="w-5 h-5" />,
-    "Todos": <FiGlobe className="w-5 h-5" />,
+  const getIconByName = (name) => {
+    const icons = {
+      "Eletrônicos": <FiMonitor className="w-5 h-5" />,
+      "Moda": <FiHeart className="w-5 h-5" />,
+      "Esportes": <FiTrendingUp className="w-5 h-5" />,
+      "Mercado": <FiShoppingCart className="w-5 h-5" />,
+      "Beleza": <FiStar className="w-5 h-5" />,
+      "Casa": <FiHome className="w-5 h-5" />,
+      "Livros": <FiBook className="w-5 h-5" />,
+      "Jogos": <FiPackage className="w-5 h-5" />,
+      "Outros": <FiGrid className="w-5 h-5" />,
+      "Todos": <FiGlobe className="w-5 h-5" />,
+    };
+    return icons[name] || <FiStar className="w-5 h-5" />;
   };
 
   const normalizedCategories = categories.map((c) => ({
     id: c.id,
     nome: c.nome,
-    icon: iconByName[c.nome] || <FiStar className="w-5 h-5" />,
+    icon: getIconByName(c.nome),
   }));
   const filteredCats = normalizedCategories.filter((c) =>
     (catQuery || "").length === 0
