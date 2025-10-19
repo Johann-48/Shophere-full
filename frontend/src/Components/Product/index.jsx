@@ -59,7 +59,7 @@ export default function ProductPage() {
             console.error("Erro ao carregar produtos relacionados", err);
           }
         }
-        setMainImage(prod.mainImage || "/assets/placeholder.png");
+        setMainImage(prod.mainImage || "/assets/placeholder.svg");
         setThumbnails(prod.thumbnails || []);
         setQuantity(1);
         setFavorited(false);

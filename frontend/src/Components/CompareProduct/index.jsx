@@ -52,7 +52,7 @@ const CompareProduct = () => {
         {produtoPrincipal && (
           <div className="…">
             <img
-              src={produtoPrincipal.mainImage || "/assets/placeholder.png"}
+              src={produtoPrincipal.mainImage || "/assets/placeholder.svg"}
               alt={produtoPrincipal.title} // <- use title
               className="w-64 h-64 object-contain rounded-xl"
             />

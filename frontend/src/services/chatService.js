@@ -10,7 +10,21 @@ export const fetchUserChats = async (clienteId) => {
 
 export const fetchStoreById = async (lojaId) => {
   const { data } = await axios.get(withBase(`/api/commerces/${lojaId}`));
-  return data;
+  const commerce = data?.commerce || data || null;
+  if (!commerce) return null;
+
+  return {
+    id: commerce.id,
+    nome: commerce.nome || commerce.name || null,
+    foto:
+      commerce.foto ||
+      commerce.fotos ||
+      commerce.logoUrl ||
+      commerce.logo_url ||
+      commerce.imagem ||
+      null,
+    raw: commerce,
+  };
 };
 
 export const startChat = async ({

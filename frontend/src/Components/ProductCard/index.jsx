@@ -70,7 +70,7 @@ export default function ProductCard({ product, isLiked, onToggleLike }) {
             // 2) se houver array de miniaturas, usa a primeira
             (Array.isArray(product.thumbnails) && product.thumbnails[0]) ||
             // 3) se mesmo assim nada existir, placeholder
-            "/assets/placeholder.png"
+            "/assets/placeholder.svg"
           }
           alt={product.title || product.name}
           className="w-full h-32 object-contain"
