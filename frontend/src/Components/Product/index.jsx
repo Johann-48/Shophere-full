@@ -2,14 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import {
-  FaTruck,
-  FaUndo,
-  FaHeart,
-  FaRegHeart,
-  FaStar,
-  FaRegStar,
-} from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaStar, FaRegStar } from "react-icons/fa";
 
 import ProductCard from "../ProductCard";
 import BackButton from "../BackButton";
@@ -17,84 +10,6 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 export default function ProductPage() {
   const { isDarkMode } = useTheme();
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [mainImage, setMainImage] = useState("");
-  const [thumbnails, setThumbnails] = useState([]);
-  const [quantity, setQuantity] = useState(1);
-  const [favorited, setFavorited] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [relatedProducts, setRelatedProducts] = useState([]);
-
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`/api/products/${id}`);
-        const prod = res.data;
-        console.log("Produto carregado:", prod); // 👈 VERIFIQUE ISSO NO CONSOLE
-        setProduct(prod);
-        if (prod.categoria_id) {
-          try {
-            const resRel = await axios.get(
-              `/api/products/categoria/${prod.categoria_id}`
-            );
-            const related = Array.isArray(resRel.data)
-              ? resRel.data
-              : resRel.data.products || [];
-
-            console.log("Produtos relacionados recebidos:", related);
-
-            // Remove o produto atual da lista
-            const filtered = related.filter((p) => p.id !== prod.id);
-            console.log(
-              "Produtos relacionados filtrados e limitados:",
-              filtered.slice(0, 4)
-            );
-
-            setRelatedProducts(filtered.slice(0, 4));
-          } catch (err) {
-            console.error("Erro ao carregar produtos relacionados", err);
-          }
-        }
-        setMainImage(prod.mainImage || "/assets/placeholder.svg");
-        setThumbnails(prod.thumbnails || []);
-        setQuantity(1);
-        setFavorited(false);
-      } catch (err) {
-        console.error("Erro ao buscar produto:", err);
-        setError("Produto não encontrado.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!id || id === "undefined" || id === "null") {
-      setError("Produto inválido ou não selecionado.");
-      setLoading(false);
-      return;
-    }
-    fetchProduct();
-  }, [id]);
-
-  const increment = () => setQuantity((q) => (q < 10 ? q + 1 : q));
-  const decrement = () => setQuantity((q) => (q > 1 ? q - 1 : q));
-  const toggleFavorite = () => setFavorited(!favorited);
-
-  const handleContactSeller = () => {
-    if (!product?.comercio?.id) return;
-    const productName = product?.title || product?.name || "produto";
-    const message = encodeURIComponent(
-      `Olá, tenho interesse no produto "${productName}". Você pode me informar disponibilidade e prazo de entrega (se disponível)?`
-    );
-
-    navigate(
-      `/contact?lojaId=${product.comercio.id}&productId=${product.id}&message=${message}`
-    );
-  };
-
   const renderStars = (count) => (
     <>
       {[...Array(5)].map((_, i) =>

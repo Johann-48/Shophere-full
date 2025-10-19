@@ -114,15 +114,15 @@ export default function ContatoLoja() {
         !lista.some((loja) => String(loja.id) === lojaParamId)
       ) {
         try {
-            const comercio = await fetchStoreById(lojaParamId);
-            if (comercio?.id) {
-              const lojaNormalizada = {
-                id: comercio.id,
-                nome: comercio.nome,
-                imagem: resolveMediaUrl(comercio.imagem),
-                chatId: null,
-              };
-              lista = [lojaNormalizada, ...lista];
+          const comercio = await fetchStoreById(lojaParamId);
+          if (comercio?.id) {
+            const lojaNormalizada = {
+              id: comercio.id,
+              nome: comercio.nome,
+              imagem: resolveMediaUrl(comercio.imagem),
+              chatId: null,
+            };
+            lista = [lojaNormalizada, ...lista];
           }
         } catch (error) {
           console.error("Não foi possível carregar a loja solicitada:", error);

@@ -51,9 +51,14 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
 
+  const contactDestination =
+    role === "commerce"
+      ? { to: "/lojadashboard", label: "Dashboard" }
+      : { to: role === "user" ? "/contact" : "/contacts", label: "Contatos" };
+
   const rightNavLinks = [
     { to: "/", label: "Página Inicial" },
-    { to: "/contact", label: "Contato" },
+    contactDestination,
     { to: "/about", label: "Sobre" },
   ];
 
@@ -69,9 +74,14 @@ export default function Header() {
       },
     },
   ];
-  const authMenu = role === "commerce"
-    ? [{ to: "/accountmanager", label: "Meu Perfil" }, { to: "/lojadashboard", label: "Dashboard" }, ...authMenuBase.slice(1)]
-    : authMenuBase;
+  const authMenu =
+    role === "commerce"
+      ? [
+          { to: "/accountmanager", label: "Meu Perfil" },
+          { to: "/lojadashboard", label: "Dashboard" },
+          ...authMenuBase.slice(1),
+        ]
+      : authMenuBase;
 
   const guestMenu = [
     { to: "/login", label: "Entrar" },
@@ -86,7 +96,9 @@ export default function Header() {
         <div className="flex items-center">
           <Link to="/" className="inline-flex items-center gap-2 select-none">
             <span className="text-xl md:text-2xl font-extrabold tracking-tight">
-              <span className={isDarkMode ? "text-white" : "text-gray-900"}>SHOP</span>
+              <span className={isDarkMode ? "text-white" : "text-gray-900"}>
+                SHOP
+              </span>
               <span className="text-blue-600">HERE</span>
             </span>
           </Link>
@@ -100,7 +112,11 @@ export default function Header() {
           {/* Nav links near theme toggle */}
           <nav className="hidden md:flex items-center gap-1 pr-2 mr-2 border-r border-current/20">
             {rightNavLinks.map((link, idx) => (
-              <motion.div key={idx} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div
+                key={idx}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <Link
                   to={link.to}
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${currentTheme.text} hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 focus-ring`}
@@ -129,8 +145,22 @@ export default function Header() {
                   className={`absolute right-0 mt-2 min-w-48 ${currentTheme.card} shadow-lg rounded-xl border p-2`}
                 >
                   <div className="px-2 pb-2 border-b border-current/10">
-                    <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'opacity-70 text-gray-600'}`}>{userName ? "Conectado como" : "Bem-vindo"}</p>
-                    <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-slate-100' : ''}`}>{userName || "Visitante"}</p>
+                    <p
+                      className={`text-xs ${
+                        isDarkMode
+                          ? "text-slate-300"
+                          : "opacity-70 text-gray-600"
+                      }`}
+                    >
+                      {userName ? "Conectado como" : "Bem-vindo"}
+                    </p>
+                    <p
+                      className={`text-sm font-semibold truncate ${
+                        isDarkMode ? "text-slate-100" : ""
+                      }`}
+                    >
+                      {userName || "Visitante"}
+                    </p>
                   </div>
                   <div className="py-1">
                     {(userName ? authMenu : guestMenu).map((item, idx) => (
@@ -138,7 +168,9 @@ export default function Header() {
                         {item.action ? (
                           <button
                             onClick={item.action}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm ${
+                              isDarkMode ? "text-slate-100" : currentTheme.text
+                            } hover:bg-blue-500/10 transition-colors`}
                           >
                             {item.label}
                           </button>
@@ -146,7 +178,9 @@ export default function Header() {
                           <Link
                             to={item.to}
                             onClick={() => setProfileOpen(false)}
-                            className={`block px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                            className={`block px-3 py-2 rounded-lg text-sm ${
+                              isDarkMode ? "text-slate-100" : currentTheme.text
+                            } hover:bg-blue-500/10 transition-colors`}
                           >
                             {item.label}
                           </Link>
@@ -186,8 +220,20 @@ export default function Header() {
             {/* Auth block */}
             <div className="mb-2">
               <div className="px-2 pb-2 border-b border-current/10">
-                <p className={`text-xs ${isDarkMode ? 'text-slate-300' : 'opacity-70 text-gray-600'}`}>{userName ? "Conectado como" : "Bem-vindo"}</p>
-                <p className={`text-sm font-semibold truncate ${isDarkMode ? 'text-slate-100' : ''}`}>{userName || "Visitante"}</p>
+                <p
+                  className={`text-xs ${
+                    isDarkMode ? "text-slate-300" : "opacity-70 text-gray-600"
+                  }`}
+                >
+                  {userName ? "Conectado como" : "Bem-vindo"}
+                </p>
+                <p
+                  className={`text-sm font-semibold truncate ${
+                    isDarkMode ? "text-slate-100" : ""
+                  }`}
+                >
+                  {userName || "Visitante"}
+                </p>
               </div>
               {(userName ? authMenu : guestMenu).map((item, idx) => (
                 <div key={`m-auth-${idx}`}>
@@ -197,7 +243,9 @@ export default function Header() {
                         item.action();
                         setIsOpen(false);
                       }}
-                      className={`block w-full text-left px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                      className={`block w-full text-left px-3 py-2 rounded-lg text-sm ${
+                        isDarkMode ? "text-slate-100" : currentTheme.text
+                      } hover:bg-blue-500/10 transition-colors`}
                     >
                       {item.label}
                     </button>
@@ -205,7 +253,9 @@ export default function Header() {
                     <Link
                       to={item.to}
                       onClick={() => setIsOpen(false)}
-                      className={`block px-3 py-2 rounded-lg text-sm ${isDarkMode ? 'text-slate-100' : currentTheme.text} hover:bg-blue-500/10 transition-colors`}
+                      className={`block px-3 py-2 rounded-lg text-sm ${
+                        isDarkMode ? "text-slate-100" : currentTheme.text
+                      } hover:bg-blue-500/10 transition-colors`}
                     >
                       {item.label}
                     </Link>

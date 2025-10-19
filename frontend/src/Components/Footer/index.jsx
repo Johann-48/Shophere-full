@@ -3,15 +3,22 @@ import { motion } from "framer-motion";
 import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useAuth } from "../../contexts/AuthContext";
 export default function Footer() {
   const { isDarkMode, dark, light } = useTheme();
+  const { role } = useAuth();
   const currentTheme = isDarkMode ? dark : light;
   const accentText = isDarkMode ? "text-blue-400" : "text-blue-700";
+  const hoverAccent = isDarkMode
+    ? "hover:text-blue-400"
+    : "hover:text-blue-700";
+  const contactLink =
+    role === "commerce"
+      ? { to: "/lojadashboard", label: "Dashboard" }
+      : { to: role === "user" ? "/contact" : "/contacts", label: "Contatos" };
   return (
     <footer className={`${currentTheme.footer} ${currentTheme.text} py-12`}>
-      <div
-        className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6 justify-items-center text-center"
-      >
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6 justify-items-center text-center">
         {/* Ajuda / Contato */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -55,18 +62,13 @@ text-lg`}
             <li>
               <Link
                 to="/accountmanager"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
+                className={`${hoverAccent} transition`}
               >
                 Minha Conta
               </Link>
             </li>
             <li>
-              <Link
-                to="/login"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
-              >
+              <Link to="/login" className={`${hoverAccent} transition`}>
                 Login / Signup
               </Link>
             </li>
@@ -88,7 +90,7 @@ text-lg`}
             <li>
               <Link
                 to="/privacy-policy"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'} transition`}
+                className={`${hoverAccent} transition`}
               >
                 Política de Privacidade
               </Link>
@@ -96,27 +98,19 @@ text-lg`}
             <li>
               <Link
                 to="/terms-of-service"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'} transition`}
+                className={`${hoverAccent} transition`}
               >
                 Termos de Uso
               </Link>
             </li>
             <li>
-              <Link
-                to="/faq"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
-              >
+              <Link to="/faq" className={`${hoverAccent} transition`}>
                 FAQ
               </Link>
             </li>
             <li>
-              <Link
-                to="/contact"
-                className={`hover:${isDarkMode ? 'text-blue-400' : 'text-blue-700'}
-transition`}
-              >
-                Contato
+              <Link to={contactLink.to} className={`${hoverAccent} transition`}>
+                {contactLink.label}
               </Link>
             </li>
           </ul>
@@ -124,7 +118,11 @@ transition`}
       </div>
       {/* Copyright */}
       <div
-        className={`mt-10 border-t pt-6 text-center text-sm ${isDarkMode ? 'border-slate-700 text-slate-400' : 'border-blue-200 text-gray-500'}`}
+        className={`mt-10 border-t pt-6 text-center text-sm ${
+          isDarkMode
+            ? "border-slate-700 text-slate-400"
+            : "border-blue-200 text-gray-500"
+        }`}
       >
         © {new Date().getFullYear()} ShopHere. Todos os direitos reservados.
       </div>

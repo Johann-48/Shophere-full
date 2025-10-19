@@ -27,6 +27,18 @@ import {
 } from "react-icons/fi";
 import API_CONFIG from "../../config/api";
 
+const formatCurrency = (valor) => {
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) {
+    return "R$ 0,00";
+  }
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: 2,
+  });
+};
+
 export default function LojaDashboard() {
   const [abaSelecionada, setAbaSelecionada] = useState("dashboard");
   const [logoUrl, setLogoUrl] = useState("");
@@ -34,48 +46,79 @@ export default function LojaDashboard() {
   const [stats, setStats] = useState({
     totalProdutos: 0,
     produtosAtivos: 0,
-    mensagensNaoLidas: 0,
+    totalConversas: 0,
     valorTotal: 0,
   });
 
   // Busca logo e estatísticas
   useEffect(() => {
-    const fetchLoja = async () => {
+    let ativo = true;
+
+    const carregarDashboard = async () => {
       try {
         const token = localStorage.getItem("token");
-        const { data } = await axios.get("/api/commerces/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        if (!token) return;
+
+        const headers = { Authorization: `Bearer ${token}` };
+        const { data } = await axios.get("/api/commerces/me", { headers });
+        if (!ativo) return;
         setLogoUrl(data.logoUrl);
         setNomeLoja(data.nome);
+
+        const lojaId = data.id;
+
+        const [produtosRes, conversasRes] = await Promise.all([
+          axios.get("/api/products/meus", { headers }),
+          lojaId
+            ? axios.get("/api/chats", { params: { lojaId }, headers })
+            : Promise.resolve({ data: [] }),
+        ]);
+
+        if (!ativo) return;
+
+        const produtosPayload = Array.isArray(produtosRes.data)
+          ? produtosRes.data
+          : produtosRes.data?.products || [];
+
+        const produtosNormalizados = produtosPayload.map((produto) => ({
+          preco:
+            Number(produto.preco ?? produto.price ?? produto.valor ?? 0) || 0,
+          quantidade:
+            Number(
+              produto.quantidade ?? produto.stock ?? produto.estoque ?? 0
+            ) || 0,
+        }));
+
+        const totalProdutos = produtosPayload.length;
+        const produtosAtivos = produtosNormalizados.filter(
+          (produto) => produto.quantidade > 0
+        ).length;
+        const valorTotal = produtosNormalizados.reduce(
+          (acc, produto) => acc + produto.preco * produto.quantidade,
+          0
+        );
+
+        const conversasPayload = Array.isArray(conversasRes.data)
+          ? conversasRes.data
+          : [];
+
+        setStats({
+          totalProdutos,
+          produtosAtivos,
+          totalConversas: conversasPayload.length,
+          valorTotal,
+        });
       } catch (err) {
         console.error("Erro ao carregar dados da loja:", err);
+        toast.error("Não foi possível carregar os dados do painel.");
       }
     };
 
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("/api/products/meus", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const produtos = res.data;
-        setStats({
-          totalProdutos: produtos.length,
-          produtosAtivos: produtos.filter((p) => p.quantidade > 0).length,
-          mensagensNaoLidas: 0,
-          valorTotal: produtos.reduce(
-            (acc, p) => acc + parseFloat(p.preco || 0),
-            0
-          ),
-        });
-      } catch (err) {
-        console.error("Erro ao carregar estatísticas:", err);
-      }
-    };
+    carregarDashboard();
 
-    fetchLoja();
-    fetchStats();
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   return (
@@ -145,15 +188,15 @@ export default function LojaDashboard() {
             />
             <StatCard
               icon={<FiMessageSquare className="w-8 h-8" />}
-              title="Mensagens"
-              value={stats.mensagensNaoLidas}
+              title="Conversas"
+              value={stats.totalConversas}
               color="from-purple-500 to-pink-500"
               delay="200"
             />
             <StatCard
               icon={<FiDollarSign className="w-8 h-8" />}
               title="Valor em Estoque"
-              value={`R$ ${stats.valorTotal.toFixed(2)}`}
+              value={formatCurrency(stats.valorTotal)}
               color="from-orange-500 to-red-500"
               delay="300"
             />
@@ -203,7 +246,12 @@ export default function LojaDashboard() {
 
         {/* Content Area */}
         <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 min-h-[400px] transform transition-all duration-300">
-          {abaSelecionada === "dashboard" && <DashboardHome stats={stats} setAbaSelecionada={setAbaSelecionada} />}
+          {abaSelecionada === "dashboard" && (
+            <DashboardHome
+              stats={stats}
+              setAbaSelecionada={setAbaSelecionada}
+            />
+          )}
           {abaSelecionada === "adicionarproduto" && <AdicionarProduto />}
           {abaSelecionada === "meusprodutos" && <MeusProdutos />}
           {abaSelecionada === "editarloja" && <EditarLoja />}
@@ -280,21 +328,35 @@ function TipItem({ text }) {
 
 function QuickActionCard({ icon, title, description, color, onClick }) {
   return (
-    <div 
+    <div
       onClick={onClick}
       className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95"
     >
       <div
         className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
       ></div>
-      <div className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+      <div
+        className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+      >
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">{title}</h3>
+      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
+        {title}
+      </h3>
       <p className="text-gray-600 group-hover:text-gray-700">{description}</p>
       <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <svg
+          className="w-6 h-6 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </div>
     </div>
@@ -646,7 +708,17 @@ function AdicionarProduto() {
   );
 }
 
-function ModernInput({ label, icon, type = "text", placeholder, value, onChange, required = false, min, step }) {
+function ModernInput({
+  label,
+  icon,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  required = false,
+  min,
+  step,
+}) {
   return (
     <div className="space-y-2">
       <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
@@ -1108,7 +1180,9 @@ function MeusProdutos() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-green-600">
-                      {produto.quantidade > 0 ? `${produto.quantidade} un.` : "Esgotado"}
+                      {produto.quantidade > 0
+                        ? `${produto.quantidade} un.`
+                        : "Esgotado"}
                     </div>
                   </div>
                   <div className="flex-1 p-6">
@@ -1118,12 +1192,16 @@ function MeusProdutos() {
                           {produto.nome}
                         </h3>
                         <p className="text-sm text-gray-500 italic">
-                          {produto.categoria || "Sem categoria"} • {produto.marca || "Sem marca"}
+                          {produto.categoria || "Sem categoria"} •{" "}
+                          {produto.marca || "Sem marca"}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                          R$ {parseFloat(produto.preco || 0).toFixed(2).replace(".", ",")}
+                          R${" "}
+                          {parseFloat(produto.preco || 0)
+                            .toFixed(2)
+                            .replace(".", ",")}
                         </p>
                       </div>
                     </div>
@@ -1238,7 +1316,8 @@ function EditarLoja() {
     } catch (err) {
       console.error("Erro ao alterar senha:", err);
       setErro(
-        err.response?.data?.message || "❌ Erro ao alterar senha. Tente novamente."
+        err.response?.data?.message ||
+          "❌ Erro ao alterar senha. Tente novamente."
       );
     }
   };

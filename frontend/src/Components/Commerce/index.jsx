@@ -1,21 +1,18 @@
 // src/pages/Commerce.jsx
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import {
-  FiHeart,
-  FiTrendingUp,
-  FiTrendingDown,
-  FiTrash2,
-} from "react-icons/fi";
-import { motion } from "framer-motion";
 import ProductCard from "../ProductCard";
 import BackButton from "../BackButton";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { resolveMediaUrl } from "../../utils/media";
 
 export default function Commerce() {
   const { isDarkMode } = useTheme();
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { role } = useAuth();
   const [commerce, setCommerce] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,12 +39,26 @@ export default function Commerce() {
     fetchCommerce();
   }, [id]);
 
-  if (loading) return <div className={`p-6 text-center ${
-    isDarkMode ? 'text-gray-200' : 'text-gray-900'
-  }`}>Carregando...</div>;
-  if (error) return <div className={`p-6 text-center ${
-    isDarkMode ? 'text-red-400' : 'text-red-500'
-  }`}>{error}</div>;
+  if (loading)
+    return (
+      <div
+        className={`p-6 text-center ${
+          isDarkMode ? "text-gray-200" : "text-gray-900"
+        }`}
+      >
+        Carregando...
+      </div>
+    );
+  if (error)
+    return (
+      <div
+        className={`p-6 text-center ${
+          isDarkMode ? "text-red-400" : "text-red-500"
+        }`}
+      >
+        {error}
+      </div>
+    );
 
   // Monta URL do Google Maps
   const mapsUrl =
@@ -59,87 +70,139 @@ export default function Commerce() {
         )}`
       : null;
 
+  const handleContactClick = () => {
+    if (!commerce?.id) return;
+
+    if (role === "commerce") {
+      navigate("/lojadashboard");
+      return;
+    }
+
+    if (role === "user") {
+      const mensagem = encodeURIComponent(
+        `Olá, tenho interesse nos produtos da loja ${commerce.name}.`
+      );
+      navigate(`/contact?lojaId=${commerce.id}&message=${mensagem}`);
+      return;
+    }
+
+    navigate("/contacts");
+  };
+
   return (
-    <div className={`min-h-screen ${
-      isDarkMode 
-        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900' 
-        : 'bg-gradient-to-br from-green-100 via-white to-green-50'
-    }`}>
+    <div
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900"
+          : "bg-gradient-to-br from-green-100 via-white to-green-50"
+      }`}
+    >
       <div className="px-4 py-8 max-w-7xl mx-auto">
-      {/* Navegação de volta */}
-      <div className="mb-6">
-        <BackButton to="/" />
-      </div>
+        {/* Navegação de volta */}
+        <div className="mb-6">
+          <BackButton to="/" />
+        </div>
 
-      {/* Info do Comércio */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
-        <img
-          src={commerce.logoUrl || "/assets/placeholder-store.png"}
-          alt={commerce.name}
-          className="w-32 h-32 object-contain rounded-full shadow-lg"
-        />
-        <div>
-          <h1 className={`text-4xl font-extrabold mb-2 ${
-            isDarkMode ? 'text-white' : 'text-gray-900'
-          }`}>{commerce.name}</h1>
-          {commerce.description && (
-            <p className={`mb-4 ${
-              isDarkMode ? 'text-gray-200' : 'text-gray-600'
-            }`}>{commerce.description}</p>
-          )}
-
-          {/* Exibe endereço */}
-          {commerce.address && (
-            <p className={`text-sm mb-2 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-500'
-            }`}>📍 {commerce.address}</p>
-          )}
-
-          {/* Botão de localização */}
-          {mapsUrl && (
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`inline-block mt-2 px-4 py-2 text-white rounded transition ${
-                isDarkMode 
-                  ? 'bg-blue-600 hover:bg-blue-500' 
-                  : 'bg-blue-600 hover:bg-blue-700'
+        {/* Info do Comércio */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
+          <img
+            src={resolveMediaUrl(
+              commerce.logoUrl || commerce.logo_url || commerce.fotos
+            )}
+            alt={commerce.name}
+            className="w-32 h-32 object-contain rounded-full shadow-lg"
+          />
+          <div>
+            <h1
+              className={`text-4xl font-extrabold mb-2 ${
+                isDarkMode ? "text-white" : "text-gray-900"
               }`}
             >
-              Ver localização
-            </a>
-          )}
-        </div>
-      </div>
+              {commerce.name}
+            </h1>
+            {commerce.description && (
+              <p
+                className={`mb-4 ${
+                  isDarkMode ? "text-gray-200" : "text-gray-600"
+                }`}
+              >
+                {commerce.description}
+              </p>
+            )}
 
-      {/* Produtos do Comércio */}
-      <section>
-        <h2 className={`text-2xl font-bold mb-4 ${
-          isDarkMode ? 'text-red-400' : 'text-red-600'
-        }`}>
-          Produtos de {commerce.name}
-        </h2>
-        {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isLiked={false}
-                onToggleLike={() => {}}
-                onAddToCart={() => {}}
-              />
-            ))}
+            {/* Exibe endereço */}
+            {commerce.address && (
+              <p
+                className={`text-sm mb-2 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-500"
+                }`}
+              >
+                📍 {commerce.address}
+              </p>
+            )}
+
+            {/* Botão de localização */}
+            {mapsUrl && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-block mt-2 px-4 py-2 text-white rounded transition ${
+                  isDarkMode
+                    ? "bg-blue-600 hover:bg-blue-500"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                Ver localização
+              </a>
+            )}
+            <div className="mt-3 flex gap-3">
+              <button
+                type="button"
+                onClick={handleContactClick}
+                className={`px-4 py-2 rounded text-white font-medium transition ${
+                  isDarkMode
+                    ? "bg-green-600 hover:bg-green-500"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+              >
+                Entrar em contato
+              </button>
+            </div>
           </div>
-        ) : (
-          <div className={`text-center ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          }`}>
-            Nenhum produto encontrado 😕
-          </div>
-        )}
-      </section>
+        </div>
+
+        {/* Produtos do Comércio */}
+        <section>
+          <h2
+            className={`text-2xl font-bold mb-4 ${
+              isDarkMode ? "text-red-400" : "text-red-600"
+            }`}
+          >
+            Produtos de {commerce.name}
+          </h2>
+          {products.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isLiked={false}
+                  onToggleLike={() => {}}
+                  onAddToCart={() => {}}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              className={`text-center ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Nenhum produto encontrado 😕
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
