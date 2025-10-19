@@ -1,61 +1,122 @@
-// GET /api/chats?clienteId=...&lojaId=...
-// controllers/chatController.js
 const pool = require("../config/db");
 
-// GET /api/chats?clienteId=...&lojaId=...&message=...
-exports.getOrCreateChat = async (req, res) => {
-  const { clienteId, lojaId, initMessage } = req.query;
-  let chatId;
+const normalizeMessage = (raw, shouldTrim = true) => {
+  if (typeof raw !== "string") return null;
+  const value = shouldTrim ? raw.trim() : raw;
+  if (!value) return null;
+  if (value === "undefined" || value === "null") return null;
+  return value;
+};
 
+const ensureChat = async ({ clienteId, lojaId, initialMessage, remetente }) => {
   const conn = await pool.getConnection();
   try {
     await conn.beginTransaction();
 
-    // 1) Busca chat existente
     const [[existing]] = await conn.query(
       `SELECT id FROM chats WHERE cliente_id = ? AND loja_id = ?`,
       [clienteId, lojaId]
     );
 
+    let chatId;
+    let created = false;
+
     if (existing) {
       chatId = existing.id;
     } else {
-      // 2) Cria novo chat
-      // 2) Cria novo chat ou recupera existente de forma atômica
       const [insertRes] = await conn.query(
         `INSERT INTO chats (cliente_id, loja_id, criado_em)
-   VALUES (?, ?, NOW())
-   ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`,
+         VALUES (?, ?, NOW())
+         ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`,
         [clienteId, lojaId]
       );
-      // insertRes.insertId agora será o id do chat novo ou o existente
       chatId = insertRes.insertId;
+      created = true;
     }
 
-    // 3) Se veio mensagem inicial (initMessage), insere como primeira mensagem
-    if (initMessage) {
-      await conn.query(
-        `INSERT INTO mensagens
-         (chat_id, remetente, tipo, conteudo, criado_em)
-       VALUES (?, 'cliente', 'texto', ?, NOW())`,
-        [chatId, decodeURIComponent(initMessage)]
+    let createdMessage = null;
+    if (initialMessage) {
+      const sender = remetente === "loja" ? "loja" : "cliente";
+      const [msgRes] = await conn.query(
+        `INSERT INTO mensagens (chat_id, remetente, tipo, conteudo, criado_em)
+         VALUES (?, ?, 'texto', ?, NOW())`,
+        [chatId, sender, initialMessage]
       );
+
+      const [messageRows] = await conn.query(
+        `SELECT * FROM mensagens WHERE id = ?`,
+        [msgRes.insertId]
+      );
+      createdMessage = messageRows[0] || null;
     }
+
+    const [[chat]] = await conn.query(`SELECT * FROM chats WHERE id = ?`, [
+      chatId,
+    ]);
 
     await conn.commit();
 
-    // 4) Busca e retorna o chat
-    const [[chat]] = await pool.query(`SELECT * FROM chats WHERE id = ?`, [
-      chatId,
-    ]);
-    // se quiser, pode também retornar a lista de mensagens já com a inicial
-    res.status(existing ? 200 : 201).json(chat);
+    return { chat, createdMessage, created };
   } catch (err) {
     await conn.rollback();
-    console.error("Erro ao obter/criar chat:", err);
-    res.status(500).json({ error: "Erro interno ao obter/criar chat" });
+    throw err;
   } finally {
     conn.release();
+  }
+};
+
+exports.startChat = async (req, res) => {
+  const { clienteId, lojaId, initialMessage, remetente } = req.body || {};
+
+  if (!clienteId || !lojaId) {
+    return res
+      .status(400)
+      .json({ error: "Os campos clienteId e lojaId são obrigatórios." });
+  }
+
+  try {
+    const normalizedMessage = normalizeMessage(initialMessage);
+    const result = await ensureChat({
+      clienteId,
+      lojaId,
+      initialMessage: normalizedMessage,
+      remetente,
+    });
+
+    return res.status(result.created ? 201 : 200).json(result);
+  } catch (err) {
+    console.error("Erro ao iniciar chat:", err);
+    return res.status(500).json({ error: "Erro interno ao iniciar chat" });
+  }
+};
+
+// GET /api/chats?clienteId=...&lojaId=...&message=...
+exports.getOrCreateChat = async (req, res) => {
+  const { clienteId, lojaId } = req.query;
+  const messageParam =
+    req.query.initMessage !== undefined
+      ? req.query.initMessage
+      : req.query.message;
+
+  if (!clienteId || !lojaId) {
+    return res
+      .status(400)
+      .json({ error: "Parâmetros clienteId e lojaId são obrigatórios." });
+  }
+
+  try {
+    const normalizedMessage = normalizeMessage(messageParam);
+    const result = await ensureChat({
+      clienteId,
+      lojaId,
+      initialMessage: normalizedMessage,
+      remetente: "cliente",
+    });
+
+    return res.status(result.created ? 201 : 200).json(result.chat);
+  } catch (err) {
+    console.error("Erro ao obter/criar chat:", err);
+    return res.status(500).json({ error: "Erro interno ao obter/criar chat" });
   }
 };
 

@@ -1,14 +1,18 @@
 const express = require("express");
 const pool = require("../config/db");
 const router = express.Router();
-const { getOrCreateChat, listChats } = require("../controllers/chatController");
+const {
+  getOrCreateChat,
+  listChats,
+  startChat,
+} = require("../controllers/chatController");
+
+router.post("/start", startChat);
 
 router.get("/", (req, res, next) => {
-  const { clienteId, lojaId, message } = req.query;
+  const { clienteId, lojaId } = req.query;
 
   if (clienteId && lojaId) {
-    // passa message junto
-    req.query.initMessage = message;
     return getOrCreateChat(req, res, next);
   }
   if (lojaId) return listChats(req, res, next);

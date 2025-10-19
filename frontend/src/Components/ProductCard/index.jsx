@@ -8,7 +8,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 export default function ProductCard({ product, isLiked, onToggleLike }) {
   const { isDarkMode, dark, light } = useTheme();
   const currentTheme = isDarkMode ? dark : light;
-  
+
   console.log("💡 ProductCard.product:", product);
   const navigate = useNavigate();
   // Extrai priceNum, oldPriceNum e trend igual ao Home
@@ -77,7 +77,9 @@ export default function ProductCard({ product, isLiked, onToggleLike }) {
         />
       </div>
       <div className="flex-grow flex flex-col">
-        <h3 className={`text-lg font-semibold mb-2 ${currentTheme.textPrimary} line-clamp-2`}>
+        <h3
+          className={`text-lg font-semibold mb-2 ${currentTheme.textPrimary} line-clamp-2`}
+        >
           {product.title || product.name}
         </h3>
 
@@ -88,7 +90,11 @@ export default function ProductCard({ product, isLiked, onToggleLike }) {
         )}
 
         {product.description && (
-          <p className={`text-sm ${currentTheme.textSecondary} mb-3 line-clamp-2 flex-grow`}>{product.description}</p>
+          <p
+            className={`text-sm ${currentTheme.textSecondary} mb-3 line-clamp-2 flex-grow`}
+          >
+            {product.description}
+          </p>
         )}
       </div>
 
@@ -99,7 +105,9 @@ export default function ProductCard({ product, isLiked, onToggleLike }) {
           </span>
         )}
         {oldPriceNum != null && (
-          <span className={`text-xs line-through ${currentTheme.textSecondary}`}>
+          <span
+            className={`text-xs line-through ${currentTheme.textSecondary}`}
+          >
             R$ {oldPriceNum.toFixed(2)}
           </span>
         )}
@@ -112,14 +120,16 @@ export default function ProductCard({ product, isLiked, onToggleLike }) {
         {/* só renderiza o link se tivermos um lojaId válido */}
         {lojaId ? (
           <Link
-            to={`/contact?lojaId=${lojaId}&message=${presetMsg}`}
+            to={`/contact?lojaId=${lojaId}&productId=${product.id}&message=${presetMsg}`}
             onClick={(e) => e.stopPropagation()}
             className={`${currentTheme.button} text-white px-4 py-1 rounded-lg transition-all duration-200 text-sm btn-primary focus-ring`}
           >
             Conversar com Vendedor
           </Link>
         ) : (
-          <span className={`${currentTheme.textSecondary} text-sm`}>Loja indisponível</span>
+          <span className={`${currentTheme.textSecondary} text-sm`}>
+            Loja indisponível
+          </span>
         )}
       </div>
     </motion.div>

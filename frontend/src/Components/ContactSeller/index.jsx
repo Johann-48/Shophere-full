@@ -1,14 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiSend, FiCamera, FiMic, FiX } from "react-icons/fi";
 import { useTheme } from "../../contexts/ThemeContext";
 
 export default function ContatoLoja() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const params = new URLSearchParams(location.search);
-  const presetMsg = params.get("message");
+  const sanitizeQueryValue = (value) => {
+    if (!value) return null;
+    if (value === "undefined" || value === "null") return null;
+    return value;
+  };
+  const presetMsg = sanitizeQueryValue(params.get("message"));
 
   // 1) Estado para lojas e seleção
   const [lojas, setLojas] = useState([]);
@@ -37,8 +43,8 @@ export default function ContatoLoja() {
 
         // 1) pega params da URL
         const params = new URLSearchParams(location.search);
-        const urlLojaId = params.get("lojaId"); // pode ser null ou string
-        const preset = params.get("message"); // pode ser null ou string
+        const urlLojaId = sanitizeQueryValue(params.get("lojaId"));
+        const preset = sanitizeQueryValue(params.get("message"));
 
         console.log("DEBUG ➔ location.search:", location.search);
         console.log("DEBUG ➔ urlLojaId raw:", urlLojaId);
@@ -98,7 +104,7 @@ export default function ContatoLoja() {
 
         // 6) define mensagem padrão se existir
         if (preset) {
-          setNovaMensagem(decodeURIComponent(preset));
+          setNovaMensagem("");
         }
       } catch (err) {
         console.error("Erro ao buscar chats do usuário:", err);
@@ -111,26 +117,48 @@ export default function ContatoLoja() {
   // Abre ou cria chat quando troca de loja
   useEffect(() => {
     if (!idLoja) return;
+
     async function getOrCreate() {
       try {
         const user = JSON.parse(localStorage.getItem("user"));
         const clienteId = user?.id;
-        // inclui message para criar a mensagem inicial no backend
-        const res = await axios.get("/api/chats", {
-          params: {
-            clienteId,
-            lojaId: idLoja,
-            initMessage: presetMsg, // aqui!
-          },
-        });
-        setChatId(res.data.id);
-        fetchMensagens(res.data.id);
+        if (!clienteId) return;
+
+        const payload = {
+          clienteId,
+          lojaId: idLoja,
+        };
+
+        if (presetMsg) {
+          payload.initialMessage = presetMsg;
+        }
+
+        const res = await axios.post("/api/chats/start", payload);
+        const chatData = res.data?.chat || res.data;
+
+        if (!chatData?.id) return;
+
+        setChatId(chatData.id);
+        await fetchMensagens(chatData.id);
+
+        if (presetMsg) {
+          const params = new URLSearchParams(location.search);
+          params.delete("message");
+          params.delete("productId");
+
+          const searchString = params.toString();
+          navigate(
+            `${location.pathname}${searchString ? `?${searchString}` : ""}`,
+            { replace: true }
+          );
+        }
       } catch (err) {
         console.error("Erro ao obter/criar chat:", err);
       }
     }
+
     getOrCreate();
-  }, [idLoja, presetMsg]);
+  }, [idLoja, presetMsg, location.pathname, location.search, navigate]);
 
   // Função para buscar mensagens de um chat
   async function fetchMensagens(id) {
