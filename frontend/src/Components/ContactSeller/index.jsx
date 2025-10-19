@@ -95,12 +95,17 @@ export default function ContatoLoja() {
     setErro(null);
     try {
       const chats = await fetchUserChats(usuarioId);
-      const lojasMapeadas = chats.map((chat) => ({
-        id: chat.loja_id,
-        nome: chat.loja_nome,
-        imagem: resolveMediaUrl(chat.loja_foto),
-        chatId: chat.id,
-      }));
+      const lojasMapeadas = chats
+        .map((chat) => {
+          if (!chat?.loja?.id) return null;
+          return {
+            id: chat.loja.id,
+            nome: chat.loja.nome,
+            imagem: resolveMediaUrl(chat.loja.imagem),
+            chatId: chat.chatId || chat.id,
+          };
+        })
+        .filter(Boolean);
 
       let lista = lojasMapeadas;
 
@@ -109,17 +114,15 @@ export default function ContatoLoja() {
         !lista.some((loja) => String(loja.id) === lojaParamId)
       ) {
         try {
-          const comercio = await fetchStoreById(lojaParamId);
-          if (comercio?.id) {
-            lista = [
-              {
+            const comercio = await fetchStoreById(lojaParamId);
+            if (comercio?.id) {
+              const lojaNormalizada = {
                 id: comercio.id,
                 nome: comercio.nome,
-                imagem: resolveMediaUrl(comercio.foto),
+                imagem: resolveMediaUrl(comercio.imagem),
                 chatId: null,
-              },
-              ...lista,
-            ];
+              };
+              lista = [lojaNormalizada, ...lista];
           }
         } catch (error) {
           console.error("Não foi possível carregar a loja solicitada:", error);
