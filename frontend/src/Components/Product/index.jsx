@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { FaHeart, FaRegHeart, FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 import BackButton from "../BackButton";
 import ProductCard from "../ProductCard";
@@ -91,7 +91,6 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState(PLACEHOLDER_IMAGE);
   const [thumbnails, setThumbnails] = useState([]);
-  const [favorited, setFavorited] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -159,8 +158,6 @@ export default function ProductPage() {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  const toggleFavorite = () => setFavorited((prev) => !prev);
 
   const handleContactSeller = () => {
     if (!product?.comercio?.id) return;
@@ -432,26 +429,6 @@ export default function ProductPage() {
                   Comparar Preços 🛍️
                 </button>
               )}
-              <button
-                onClick={toggleFavorite}
-                aria-label={
-                  favorited
-                    ? "Remover dos favoritos"
-                    : "Adicionar aos favoritos"
-                }
-                className={`w-14 h-14 flex justify-center items-center border rounded-md transition focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                  favorited
-                    ? isDarkMode
-                      ? "text-blue-400 bg-blue-900 border-blue-600"
-                      : "text-blue-600 bg-blue-100 border-blue-300"
-                    : isDarkMode
-                    ? "text-gray-400 hover:text-blue-400 hover:bg-blue-900 border-gray-600"
-                    : "text-gray-400 hover:text-blue-600 hover:bg-blue-100 border-gray-300"
-                }`}
-                type="button"
-              >
-                {favorited ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
-              </button>
             </div>
           </div>
         </div>
