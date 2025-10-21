@@ -43,12 +43,16 @@ export default function LojaDashboard() {
   const [abaSelecionada, setAbaSelecionada] = useState("dashboard");
   const [logoUrl, setLogoUrl] = useState("");
   const [nomeLoja, setNomeLoja] = useState("");
+  const [enderecoLoja, setEnderecoLoja] = useState("");
+  const [descricaoLoja, setDescricaoLoja] = useState("");
   const [stats, setStats] = useState({
     totalProdutos: 0,
     produtosAtivos: 0,
     totalConversas: 0,
     valorTotal: 0,
   });
+  const fileInputRef = useRef(null);
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
 
   // Busca logo e estatísticas
   useEffect(() => {
@@ -64,6 +68,8 @@ export default function LojaDashboard() {
         if (!ativo) return;
         setLogoUrl(data.logoUrl);
         setNomeLoja(data.nome);
+        setEnderecoLoja(data.endereco || "");
+        setDescricaoLoja(data.descricao || "");
 
         const lojaId = data.id;
 
@@ -121,6 +127,71 @@ export default function LojaDashboard() {
     };
   }, []);
 
+  const handleLogoClick = () => {
+    if (isLogoUploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleLogoChange = async (event) => {
+    const inputElement = event.target;
+    const file = inputElement.files?.[0];
+    if (!file) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar autenticado para alterar a logo.");
+      inputElement.value = "";
+      return;
+    }
+
+    setIsLogoUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("imagem", file);
+
+      const uploadResponse = await axios.post(
+        API_CONFIG.getApiUrl("/api/upload/image/imagem"),
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const uploadedUrl = uploadResponse.data?.caminho;
+      if (!uploadedUrl) {
+        throw new Error("Resposta inválida do servidor ao enviar a logo.");
+      }
+
+      await axios.put(
+        "/api/commerces/me",
+        {
+          nome: nomeLoja,
+          endereco: enderecoLoja,
+          logoUrl: uploadedUrl,
+          descricao: descricaoLoja,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setLogoUrl(uploadedUrl);
+      toast.success("Logo atualizada com sucesso!");
+    } catch (err) {
+      console.error("Erro ao atualizar logo:", err);
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Não foi possível atualizar a logo.";
+      toast.error(message);
+    } finally {
+      setIsLogoUploading(false);
+      inputElement.value = "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -128,24 +199,45 @@ export default function LojaDashboard() {
         <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transform hover:scale-[1.01] transition-all duration-300">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Logo Container */}
-            <div className="relative group">
+            <div className="relative group flex flex-col items-center md:items-start">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
               <div className="relative">
-                <img
-                  src={
-                    logoUrl
-                      ? logoUrl.startsWith("http")
-                        ? logoUrl
-                        : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
-                      : "https://via.placeholder.com/200?text=Sua+Logo"
-                  }
-                  alt={nomeLoja || "Logo da Loja"}
-                  className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg"
-                />
-                <button className="absolute -bottom-2 -right-2 p-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full shadow-lg hover:scale-110 transition transform">
-                  <FiCamera className="w-4 h-4" />
+                <button
+                  type="button"
+                  onClick={handleLogoClick}
+                  disabled={isLogoUploading}
+                  className="relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+                  aria-label="Alterar logo da loja"
+                  aria-busy={isLogoUploading}
+                >
+                  <img
+                    src={
+                      logoUrl
+                        ? logoUrl.startsWith("http")
+                          ? logoUrl
+                          : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
+                        : "https://via.placeholder.com/200?text=Sua+Logo"
+                    }
+                    alt={nomeLoja || "Logo da Loja"}
+                    className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg transition-transform duration-200 group-hover:scale-[1.02]"
+                  />
+                  {isLogoUploading && (
+                    <span className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
+                      <span className="w-8 h-8 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
+                    </span>
+                  )}
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleLogoChange}
+                />
               </div>
+              <span className="mt-3 text-xs text-gray-500 text-center md:text-left opacity-80 group-hover:opacity-100 transition-opacity">
+                Clique na logo para atualizar
+              </span>
             </div>
 
             {/* Info da Loja */}
@@ -743,12 +835,16 @@ function MeusProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
   const [produtoEditando, setProdutoEditando] = useState(null);
+  const [enderecoLoja, setEnderecoLoja] = useState("");
+  const [descricaoLoja, setDescricaoLoja] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [galeria, setGaleria] = useState([]);
   const [galeriaLoading, setGaleriaLoading] = useState(false);
   const [novaImagemUrl, setNovaImagemUrl] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const fileInputRef = useRef(null);
+  const [isLogoUploading, setIsLogoUploading] = useState(false);
   useEffect(() => {
     axios
       .get("/api/categories")
@@ -802,6 +898,8 @@ function MeusProdutos() {
       setGaleriaLoading(false);
     }
   }
+  setEnderecoLoja(data.endereco || "");
+  setDescricaoLoja(data.descricao || "");
 
   async function uploadImagemArquivo(file) {
     if (!file || !produtoEditandoId) return;
@@ -1267,6 +1365,70 @@ function EditarLoja() {
     };
     fetchData();
   }, []);
+
+  const handleLogoClick = () => {
+    if (isLogoUploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleLogoChange = async (event) => {
+    const inputEl = event.target;
+    const file = inputEl.files?.[0];
+    if (!file) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Você precisa estar autenticado para alterar a logo.");
+      inputEl.value = "";
+      return;
+    }
+
+    setIsLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("imagem", file);
+
+      const uploadResponse = await axios.post(
+        API_CONFIG.getApiUrl("/api/upload/image/imagem"),
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      const uploadedUrl = uploadResponse.data?.caminho;
+      if (!uploadedUrl) {
+        throw new Error("Resposta inválida do servidor ao enviar a logo.");
+      }
+
+      await axios.put(
+        "/api/commerces/me",
+        {
+          nome: nomeLoja,
+          endereco: enderecoLoja,
+          logoUrl: uploadedUrl,
+          descricao: descricaoLoja,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setLogoUrl(uploadedUrl);
+      toast.success("Logo atualizada com sucesso!");
+    } catch (err) {
+      console.error("Erro ao atualizar logo:", err);
+      const message =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        "Não foi possível atualizar a logo.";
+      toast.error(message);
+    } finally {
+      setIsLogoUploading(false);
+      inputEl.value = "";
+    }
+  };
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
