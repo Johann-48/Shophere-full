@@ -326,6 +326,28 @@ function TipItem({ text }) {
   );
 }
 
+function StatCard({ icon, title, value, color, delay }) {
+  return (
+    <div
+      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-800">{value}</p>
+        </div>
+        <div
+          className={`bg-gradient-to-r ${color} w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg`}
+        >
+          {icon}
+        </div>
+      </div>
+      <div className={`mt-4 h-1 bg-gradient-to-r ${color} rounded-full`}></div>
+    </div>
+  );
+}
+
 function QuickActionCard({ icon, title, description, color, onClick }) {
   return (
     <div
