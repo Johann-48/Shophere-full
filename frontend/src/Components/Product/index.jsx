@@ -91,7 +91,6 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const [mainImage, setMainImage] = useState(PLACEHOLDER_IMAGE);
   const [thumbnails, setThumbnails] = useState([]);
-  const [quantity, setQuantity] = useState(1);
   const [favorited, setFavorited] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -161,8 +160,6 @@ export default function ProductPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const increment = () => setQuantity((prev) => Math.min(prev + 1, 10));
-  const decrement = () => setQuantity((prev) => Math.max(prev - 1, 1));
   const toggleFavorite = () => setFavorited((prev) => !prev);
 
   const handleContactSeller = () => {
@@ -407,51 +404,6 @@ export default function ProductPage() {
                 {product.description}
               </p>
             )}
-
-            <div className="flex items-center gap-4">
-              <span
-                className={`font-semibold select-none ${
-                  isDarkMode ? "text-gray-300" : "text-gray-700"
-                }`}
-              >
-                Quantidade:
-              </span>
-              <div
-                className={`flex items-center border rounded-md overflow-hidden select-none ${
-                  isDarkMode ? "border-gray-600" : "border-gray-300"
-                }`}
-              >
-                <button
-                  onClick={decrement}
-                  className={`px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    isDarkMode
-                      ? "bg-gray-600 hover:bg-gray-500 text-gray-100"
-                      : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                  }`}
-                  type="button"
-                >
-                  -
-                </button>
-                <span
-                  className={`px-6 py-2 font-mono ${
-                    isDarkMode ? "text-gray-100" : "text-gray-800"
-                  }`}
-                >
-                  {quantity}
-                </span>
-                <button
-                  onClick={increment}
-                  className={`px-4 py-2 transition focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                    isDarkMode
-                      ? "bg-gray-600 hover:bg-gray-500 text-gray-100"
-                      : "bg-gray-200 hover:bg-gray-300 text-gray-800"
-                  }`}
-                  type="button"
-                >
-                  +
-                </button>
-              </div>
-            </div>
 
             <div className="flex gap-4 mt-auto">
               <button
