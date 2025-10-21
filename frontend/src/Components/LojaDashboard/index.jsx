@@ -62,8 +62,8 @@ export default function LojaDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
         const { data } = await axios.get("/api/commerces/me", { headers });
         if (!ativo) return;
-  setLogoUrl(data.logoUrl);
-  setNomeLoja(data.nome);
+        setLogoUrl(data.logoUrl);
+        setNomeLoja(data.nome);
 
         const lojaId = data.id;
 
@@ -329,6 +329,49 @@ function TipItem({ text }) {
 function QuickActionCard({ icon, title, description, color, onClick }) {
   return (
     <div
+      onClick={onClick}
+      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95"
+    >
+      <div
+        className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+      ></div>
+      <div
+        className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+      >
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
+        {title}
+      </h3>
+      <p className="text-gray-600 group-hover:text-gray-700">{description}</p>
+      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <svg
+          className="w-6 h-6 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, text, color }) {
+  const colors = {
+    purple: "from-purple-600 to-pink-600",
+    blue: "from-blue-600 to-cyan-600",
+    green: "from-green-600 to-emerald-600",
+    orange: "from-orange-600 to-red-600",
+    pink: "from-pink-600 to-rose-600",
+  };
+
   return (
     <button
       onClick={onClick}
@@ -678,16 +721,11 @@ function MeusProdutos() {
   const [produtos, setProdutos] = useState([]);
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
   const [produtoEditando, setProdutoEditando] = useState(null);
-  const [enderecoLoja, setEnderecoLoja] = useState("");
-  const [descricaoLoja, setDescricaoLoja] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [galeria, setGaleria] = useState([]);
   const [galeriaLoading, setGaleriaLoading] = useState(false);
   const [novaImagemUrl, setNovaImagemUrl] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const fileInputRef = useRef(null);
-  const [isLogoUploading, setIsLogoUploading] = useState(false);
   useEffect(() => {
     axios
       .get("/api/categories")
@@ -741,8 +779,6 @@ function MeusProdutos() {
       setGaleriaLoading(false);
     }
   }
-  setEnderecoLoja(data.endereco || "");
-  setDescricaoLoja(data.descricao || "");
 
   async function uploadImagemArquivo(file) {
     if (!file || !produtoEditandoId) return;
@@ -1208,71 +1244,6 @@ function EditarLoja() {
     };
     fetchData();
   }, []);
-
-  const handleLogoClick = () => {
-    if (isLogoUploading) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleLogoChange = async (event) => {
-    const inputEl = event.target;
-    const file = inputEl.files?.[0];
-    if (!file) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Você precisa estar autenticado para alterar a logo.");
-      inputEl.value = "";
-      return;
-    }
-
-    setIsLogoUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("imagem", file);
-
-      const uploadResponse = await axios.post(
-        API_CONFIG.getApiUrl("/api/upload/image/imagem"),
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const uploadedUrl = uploadResponse.data?.caminho;
-      if (!uploadedUrl) {
-        throw new Error("Resposta inválida do servidor ao enviar a logo.");
-      }
-
-      await axios.put(
-        "/api/commerces/me",
-        {
-          nome: nomeLoja,
-          endereco: enderecoLoja,
-          logoUrl: uploadedUrl,
-          descricao: descricaoLoja,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setLogoUrl(uploadedUrl);
-      toast.success("Logo atualizada com sucesso!");
-    } catch (err) {
-      console.error("Erro ao atualizar logo:", err);
-      const message =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Não foi possível atualizar a logo.";
-      toast.error(message);
-    } finally {
-      setIsLogoUploading(false);
-      inputEl.value = "";
-    }
-  };
-
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
