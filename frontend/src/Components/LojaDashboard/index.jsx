@@ -43,16 +43,12 @@ export default function LojaDashboard() {
   const [abaSelecionada, setAbaSelecionada] = useState("dashboard");
   const [logoUrl, setLogoUrl] = useState("");
   const [nomeLoja, setNomeLoja] = useState("");
-  const [enderecoLoja, setEnderecoLoja] = useState("");
-  const [descricaoLoja, setDescricaoLoja] = useState("");
   const [stats, setStats] = useState({
     totalProdutos: 0,
     produtosAtivos: 0,
     totalConversas: 0,
     valorTotal: 0,
   });
-  const fileInputRef = useRef(null);
-  const [isLogoUploading, setIsLogoUploading] = useState(false);
 
   // Busca logo e estatísticas
   useEffect(() => {
@@ -66,10 +62,8 @@ export default function LojaDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
         const { data } = await axios.get("/api/commerces/me", { headers });
         if (!ativo) return;
-        setLogoUrl(data.logoUrl);
-        setNomeLoja(data.nome);
-        setEnderecoLoja(data.endereco || "");
-        setDescricaoLoja(data.descricao || "");
+  setLogoUrl(data.logoUrl);
+  setNomeLoja(data.nome);
 
         const lojaId = data.id;
 
@@ -127,71 +121,6 @@ export default function LojaDashboard() {
     };
   }, []);
 
-  const handleLogoClick = () => {
-    if (isLogoUploading) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleLogoChange = async (event) => {
-    const inputElement = event.target;
-    const file = inputElement.files?.[0];
-    if (!file) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      toast.error("Você precisa estar autenticado para alterar a logo.");
-      inputElement.value = "";
-      return;
-    }
-
-    setIsLogoUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("imagem", file);
-
-      const uploadResponse = await axios.post(
-        API_CONFIG.getApiUrl("/api/upload/image/imagem"),
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const uploadedUrl = uploadResponse.data?.caminho;
-      if (!uploadedUrl) {
-        throw new Error("Resposta inválida do servidor ao enviar a logo.");
-      }
-
-      await axios.put(
-        "/api/commerces/me",
-        {
-          nome: nomeLoja,
-          endereco: enderecoLoja,
-          logoUrl: uploadedUrl,
-          descricao: descricaoLoja,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setLogoUrl(uploadedUrl);
-      toast.success("Logo atualizada com sucesso!");
-    } catch (err) {
-      console.error("Erro ao atualizar logo:", err);
-      const message =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        "Não foi possível atualizar a logo.";
-      toast.error(message);
-    } finally {
-      setIsLogoUploading(false);
-      inputElement.value = "";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -201,42 +130,21 @@ export default function LojaDashboard() {
             {/* Logo Container */}
             <div className="relative group flex flex-col items-center md:items-start">
               <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={handleLogoClick}
-                  disabled={isLogoUploading}
-                  className="relative rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
-                  aria-label="Alterar logo da loja"
-                  aria-busy={isLogoUploading}
-                >
-                  <img
-                    src={
-                      logoUrl
-                        ? logoUrl.startsWith("http")
-                          ? logoUrl
-                          : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
-                        : "https://via.placeholder.com/200?text=Sua+Logo"
-                    }
-                    alt={nomeLoja || "Logo da Loja"}
-                    className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg transition-transform duration-200 group-hover:scale-[1.02]"
-                  />
-                  {isLogoUploading && (
-                    <span className="absolute inset-0 rounded-2xl bg-black/40 flex items-center justify-center">
-                      <span className="w-8 h-8 border-2 border-white/60 border-t-transparent rounded-full animate-spin" />
-                    </span>
-                  )}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogoChange}
+              <div className="relative rounded-2xl overflow-hidden">
+                <img
+                  src={
+                    logoUrl
+                      ? logoUrl.startsWith("http")
+                        ? logoUrl
+                        : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
+                      : "https://via.placeholder.com/200?text=Sua+Logo"
+                  }
+                  alt={nomeLoja || "Logo da Loja"}
+                  className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg transition-transform duration-200"
                 />
               </div>
-              <span className="mt-3 text-xs text-gray-500 text-center md:text-left opacity-80 group-hover:opacity-100 transition-opacity">
-                Clique na logo para atualizar
+              <span className="mt-3 text-xs text-gray-500 text-center md:text-left opacity-80">
+                Atualize a logo na aba "Editar Loja" usando o campo URL da Logo.
               </span>
             </div>
 
@@ -421,71 +329,6 @@ function TipItem({ text }) {
 function QuickActionCard({ icon, title, description, color, onClick }) {
   return (
     <div
-      onClick={onClick}
-      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95"
-    >
-      <div
-        className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-      ></div>
-      <div
-        className={`bg-gradient-to-r ${color} w-16 h-16 rounded-xl flex items-center justify-center text-white mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-      >
-        {icon}
-      </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
-        {title}
-      </h3>
-      <p className="text-gray-600 group-hover:text-gray-700">{description}</p>
-      <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <svg
-          className="w-6 h-6 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ icon, title, value, color, delay }) {
-  return (
-    <div
-      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-800">{value}</p>
-        </div>
-        <div
-          className={`bg-gradient-to-r ${color} w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg`}
-        >
-          {icon}
-        </div>
-      </div>
-      <div className={`mt-4 h-1 bg-gradient-to-r ${color} rounded-full`}></div>
-    </div>
-  );
-}
-
-function TabButton({ active, onClick, icon, text, color }) {
-  const colors = {
-    purple: "from-purple-600 to-pink-600",
-    blue: "from-blue-600 to-cyan-600",
-    green: "from-green-600 to-emerald-600",
-    orange: "from-orange-600 to-red-600",
-    pink: "from-pink-600 to-rose-600",
-  };
-
   return (
     <button
       onClick={onClick}
