@@ -128,20 +128,21 @@ export default function LojaDashboard() {
         <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transform hover:scale-[1.01] transition-all duration-300">
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Logo Container */}
-            <div className="relative group flex flex-col items-center md:items-start">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-300"></div>
-              <div className="relative rounded-2xl overflow-hidden">
-                <img
-                  src={
-                    logoUrl
-                      ? logoUrl.startsWith("http")
-                        ? logoUrl
-                        : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
-                      : "https://via.placeholder.com/200?text=Sua+Logo"
-                  }
-                  alt={nomeLoja || "Logo da Loja"}
-                  className="rounded-2xl w-32 h-32 object-cover bg-white p-2 shadow-lg transition-transform duration-200"
-                />
+            <div className="relative flex flex-col items-center md:items-start">
+              <div className="rounded-[22px] bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-[3px] shadow-[0_18px_45px_rgba(168,85,247,0.25)]">
+                <div className="rounded-[18px] bg-white/95 backdrop-blur-sm p-3">
+                  <img
+                    src={
+                      logoUrl
+                        ? logoUrl.startsWith("http")
+                          ? logoUrl
+                          : `${API_CONFIG.getApiUrl("/uploads")}/${logoUrl}`
+                        : "https://via.placeholder.com/200?text=Sua+Logo"
+                    }
+                    alt={nomeLoja || "Logo da Loja"}
+                    className="w-28 h-28 object-contain rounded-[14px] transition-transform duration-200"
+                  />
+                </div>
               </div>
               <span className="mt-3 text-xs text-gray-500 text-center md:text-left opacity-80">
                 Atualize a logo na aba "Editar Loja" usando o campo URL da Logo.
