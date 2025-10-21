@@ -62,26 +62,20 @@ export default function Header() {
     { to: "/about", label: "Sobre" },
   ];
 
-  const authMenuBase = [
-    { to: "/accountmanager", label: "Meu Perfil" },
-    {
-      label: "Sair",
-      action: () => {
-        localStorage.clear();
-        setUserName(null);
-        setProfileOpen(false);
-        navigate("/login");
-      },
+  const logoutItem = {
+    label: "Sair",
+    action: () => {
+      localStorage.clear();
+      setUserName(null);
+      setProfileOpen(false);
+      navigate("/login");
     },
-  ];
+  };
+
   const authMenu =
     role === "commerce"
-      ? [
-          { to: "/accountmanager", label: "Meu Perfil" },
-          { to: "/lojadashboard", label: "Dashboard" },
-          ...authMenuBase.slice(1),
-        ]
-      : authMenuBase;
+      ? [{ to: "/lojadashboard", label: "Dashboard" }, logoutItem]
+      : [{ to: "/accountmanager", label: "Meu Perfil" }, logoutItem];
 
   const guestMenu = [
     { to: "/login", label: "Entrar" },
