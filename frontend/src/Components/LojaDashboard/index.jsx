@@ -711,6 +711,7 @@ function AdicionarProduto() {
 function ModernInput({
   label,
   icon,
+  name,
   type = "text",
   placeholder,
   value,
@@ -727,6 +728,7 @@ function ModernInput({
       </label>
       <input
         type={type}
+        name={name}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
