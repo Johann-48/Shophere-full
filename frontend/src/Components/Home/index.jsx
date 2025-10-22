@@ -32,8 +32,8 @@ const PRICE_BANDS = [
 ];
 
 // Banner images for dark and light modes
-const HERO_IMAGE_DARK = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000c530620eb61d4d882099de69&ts=489112&p=fs&cid=1&sig=e8abf4ccf20c54f271c04e979895a63993248f5734c8919afbc652f1504f289c&v=0";
-const HERO_IMAGE_LIGHT = "https://chatgpt.com/backend-api/estuary/content?id=file_00000000c530620eb61d4d882099de69&ts=489112&p=fs&cid=1&sig=e8abf4ccf20c54f271c04e979895a63993248f5734c8919afbc652f1504f289c&v=0";
+const HERO_IMAGE_DARK = "/assets/banner.jpg";
+const HERO_IMAGE_LIGHT = "/assets/banner.jpg";
 const HERO_FALLBACK_URL = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop&q=80";
 
 export default function Home() {
@@ -383,7 +383,7 @@ export default function Home() {
           <img
             src={heroError ? HERO_FALLBACK_URL : heroSrc}
             alt="Banner principal"
-            className="w-full h-48 md:h-72 object-cover rounded-2xl shadow"
+            className="w-full h-auto object-contain rounded-2xl shadow"
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setHeroError(true)}
