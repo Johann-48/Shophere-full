@@ -49,23 +49,21 @@ const About = () => {
     {
       nome: "Johann Bauermann",
       cargo: "Back-End e Banco de Dados",
-      imagem:
-        "https://f.i.uol.com.br/fotografia/2021/08/11/162871253661142e587ca24_1628712536_3x2_md.jpg",
+      imagem: "https://ui-avatars.com/api/?name=Johann+Bauermann&size=200&background=6366F1&color=fff&bold=true",
       bio: "Especialista em Node.js e SQL, cria toda a estrutura funcional do sistema",
       instagram: "https://www.instagram.com/johannsb2008",
     },
     {
       nome: "Gabriel Luccas",
       cargo: "Front-End e Back-End",
-      imagem:
-        "https://upload.wikimedia.org/wikipedia/pt/b/bf/SpongeBob_SquarePants_personagem.png",
+      imagem: "https://ui-avatars.com/api/?name=Gabriel+Luccas&size=200&background=8B5CF6&color=fff&bold=true",
       bio: "Especialista em React e design responsivo, cria interfaces modernas e funcionais.",
       instagram: "https://www.instagram.com/gabrieel.lc",
     },
     {
-      nome: "Leonardo",
+      nome: "Leonardo Gonçalves Francisco",
       cargo: "Front-End",
-      imagem: "https://randomuser.me/api/portraits/men/75.jpg",
+      imagem: "https://ui-avatars.com/api/?name=Leonardo+Goncalves+Francisco&size=200&background=4F46E5&color=fff&bold=true",
       bio: "Auxiliar em desenvolvimento Front-End e UX/UI",
       instagram: "https://www.instagram.com/leozeraaa2807",
     },
