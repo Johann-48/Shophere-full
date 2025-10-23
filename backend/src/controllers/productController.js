@@ -250,7 +250,7 @@ exports.getProductsByCategory = async (req, res) => {
 exports.searchProducts = async (req, res) => {
   const q = req.query.q || "";
   try {
-  const [rows] = await pool.query(
+    const [rows] = await pool.query(
       `
       SELECT 
         p.id,
@@ -283,7 +283,7 @@ exports.searchProducts = async (req, res) => {
 exports.getProductsByCommerce = async (req, res) => {
   const { id } = req.params; // id do comércio
   try {
-  const [rows] = await pool.query(
+    const [rows] = await pool.query(
       `SELECT 
     p.id,
     p.nome        AS name,
@@ -545,12 +545,45 @@ exports.deleteProduct = async (req, res) => {
   const { id } = req.params;
   const comercioId = req.userId;
   try {
-    await pool.query(
-      `DELETE FROM produtos
-       WHERE id = ? AND comercio_id = ?`,
-      [id, comercioId]
-    );
-    res.json({ message: "Produto excluído" });
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const [prodRows] = await connection.query(
+        `SELECT id FROM produtos WHERE id = ? AND comercio_id = ? FOR UPDATE`,
+        [id, comercioId]
+      );
+
+      if (prodRows.length === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
+
+      await connection.query(
+        `DELETE FROM avaliacoesproduto WHERE produto_id = ?`,
+        [id]
+      );
+      await connection.query(
+        `DELETE FROM produtos_categorias WHERE produto_id = ?`,
+        [id]
+      );
+      await connection.query(`DELETE FROM fotos_produto WHERE produto_id = ?`, [
+        id,
+      ]);
+
+      await connection.query(
+        `DELETE FROM produtos WHERE id = ? AND comercio_id = ?`,
+        [id, comercioId]
+      );
+
+      await connection.commit();
+      res.json({ message: "Produto excluído" });
+    } catch (err) {
+      await connection.rollback();
+      throw err;
+    } finally {
+      connection.release();
+    }
   } catch (err) {
     console.error("Erro ao excluir produto:", err);
     res.status(500).json({ error: "Erro interno" });
