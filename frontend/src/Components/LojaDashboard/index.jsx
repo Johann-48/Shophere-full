@@ -898,6 +898,43 @@ function MeusProdutos() {
     }
   }
 
+  async function removerImagem(imageId) {
+    if (!produtoEditandoId || !imageId) return;
+    if (!window.confirm("Deseja remover esta imagem?")) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      await axios.delete(
+        `/api/products/${produtoEditandoId}/images/${imageId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Imagem removida com sucesso!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
+      const imgs = await carregarGaleria(produtoEditandoId);
+      const principal = (imgs || []).find((g) => g.principal);
+      const imagemAtualizada = principal ? principal.url : "";
+
+      setProdutoEditando((prev) =>
+        prev ? { ...prev, imagem: imagemAtualizada } : prev
+      );
+      setProdutos((prev) =>
+        prev.map((p) =>
+          p.id === produtoEditandoId ? { ...p, imagem: imagemAtualizada } : p
+        )
+      );
+    } catch (e) {
+      console.error("Erro ao remover imagem:", e);
+      toast.error(
+        e.response?.data?.error || "Não foi possível remover a imagem.",
+        { position: "top-right", autoClose: 3000 }
+      );
+    }
+  }
+
   function handleEditChange(e) {
     const { name, value } = e.target;
     setProdutoEditando((prev) => ({ ...prev, [name]: value }));
@@ -1151,6 +1188,16 @@ function MeusProdutos() {
                               </button>
                             )}
                           </div>
+                          {img.id && (
+                            <button
+                              type="button"
+                              onClick={() => removerImagem(img.id)}
+                              className="absolute top-2 right-2 bg-gray-900/75 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
+                              title="Remover imagem"
+                            >
+                              <FiTrash2 size={14} />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -1642,6 +1689,34 @@ function BatePapo() {
     }
   }
 
+  async function excluirMensagem(mensagemId) {
+    if (!chatId || !mensagemId) return;
+    if (!window.confirm("Deseja remover esta mensagem?")) return;
+
+    try {
+      await axios.delete(`/api/chats/${chatId}/mensagens/${mensagemId}`);
+      const res = await axios.get(`/api/chats/${chatId}/mensagens`);
+      const atualizado = {
+        ...clienteSelecionado,
+        mensagens: res.data,
+      };
+      atualizarClienteAtualizado(atualizado);
+      toast.success("Mensagem removida.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (err) {
+      console.error("Erro ao excluir mensagem:", err);
+      toast.error(
+        err.response?.data?.error || "Não foi possível remover a mensagem.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+        }
+      );
+    }
+  }
+
   return (
     <div className="flex flex-col md:flex-row gap-6 h-[600px]">
       {/* Lista clientes */}
@@ -1712,13 +1787,23 @@ function BatePapo() {
             return (
               <div
                 key={msg.id ?? `${msg.tipo}-${index}`}
-                className={`max-w-[75%] p-3 rounded-lg whitespace-pre-wrap break-words flex flex-col ${
+                className={`group relative max-w-[75%] p-3 rounded-lg whitespace-pre-wrap break-words flex flex-col ${
                   isCliente
                     ? "bg-green-200 self-start"
                     : "bg-blue-500 text-white self-end"
                 }`}
                 style={{ alignSelf: isCliente ? "flex-start" : "flex-end" }}
               >
+                {msg.id && (
+                  <button
+                    type="button"
+                    onClick={() => excluirMensagem(msg.id)}
+                    className="absolute -top-3 -right-3 bg-gray-900/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition"
+                    title="Remover mensagem"
+                  >
+                    <FiTrash2 size={12} />
+                  </button>
+                )}
                 {/* Texto (sempre usa msg.conteudo) */}
                 {msg.tipo === "texto" && <span>{msg.conteudo}</span>}
 

@@ -5,6 +5,7 @@ const {
   DRIVER,
   uploadBufferToS3,
   uploadBufferToBlob,
+  deleteStoredFile,
 } = require("../config/storage");
 const pool = require("../config/db");
 const { toAbsoluteUrl, isAbsoluteUrl } = require("../utils/url");
@@ -113,6 +114,79 @@ router.post(
     } catch (e) {
       console.error("upload product image error:", e.message);
       res.status(500).json({ error: "Erro ao enviar imagem" });
+    }
+  }
+);
+
+router.delete(
+  "/products/:id/images/:imageId",
+  requireAuth,
+  requireCommerce,
+  async (req, res) => {
+    const { id, imageId } = req.params;
+    const commerceId = req.userId;
+    const conn = await pool.getConnection();
+
+    try {
+      await conn.beginTransaction();
+
+      const [[product]] = await conn.query(
+        `SELECT comercio_id FROM produtos WHERE id = ? LIMIT 1`,
+        [id]
+      );
+
+      if (!product) {
+        await conn.rollback();
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
+
+      if (Number(product.comercio_id) !== Number(commerceId)) {
+        await conn.rollback();
+        return res.status(403).json({ error: "Produto não pertence à loja" });
+      }
+
+      const [[image]] = await conn.query(
+        `SELECT id, url, principal FROM fotos_produto WHERE id = ? AND produto_id = ? LIMIT 1`,
+        [imageId, id]
+      );
+
+      if (!image) {
+        await conn.rollback();
+        return res.status(404).json({ error: "Imagem não encontrada" });
+      }
+
+      await conn.query(`DELETE FROM fotos_produto WHERE id = ?`, [imageId]);
+
+      let newPrincipalId = null;
+      if (image.principal) {
+        const [[nextImage]] = await conn.query(
+          `SELECT id FROM fotos_produto WHERE produto_id = ? ORDER BY id ASC LIMIT 1`,
+          [id]
+        );
+        if (nextImage) {
+          await conn.query(
+            `UPDATE fotos_produto SET principal = 1 WHERE id = ?`,
+            [nextImage.id]
+          );
+          newPrincipalId = nextImage.id;
+        }
+      }
+
+      await conn.commit();
+
+      await deleteStoredFile(image.url);
+
+      return res.json({
+        ok: true,
+        deletedId: Number(imageId),
+        reassignedPrincipalId: newPrincipalId,
+      });
+    } catch (err) {
+      await conn.rollback();
+      console.error("delete product image error:", err.message);
+      return res.status(500).json({ error: "Erro ao excluir imagem" });
+    } finally {
+      conn.release();
     }
   }
 );

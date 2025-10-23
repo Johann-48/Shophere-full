@@ -6,13 +6,15 @@ import React, {
   useRef,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiSend, FiCamera, FiMic, FiX } from "react-icons/fi";
+import { FiSend, FiCamera, FiMic, FiX, FiTrash2 } from "react-icons/fi";
+import { toast } from "react-toastify";
 import {
   fetchUserChats,
   fetchStoreById,
   startChat as startChatService,
   fetchMessages as fetchMessagesService,
   sendMessage as sendMessageService,
+  deleteMessage as deleteMessageService,
   uploadChatImage,
   uploadChatAudio,
 } from "../../services/chatService";
@@ -392,6 +394,32 @@ export default function ContatoLoja() {
     }
   };
 
+  const handleDeleteMessage = async (mensagemId) => {
+    if (!chatId || !mensagemId) return;
+    if (!window.confirm("Deseja remover esta mensagem?")) return;
+
+    try {
+      await deleteMessageService(chatId, mensagemId);
+      setMessagesByChat((prev) => {
+        const atuais = prev[chatId] || [];
+        return {
+          ...prev,
+          [chatId]: atuais.filter((msg) => Number(msg.id) !== Number(mensagemId)),
+        };
+      });
+      toast.success("Mensagem removida.", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Erro ao excluir mensagem:", error);
+      const msg =
+        error?.response?.data?.error || "Não foi possível remover a mensagem.";
+      setErro(msg);
+      toast.error(msg, { position: "top-right", autoClose: 3000 });
+    }
+  };
+
   const mensagensAtuais = currentMessages;
   const gradientBg = isDarkMode
     ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
@@ -526,8 +554,20 @@ export default function ContatoLoja() {
                         }`}
                       >
                         <div
-                          className={`max-w-[75%] p-3 rounded-xl shadow ${bubbleStyles}`}
+                          className={`group relative max-w-[75%] p-3 rounded-xl shadow ${bubbleStyles}`}
                         >
+                          {isCliente && msg.id && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className={`absolute -top-3 -right-3 bg-gray-900/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 transition ${
+                                isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-800"
+                              }`}
+                              title="Remover mensagem"
+                            >
+                              <FiTrash2 size={12} />
+                            </button>
+                          )}
                           {msg.tipo === "texto" && <span>{msg.conteudo}</span>}
                           {msg.tipo === "imagem" && (
                             <img

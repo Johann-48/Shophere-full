@@ -95,6 +95,10 @@ export const sendMessage = async (chatId, message) => {
   return data;
 };
 
+export const deleteMessage = async (chatId, messageId) => {
+  await axios.delete(withBase(`/api/chats/${chatId}/mensagens/${messageId}`));
+};
+
 export const uploadChatImage = async (file) => {
   const formData = new FormData();
   formData.append("imagem", file);
