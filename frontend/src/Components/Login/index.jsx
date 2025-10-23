@@ -64,12 +64,12 @@ export default function Login({ goToForgotPassword, goToSignUp, goToSeller }) {
           transition={{ duration: 0.8 }}
           className="hidden lg:flex items-center justify-center"
         >
-          <div className="relative w-full max-w-md">
+          <div className="relative w-full max-w-2xl">
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-2xl opacity-20 animate-pulse"></div>
             <img
               src="/assets/login-banner.png"
               alt="Login Visual"
-              className="relative w-full h-auto max-h-[400px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition-transform duration-500"
+              className="relative w-full h-auto max-h-[600px] rounded-3xl shadow-2xl object-cover transform hover:scale-105 transition-transform duration-500"
             />
           </div>
         </motion.div>

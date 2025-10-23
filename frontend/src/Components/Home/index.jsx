@@ -31,11 +31,6 @@ const PRICE_BANDS = [
   { id: "premium", label: "Acima de R$500", range: [500, Infinity] },
 ];
 
-// Banner images for dark and light modes
-const HERO_IMAGE_DARK = "/assets/banner.jpg";
-const HERO_IMAGE_LIGHT = "/assets/banner.jpg";
-const HERO_FALLBACK_URL = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop&q=80";
-
 export default function Home() {
   const navigate = useNavigate();
   const { isDarkMode, dark, light } = useTheme();
@@ -67,10 +62,6 @@ export default function Home() {
   const [selectedPriceBand, setSelectedPriceBand] = useState(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [onlyDiscounted, setOnlyDiscounted] = useState(false);
-  
-  // Hero banner image based on theme
-  const heroSrc = isDarkMode ? HERO_IMAGE_DARK : HERO_IMAGE_LIGHT;
-  const [heroError, setHeroError] = useState(false);
 
   const toggleLike = (id) => {
     setLiked((prev) =>
@@ -377,17 +368,75 @@ export default function Home() {
           aria-hidden
         />
       )}
-      {/* Hero Image */}
+      {/* Hero Banner com Texto */}
       <section className="w-full">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
-          <img
-            src={heroError ? HERO_FALLBACK_URL : heroSrc}
-            alt="Banner principal"
-            className="w-full h-auto max-h-[750px] object-cover rounded-2xl shadow"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={() => setHeroError(true)}
-          />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className={`relative overflow-hidden rounded-3xl shadow-2xl ${
+              isDarkMode
+                ? "bg-gradient-to-br from-slate-800 via-blue-900 to-purple-900"
+                : "bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+            } p-12 md:p-16 lg:p-20`}
+          >
+            {/* Efeitos de fundo decorativos */}
+            <div className="absolute inset-0 opacity-20">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+            </div>
+
+            {/* Conteúdo */}
+            <div className="relative z-10 text-center">
+              {/* Título em alto relevo */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
+                <span
+                  className="block text-white"
+                  style={{
+                    textShadow: `
+                      2px 2px 4px rgba(0, 0, 0, 0.3),
+                      4px 4px 8px rgba(0, 0, 0, 0.2),
+                      0 0 20px rgba(255, 255, 255, 0.1)
+                    `,
+                    letterSpacing: '0.02em'
+                  }}
+                >
+                  Seja bem-vindo à Shophere!
+                </span>
+              </h1>
+
+              {/* Subtítulo */}
+              <p className="text-lg md:text-xl lg:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed font-medium">
+                Aqui você encontra os melhores produtos com as melhores promoções dos comércios perto de você!
+              </p>
+
+              {/* Ícones decorativos */}
+              <div className="flex items-center justify-center gap-6 mt-8">
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-white/80"
+                >
+                  <FiShoppingBag size={32} />
+                </motion.div>
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 2, delay: 0.3, repeat: Infinity }}
+                  className="text-white/80"
+                >
+                  <FiTrendingUp size={32} />
+                </motion.div>
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 2, delay: 0.6, repeat: Infinity }}
+                  className="text-white/80"
+                >
+                  <FiHeart size={32} />
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
