@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const { deleteStoredFile } = require("../config/storage");
 
 // GET /api/chats/:chatId/mensagens
 exports.listMensagens = async (req, res) => {
@@ -34,5 +35,30 @@ exports.createMensagem = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro ao enviar mensagem" });
+  }
+};
+
+// DELETE /api/chats/:chatId/mensagens/:mensagemId
+exports.deleteMensagem = async (req, res) => {
+  const { chatId, mensagemId } = req.params;
+
+  try {
+    const [[mensagem]] = await pool.query(
+      `SELECT id, tipo, conteudo FROM mensagens WHERE id = ? AND chat_id = ? LIMIT 1`,
+      [mensagemId, chatId]
+    );
+
+    if (!mensagem) {
+      return res.status(404).json({ error: "Mensagem não encontrada" });
+    }
+
+    await pool.query(`DELETE FROM mensagens WHERE id = ?`, [mensagemId]);
+
+    await deleteStoredFile(mensagem.conteudo);
+
+    return res.json({ ok: true, deletedId: Number(mensagemId) });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Erro ao excluir mensagem" });
   }
 };
