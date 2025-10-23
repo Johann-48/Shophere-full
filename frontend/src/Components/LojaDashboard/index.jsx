@@ -26,6 +26,7 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 import API_CONFIG from "../../config/api";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const formatCurrency = (valor) => {
   const numero = Number(valor);
@@ -40,6 +41,8 @@ const formatCurrency = (valor) => {
 };
 
 export default function LojaDashboard() {
+  const { isDarkMode, dark, light } = useTheme();
+  const currentTheme = isDarkMode ? dark : light;
   const [abaSelecionada, setAbaSelecionada] = useState("dashboard");
   const [logoUrl, setLogoUrl] = useState("");
   const [nomeLoja, setNomeLoja] = useState("");
@@ -122,15 +125,15 @@ export default function LojaDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 sm:p-6 lg:p-8">
+    <div className={`min-h-screen ${currentTheme.background} p-4 sm:p-6 lg:p-8`}>
       <div className="max-w-7xl mx-auto">
         {/* Header com Logo e Info */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transform hover:scale-[1.01] transition-all duration-300">
+        <div className={`${currentTheme.card} rounded-3xl shadow-xl p-6 mb-8 transform hover:scale-[1.01] transition-all duration-300`}>
           <div className="flex flex-col md:flex-row items-center gap-6">
             {/* Logo Container */}
             <div className="relative flex flex-col items-center md:items-start">
               <div className="rounded-[22px] bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-[3px] shadow-[0_18px_45px_rgba(168,85,247,0.25)]">
-                <div className="rounded-[18px] bg-white/95 backdrop-blur-sm p-3">
+                <div className={`rounded-[18px] ${isDarkMode ? 'bg-slate-800' : 'bg-white/95'} backdrop-blur-sm p-3`}>
                   <img
                     src={
                       logoUrl
@@ -144,7 +147,7 @@ export default function LojaDashboard() {
                   />
                 </div>
               </div>
-              <span className="mt-3 text-xs text-gray-500 text-center md:text-left opacity-80">
+              <span className={`mt-3 text-xs ${currentTheme.text} text-center md:text-left opacity-80`}>
                 Atualize a logo na aba "Editar Loja" usando o campo URL da Logo.
               </span>
             </div>
@@ -154,7 +157,7 @@ export default function LojaDashboard() {
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
                 {nomeLoja || "Minha Loja"}
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className={`${currentTheme.text} text-lg`}>
                 Gerencie sua loja de forma inteligente
               </p>
             </div>
@@ -205,7 +208,7 @@ export default function LojaDashboard() {
         )}
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-2xl shadow-lg p-2 mb-8 overflow-x-auto">
+        <div className={`${currentTheme.card} rounded-2xl shadow-lg p-2 mb-8 overflow-x-auto`}>
           <div className="flex gap-2 min-w-max">
             <TabButton
               active={abaSelecionada === "dashboard"}
@@ -213,6 +216,7 @@ export default function LojaDashboard() {
               icon={<FiBarChart2 />}
               text="Dashboard"
               color="purple"
+              isDarkMode={isDarkMode}
             />
             <TabButton
               active={abaSelecionada === "adicionarproduto"}
@@ -220,6 +224,7 @@ export default function LojaDashboard() {
               icon={<FiPlusCircle />}
               text="Adicionar"
               color="blue"
+              isDarkMode={isDarkMode}
             />
             <TabButton
               active={abaSelecionada === "meusprodutos"}
@@ -227,6 +232,7 @@ export default function LojaDashboard() {
               icon={<FiPackage />}
               text="Produtos"
               color="green"
+              isDarkMode={isDarkMode}
             />
             <TabButton
               active={abaSelecionada === "editarloja"}
@@ -234,6 +240,7 @@ export default function LojaDashboard() {
               icon={<FiEdit />}
               text="Editar Loja"
               color="orange"
+              isDarkMode={isDarkMode}
             />
             <TabButton
               active={abaSelecionada === "batepapo"}
@@ -241,22 +248,25 @@ export default function LojaDashboard() {
               icon={<FiMessageSquare />}
               text="Chat"
               color="pink"
+              isDarkMode={isDarkMode}
             />
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 min-h-[400px] transform transition-all duration-300">
+        <div className={`${currentTheme.card} rounded-3xl shadow-xl p-6 md:p-8 min-h-[400px] transform transition-all duration-300`}>
           {abaSelecionada === "dashboard" && (
             <DashboardHome
               stats={stats}
               setAbaSelecionada={setAbaSelecionada}
+              currentTheme={currentTheme}
+              isDarkMode={isDarkMode}
             />
           )}
-          {abaSelecionada === "adicionarproduto" && <AdicionarProduto />}
-          {abaSelecionada === "meusprodutos" && <MeusProdutos />}
-          {abaSelecionada === "editarloja" && <EditarLoja />}
-          {abaSelecionada === "batepapo" && <BatePapo />}
+          {abaSelecionada === "adicionarproduto" && <AdicionarProduto currentTheme={currentTheme} isDarkMode={isDarkMode} />}
+          {abaSelecionada === "meusprodutos" && <MeusProdutos currentTheme={currentTheme} isDarkMode={isDarkMode} />}
+          {abaSelecionada === "editarloja" && <EditarLoja currentTheme={currentTheme} isDarkMode={isDarkMode} />}
+          {abaSelecionada === "batepapo" && <BatePapo currentTheme={currentTheme} isDarkMode={isDarkMode} />}
         </div>
       </div>
     </div>
@@ -264,14 +274,14 @@ export default function LojaDashboard() {
 }
 
 // Novo componente: Dashboard Home
-function DashboardHome({ stats, setAbaSelecionada }) {
+function DashboardHome({ stats, setAbaSelecionada, currentTheme, isDarkMode }) {
   return (
     <div className="space-y-8">
       <div className="text-center py-12">
-        <h2 className="text-4xl font-bold text-gray-800 mb-4">
+        <h2 className={`text-4xl font-bold ${currentTheme.textPrimary} mb-4`}>
           Bem-vindo ao seu Painel! 🎉
         </h2>
-        <p className="text-gray-600 text-lg mb-8">
+        <p className={`${currentTheme.text} text-lg mb-8`}>
           Aqui você tem tudo para gerenciar sua loja de forma profissional
         </p>
 
@@ -283,6 +293,7 @@ function DashboardHome({ stats, setAbaSelecionada }) {
             description="Cadastre novos produtos rapidamente"
             color="from-blue-500 to-cyan-500"
             onClick={() => setAbaSelecionada("adicionarproduto")}
+            isDarkMode={isDarkMode}
           />
           <QuickActionCard
             icon={<FiEdit className="w-12 h-12" />}
@@ -290,6 +301,7 @@ function DashboardHome({ stats, setAbaSelecionada }) {
             description="Edite e organize seu catálogo"
             color="from-green-500 to-emerald-500"
             onClick={() => setAbaSelecionada("meusprodutos")}
+            isDarkMode={isDarkMode}
           />
           <QuickActionCard
             icon={<FiMessageSquare className="w-12 h-12" />}
@@ -297,20 +309,21 @@ function DashboardHome({ stats, setAbaSelecionada }) {
             description="Responda mensagens e dúvidas"
             color="from-purple-500 to-pink-500"
             onClick={() => setAbaSelecionada("batepapo")}
+            isDarkMode={isDarkMode}
           />
         </div>
 
         {/* Tips Section */}
-        <div className="mt-16 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+        <div className={`mt-16 ${isDarkMode ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30' : 'bg-gradient-to-r from-purple-100 to-pink-100'} rounded-2xl p-8`}>
+          <h3 className={`text-2xl font-bold ${currentTheme.textPrimary} mb-4 flex items-center justify-center gap-2`}>
             <FiAlertCircle className="text-purple-600" />
             Dicas para Vender Mais
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left max-w-3xl mx-auto">
-            <TipItem text="Adicione fotos de qualidade aos seus produtos" />
-            <TipItem text="Mantenha descrições detalhadas e precisas" />
-            <TipItem text="Responda mensagens dos clientes rapidamente" />
-            <TipItem text="Mantenha seu estoque sempre atualizado" />
+            <TipItem text="Adicione fotos de qualidade aos seus produtos" isDarkMode={isDarkMode} />
+            <TipItem text="Mantenha descrições detalhadas e precisas" isDarkMode={isDarkMode} />
+            <TipItem text="Responda mensagens dos clientes rapidamente" isDarkMode={isDarkMode} />
+            <TipItem text="Mantenha seu estoque sempre atualizado" isDarkMode={isDarkMode} />
           </div>
         </div>
       </div>
@@ -318,11 +331,11 @@ function DashboardHome({ stats, setAbaSelecionada }) {
   );
 }
 
-function TipItem({ text }) {
+function TipItem({ text, isDarkMode }) {
   return (
-    <div className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition">
+    <div className={`flex items-start gap-3 ${isDarkMode ? 'bg-slate-700' : 'bg-white'} rounded-lg p-4 shadow-sm hover:shadow-md transition`}>
       <FiCheckCircle className="text-green-500 flex-shrink-0 mt-1" />
-      <span className="text-gray-700">{text}</span>
+      <span className={isDarkMode ? 'text-slate-200' : 'text-gray-700'}>{text}</span>
     </div>
   );
 }
@@ -349,11 +362,11 @@ function StatCard({ icon, title, value, color, delay }) {
   );
 }
 
-function QuickActionCard({ icon, title, description, color, onClick }) {
+function QuickActionCard({ icon, title, description, color, onClick, isDarkMode }) {
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95"
+      className={`group relative ${isDarkMode ? 'bg-slate-700' : 'bg-white'} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer active:scale-95`}
     >
       <div
         className={`absolute inset-0 bg-gradient-to-r ${color} rounded-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
@@ -363,13 +376,13 @@ function QuickActionCard({ icon, title, description, color, onClick }) {
       >
         {icon}
       </div>
-      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900">
+      <h3 className={`text-xl font-bold ${isDarkMode ? 'text-slate-100 group-hover:text-white' : 'text-gray-800 group-hover:text-gray-900'} mb-2`}>
         {title}
       </h3>
-      <p className="text-gray-600 group-hover:text-gray-700">{description}</p>
+      <p className={`${isDarkMode ? 'text-slate-300 group-hover:text-slate-200' : 'text-gray-600 group-hover:text-gray-700'}`}>{description}</p>
       <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <svg
-          className="w-6 h-6 text-gray-400"
+          className={`w-6 h-6 ${isDarkMode ? 'text-slate-400' : 'text-gray-400'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -386,7 +399,7 @@ function QuickActionCard({ icon, title, description, color, onClick }) {
   );
 }
 
-function TabButton({ active, onClick, icon, text, color }) {
+function TabButton({ active, onClick, icon, text, color, isDarkMode }) {
   const colors = {
     purple: "from-purple-600 to-pink-600",
     blue: "from-blue-600 to-cyan-600",
@@ -401,7 +414,7 @@ function TabButton({ active, onClick, icon, text, color }) {
       className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
         active
           ? `bg-gradient-to-r ${colors[color]} text-white shadow-lg`
-          : "text-gray-600 hover:bg-gray-100"
+          : `${isDarkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-gray-600 hover:bg-gray-100'}`
       }`}
     >
       {icon}

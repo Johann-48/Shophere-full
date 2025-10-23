@@ -383,7 +383,7 @@ export default function Home() {
           <img
             src={heroError ? HERO_FALLBACK_URL : heroSrc}
             alt="Banner principal"
-            className="w-full h-auto object-contain rounded-2xl shadow"
+            className="w-full h-auto max-h-[750px] object-cover rounded-2xl shadow"
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setHeroError(true)}
