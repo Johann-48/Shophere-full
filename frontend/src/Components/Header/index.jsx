@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { FiMenu, FiX, FiUser, FiSearch, FiImage } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiSearch, FiTrendingUp, FiShoppingBag, FiStar, FiClock, FiImage, FiArrowRight } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import API_CONFIG from "../../config/api";
 import { useTheme } from "../../contexts/ThemeContext";
