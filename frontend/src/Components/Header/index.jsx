@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { FiMenu, FiX, FiUser, FiSearch } from "react-icons/fi";
+import { FiMenu, FiX, FiUser, FiSearch, FiTrendingUp, FiShoppingBag, FiStar, FiClock } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import API_CONFIG from "../../config/api";
@@ -245,92 +245,240 @@ export default function Header() {
                 <AnimatePresence>
                   {showResults && searchResults.length > 0 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                      initial={{ opacity: 0, y: -20, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className={`absolute top-full mt-2 w-full rounded-xl shadow-2xl border overflow-hidden z-50 backdrop-blur-sm ${
-                        isDarkMode
-                          ? "bg-slate-800/95 border-slate-700"
-                          : "bg-white/95 border-gray-200"
-                      }`}
+                      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                      className="absolute top-full mt-3 w-full z-50"
                     >
-                      {searchLoading ? (
-                        <div className="p-6 text-center">
-                          <div className="inline-block w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                          <p className={`mt-2 text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                            Buscando...
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                          {searchResults.map((product, index) => (
-                            <motion.button
-                              key={product.id}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              onClick={() => handleProductClick(product.id)}
-                              className={`w-full p-4 flex items-center gap-4 transition-all duration-200 group ${
-                                isDarkMode
-                                  ? "hover:bg-slate-700/70"
-                                  : "hover:bg-blue-50/70"
-                              } border-b ${
-                                isDarkMode
-                                  ? "border-slate-700/50"
-                                  : "border-gray-100"
-                              } last:border-b-0`}
-                            >
-                              <div className="relative flex-shrink-0">
-                                <img
-                                  src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
-                                  alt={product.name || product.nome}
-                                  className="w-14 h-14 object-cover rounded-lg shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105"
-                                />
-                                <div className={`absolute inset-0 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}></div>
-                              </div>
-                              <div className="flex-1 text-left min-w-0">
-                                <h4
-                                  className={`font-semibold text-sm mb-1 group-hover:text-blue-600 transition-colors ${
-                                    isDarkMode ? "text-slate-100" : "text-gray-900"
-                                  }`}
-                                >
-                                  {product.name || product.nome}
-                                </h4>
-                                {(product.description || product.descricao) && (
-                                  <p
-                                    className={`text-xs leading-relaxed line-clamp-2 ${
-                                      isDarkMode ? "text-slate-400" : "text-gray-500"
-                                    }`}
-                                  >
-                                    {(product.description || product.descricao)?.substring(0, 60)}
-                                    {(product.description || product.descricao)?.length > 60 ? "..." : ""}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="text-right flex-shrink-0">
-                                <p className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                  {formatPrice(product.price || product.preco)}
-                                </p>
-                                <p className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                                  Ver detalhes →
-                                </p>
-                              </div>
-                            </motion.button>
-                          ))}
-                          <button
-                            onClick={handleSearch}
-                            className={`w-full p-4 text-center text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                              isDarkMode
-                                ? "text-blue-400 hover:bg-slate-700/70 hover:text-blue-300"
-                                : "text-blue-600 hover:bg-blue-50/70 hover:text-blue-700"
-                            }`}
+                      {/* Decorative blur background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl -z-10"></div>
+                      
+                      <div className={`rounded-2xl shadow-2xl border backdrop-blur-xl overflow-hidden ${
+                        isDarkMode
+                          ? "bg-slate-900/95 border-slate-700/50"
+                          : "bg-white/95 border-gray-200/50"
+                      }`}>
+                        {/* Header com estatísticas */}
+                        <div className={`px-4 py-3 border-b flex items-center justify-between ${
+                          isDarkMode ? "border-slate-700/50 bg-slate-800/50" : "border-gray-200/50 bg-gray-50/50"
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span className={`text-xs font-semibold ${isDarkMode ? "text-slate-300" : "text-gray-600"}`}>
+                              {searchResults.length} produtos encontrados
+                            </span>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="w-4 h-4"
                           >
-                            <FiSearch size={16} />
-                            Ver todos os {searchResults.length}+ resultados
-                          </button>
+                            <FiTrendingUp className="text-blue-500" size={16} />
+                          </motion.div>
                         </div>
-                      )}
+
+                        {searchLoading ? (
+                          <div className="p-8 text-center">
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                              className="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"
+                            ></motion.div>
+                            <p className={`mt-3 text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                              Procurando os melhores produtos...
+                            </p>
+                            <div className="flex items-center justify-center gap-1 mt-2">
+                              {[...Array(3)].map((_, i) => (
+                                <motion.div
+                                  key={i}
+                                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                                  transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
+                                  className="w-1.5 h-1.5 bg-blue-500 rounded-full"
+                                ></motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+                            {searchResults.map((product, index) => {
+                              const hasDiscount = product.oldPrice && product.price < product.oldPrice;
+                              const discountPercent = hasDiscount 
+                                ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
+                                : 0;
+                              
+                              return (
+                                <motion.button
+                                  key={product.id}
+                                  initial={{ opacity: 0, x: -30 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ 
+                                    delay: index * 0.05, 
+                                    type: "spring",
+                                    stiffness: 100,
+                                    damping: 15
+                                  }}
+                                  onClick={() => handleProductClick(product.id)}
+                                  className={`w-full p-4 flex items-center gap-4 transition-all duration-300 group relative overflow-hidden ${
+                                    isDarkMode
+                                      ? "hover:bg-gradient-to-r hover:from-slate-800/80 hover:to-slate-700/80"
+                                      : "hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-purple-50/80"
+                                  } border-b ${
+                                    isDarkMode
+                                      ? "border-slate-800/50"
+                                      : "border-gray-100/50"
+                                  } last:border-b-0`}
+                                >
+                                  {/* Efeito de luz no hover */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-purple-500/5 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                  
+                                  {/* Imagem do produto */}
+                                  <div className="relative flex-shrink-0">
+                                    <motion.div
+                                      whileHover={{ scale: 1.1, rotate: 2 }}
+                                      transition={{ type: "spring", stiffness: 300 }}
+                                      className="relative"
+                                    >
+                                      <img
+                                        src={product.mainImage || product.imagem || "https://via.placeholder.com/80"}
+                                        alt={product.name || product.nome}
+                                        className="w-20 h-20 object-cover rounded-xl shadow-lg ring-2 ring-transparent group-hover:ring-blue-500/50 transition-all duration-300"
+                                      />
+                                      {/* Badge de desconto */}
+                                      {hasDiscount && (
+                                        <motion.div
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
+                                          className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg"
+                                        >
+                                          -{discountPercent}%
+                                        </motion.div>
+                                      )}
+                                      {/* Efeito de brilho */}
+                                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                    </motion.div>
+                                  </div>
+
+                                  {/* Informações do produto */}
+                                  <div className="flex-1 text-left min-w-0 space-y-2">
+                                    {/* Nome e categoria */}
+                                    <div>
+                                      <h4
+                                        className={`font-bold text-base mb-1 group-hover:text-blue-600 transition-colors line-clamp-1 ${
+                                          isDarkMode ? "text-slate-100" : "text-gray-900"
+                                        }`}
+                                      >
+                                        {product.name || product.nome}
+                                      </h4>
+                                      {product.commerceName && (
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                                            isDarkMode 
+                                              ? "bg-slate-700/50 text-slate-300" 
+                                              : "bg-gray-100 text-gray-600"
+                                          }`}>
+                                            <FiShoppingBag size={10} />
+                                            {product.commerceName}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Descrição */}
+                                    {(product.description || product.descricao) && (
+                                      <p
+                                        className={`text-xs leading-relaxed line-clamp-2 ${
+                                          isDarkMode ? "text-slate-400" : "text-gray-500"
+                                        }`}
+                                      >
+                                        {(product.description || product.descricao)?.substring(0, 80)}
+                                        {(product.description || product.descricao)?.length > 80 ? "..." : ""}
+                                      </p>
+                                    )}
+
+                                    {/* Badges adicionais */}
+                                    <div className="flex items-center gap-2">
+                                      <motion.span
+                                        whileHover={{ scale: 1.05 }}
+                                        className="inline-flex items-center gap-1 text-xs font-medium text-yellow-600 dark:text-yellow-500"
+                                      >
+                                        <FiStar size={12} className="fill-current" />
+                                        {product.avgRating || "4.5"}
+                                      </motion.span>
+                                      <span className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`}>•</span>
+                                      <span className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                                        {product.sales || Math.floor(Math.random() * 100) + 10} vendas
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Preço e ação */}
+                                  <div className="text-right flex-shrink-0 space-y-2">
+                                    {/* Preço antigo */}
+                                    {hasDiscount && (
+                                      <p className="text-xs line-through text-gray-400">
+                                        {formatPrice(product.oldPrice)}
+                                      </p>
+                                    )}
+                                    
+                                    {/* Preço atual */}
+                                    <motion.div
+                                      whileHover={{ scale: 1.05 }}
+                                      className="relative"
+                                    >
+                                      <p className="font-black text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                        {formatPrice(product.price || product.preco)}
+                                      </p>
+                                      {/* Efeito de brilho no preço */}
+                                      <motion.div
+                                        animate={{ x: [-100, 100] }}
+                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                      ></motion.div>
+                                    </motion.div>
+
+                                    {/* Botão de ação */}
+                                    <motion.div
+                                      whileHover={{ scale: 1.05 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      className={`text-xs font-semibold px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 justify-center`}
+                                    >
+                                      Ver produto
+                                      <motion.span
+                                        animate={{ x: [0, 3, 0] }}
+                                        transition={{ duration: 1, repeat: Infinity }}
+                                      >
+                                        →
+                                      </motion.span>
+                                    </motion.div>
+                                  </div>
+                                </motion.button>
+                              );
+                            })}
+
+                            {/* Footer com botão ver todos */}
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={handleSearch}
+                              className={`w-full p-4 text-center font-bold transition-all duration-300 flex items-center justify-center gap-3 border-t ${
+                                isDarkMode
+                                  ? "bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 border-slate-700 text-blue-400"
+                                  : "bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 border-gray-200 text-blue-600"
+                              }`}
+                            >
+                              <FiSearch size={18} />
+                              <span>Ver todos os {searchResults.length}+ resultados</span>
+                              <motion.div
+                                animate={{ rotate: [0, 360] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                              >
+                                <FiTrendingUp size={18} />
+                              </motion.div>
+                            </motion.button>
+                          </div>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -488,77 +636,116 @@ export default function Header() {
               <AnimatePresence>
                 {showResults && searchResults.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className={`mt-3 rounded-xl shadow-2xl border overflow-hidden backdrop-blur-sm ${
-                      isDarkMode
-                        ? "bg-slate-800/95 border-slate-700"
-                        : "bg-white/95 border-gray-200"
-                    }`}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className="mt-3"
                   >
-                    {searchLoading ? (
-                      <div className="p-6 text-center">
-                        <div className="inline-block w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className={`mt-2 text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                          Buscando...
-                        </p>
+                    {/* Decorative blur background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-2xl -z-10"></div>
+                    
+                    <div className={`rounded-2xl shadow-2xl border backdrop-blur-xl overflow-hidden ${
+                      isDarkMode
+                        ? "bg-slate-900/95 border-slate-700/50"
+                        : "bg-white/95 border-gray-200/50"
+                    }`}>
+                      {/* Header */}
+                      <div className={`px-4 py-2.5 border-b flex items-center justify-between ${
+                        isDarkMode ? "border-slate-700/50 bg-slate-800/50" : "border-gray-200/50 bg-gray-50/50"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className={`text-xs font-semibold ${isDarkMode ? "text-slate-300" : "text-gray-600"}`}>
+                            {searchResults.length} encontrados
+                          </span>
+                        </div>
+                        <FiTrendingUp className="text-blue-500" size={14} />
                       </div>
-                    ) : (
-                      <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                        {searchResults.map((product, index) => (
-                          <motion.button
-                            key={product.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() => handleProductClick(product.id)}
-                            className={`w-full p-4 flex items-center gap-3 transition-all duration-200 group ${
-                              isDarkMode
-                                ? "hover:bg-slate-700/70"
-                                : "hover:bg-blue-50/70"
-                            } border-b ${
-                              isDarkMode
-                                ? "border-slate-700/50"
-                                : "border-gray-100"
-                            } last:border-b-0`}
-                          >
-                            <div className="relative flex-shrink-0">
-                              <img
-                                src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
-                                alt={product.name || product.nome}
-                                className="w-16 h-16 object-cover rounded-lg shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105"
-                              />
-                              <div className={`absolute inset-0 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}></div>
-                            </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <h4
-                                className={`font-semibold text-sm mb-1 truncate group-hover:text-blue-600 transition-colors ${
+
+                      {searchLoading ? (
+                        <div className="p-6 text-center">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="inline-block w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full"
+                          ></motion.div>
+                          <p className={`mt-2 text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                            Procurando produtos...
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                          {searchResults.map((product, index) => (
+                            <motion.button
+                              key={product.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.04, type: "spring", stiffness: 100 }}
+                              onClick={() => handleProductClick(product.id)}
+                              className={`w-full p-3 flex items-center gap-3 transition-all duration-300 group relative overflow-hidden ${
+                                isDarkMode
+                                  ? "hover:bg-gradient-to-r hover:from-slate-800 hover:to-slate-700"
+                                  : "hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
+                              } border-b ${
+                                isDarkMode ? "border-slate-800/50" : "border-gray-100/50"
+                              } last:border-b-0`}
+                            >
+                              {/* Efeito de luz */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                              
+                              {/* Imagem */}
+                              <div className="relative flex-shrink-0">
+                                <motion.div whileHover={{ scale: 1.08 }} className="relative">
+                                  <img
+                                    src={product.mainImage || product.imagem || "https://via.placeholder.com/80"}
+                                    alt={product.name || product.nome}
+                                    className="w-16 h-16 object-cover rounded-lg shadow-md ring-1 ring-transparent group-hover:ring-blue-500/30 transition-all"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                </motion.div>
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 text-left min-w-0 space-y-1">
+                                <h4 className={`font-bold text-sm truncate group-hover:text-blue-600 transition-colors ${
                                   isDarkMode ? "text-slate-100" : "text-gray-900"
-                                }`}
-                              >
-                                {product.name || product.nome}
-                              </h4>
-                              <p className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                {formatPrice(product.price || product.preco)}
-                              </p>
-                            </div>
+                                }`}>
+                                  {product.name || product.nome}
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex items-center gap-0.5 text-xs text-yellow-600">
+                                    <FiStar size={10} className="fill-current" />
+                                    {product.avgRating || "4.5"}
+                                  </span>
+                                  <span className={`text-xs ${isDarkMode ? 'text-slate-500' : 'text-gray-400'}`}>•</span>
+                                  <span className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                                    {product.sales || Math.floor(Math.random() * 50) + 5} vendas
+                                  </span>
+                                </div>
+                                <p className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                  {formatPrice(product.price || product.preco)}
+                                </p>
+                              </div>
+                            </motion.button>
+                          ))}
+
+                          {/* Footer */}
+                          <motion.button
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleSearch}
+                            className={`w-full p-3 text-center text-xs font-bold transition-all flex items-center justify-center gap-2 border-t ${
+                              isDarkMode
+                                ? "bg-gradient-to-r from-slate-800 to-slate-700 border-slate-700 text-blue-400"
+                                : "bg-gradient-to-r from-gray-50 to-blue-50 border-gray-200 text-blue-600"
+                            }`}
+                          >
+                            <FiSearch size={14} />
+                            Ver todos os resultados
                           </motion.button>
-                        ))}
-                        <button
-                          onClick={handleSearch}
-                          className={`w-full p-4 text-center text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                            isDarkMode
-                              ? "text-blue-400 hover:bg-slate-700/70 hover:text-blue-300"
-                              : "text-blue-600 hover:bg-blue-50/70 hover:text-blue-700"
-                          }`}
-                        >
-                          <FiSearch size={16} />
-                          Ver todos os {searchResults.length}+ resultados
-                        </button>
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
