@@ -245,74 +245,89 @@ export default function Header() {
                 <AnimatePresence>
                   {showResults && searchResults.length > 0 && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className={`absolute top-full mt-2 w-full rounded-lg shadow-2xl border overflow-hidden z-50 ${
+                      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className={`absolute top-full mt-2 w-full rounded-xl shadow-2xl border overflow-hidden z-50 backdrop-blur-sm ${
                         isDarkMode
-                          ? "bg-slate-800 border-slate-700"
-                          : "bg-white border-gray-200"
+                          ? "bg-slate-800/95 border-slate-700"
+                          : "bg-white/95 border-gray-200"
                       }`}
                     >
                       {searchLoading ? (
-                        <div className="p-4 text-center">
-                          <div className="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="p-6 text-center">
+                          <div className="inline-block w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          <p className={`mt-2 text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                            Buscando...
+                          </p>
                         </div>
                       ) : (
-                        <div className="max-h-96 overflow-y-auto">
-                          {searchResults.map((product) => (
-                            <button
+                        <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                          {searchResults.map((product, index) => (
+                            <motion.button
                               key={product.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.05 }}
                               onClick={() => handleProductClick(product.id)}
-                              className={`w-full p-3 flex items-center gap-3 transition-colors ${
+                              className={`w-full p-4 flex items-center gap-4 transition-all duration-200 group ${
                                 isDarkMode
-                                  ? "hover:bg-slate-700"
-                                  : "hover:bg-gray-50"
+                                  ? "hover:bg-slate-700/70"
+                                  : "hover:bg-blue-50/70"
                               } border-b ${
                                 isDarkMode
-                                  ? "border-slate-700"
+                                  ? "border-slate-700/50"
                                   : "border-gray-100"
                               } last:border-b-0`}
                             >
-                              <img
-                                src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
-                                alt={product.name || product.nome}
-                                className="w-12 h-12 object-cover rounded-lg"
-                              />
-                              <div className="flex-1 text-left">
+                              <div className="relative flex-shrink-0">
+                                <img
+                                  src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
+                                  alt={product.name || product.nome}
+                                  className="w-14 h-14 object-cover rounded-lg shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105"
+                                />
+                                <div className={`absolute inset-0 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}></div>
+                              </div>
+                              <div className="flex-1 text-left min-w-0">
                                 <h4
-                                  className={`font-medium text-sm ${
-                                    isDarkMode ? "text-slate-200" : "text-gray-900"
+                                  className={`font-semibold text-sm mb-1 group-hover:text-blue-600 transition-colors ${
+                                    isDarkMode ? "text-slate-100" : "text-gray-900"
                                   }`}
                                 >
                                   {product.name || product.nome}
                                 </h4>
-                                <p
-                                  className={`text-xs ${
-                                    isDarkMode ? "text-slate-400" : "text-gray-500"
-                                  }`}
-                                >
-                                  {(product.description || product.descricao)?.substring(0, 50)}
-                                  {(product.description || product.descricao)?.length > 50 ? "..." : ""}
-                                </p>
+                                {(product.description || product.descricao) && (
+                                  <p
+                                    className={`text-xs leading-relaxed line-clamp-2 ${
+                                      isDarkMode ? "text-slate-400" : "text-gray-500"
+                                    }`}
+                                  >
+                                    {(product.description || product.descricao)?.substring(0, 60)}
+                                    {(product.description || product.descricao)?.length > 60 ? "..." : ""}
+                                  </p>
+                                )}
                               </div>
-                              <div className="text-right">
-                                <p className="font-bold text-blue-600">
+                              <div className="text-right flex-shrink-0">
+                                <p className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                   {formatPrice(product.price || product.preco)}
                                 </p>
+                                <p className={`text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                                  Ver detalhes →
+                                </p>
                               </div>
-                            </button>
+                            </motion.button>
                           ))}
                           <button
                             onClick={handleSearch}
-                            className={`w-full p-3 text-center text-sm font-medium transition-colors ${
+                            className={`w-full p-4 text-center text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                               isDarkMode
-                                ? "text-blue-400 hover:bg-slate-700"
-                                : "text-blue-600 hover:bg-gray-50"
+                                ? "text-blue-400 hover:bg-slate-700/70 hover:text-blue-300"
+                                : "text-blue-600 hover:bg-blue-50/70 hover:text-blue-700"
                             }`}
                           >
-                            Ver todos os resultados →
+                            <FiSearch size={16} />
+                            Ver todos os {searchResults.length}+ resultados
                           </button>
                         </div>
                       )}
@@ -473,64 +488,74 @@ export default function Header() {
               <AnimatePresence>
                 {showResults && searchResults.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className={`mt-2 rounded-lg shadow-2xl border overflow-hidden ${
+                    initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className={`mt-3 rounded-xl shadow-2xl border overflow-hidden backdrop-blur-sm ${
                       isDarkMode
-                        ? "bg-slate-800 border-slate-700"
-                        : "bg-white border-gray-200"
+                        ? "bg-slate-800/95 border-slate-700"
+                        : "bg-white/95 border-gray-200"
                     }`}
                   >
                     {searchLoading ? (
-                      <div className="p-4 text-center">
-                        <div className="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="p-6 text-center">
+                        <div className="inline-block w-6 h-6 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className={`mt-2 text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                          Buscando...
+                        </p>
                       </div>
                     ) : (
-                      <div className="max-h-80 overflow-y-auto">
-                        {searchResults.map((product) => (
-                          <button
+                      <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                        {searchResults.map((product, index) => (
+                          <motion.button
                             key={product.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
                             onClick={() => handleProductClick(product.id)}
-                            className={`w-full p-3 flex items-center gap-3 transition-colors ${
+                            className={`w-full p-4 flex items-center gap-3 transition-all duration-200 group ${
                               isDarkMode
-                                ? "hover:bg-slate-700"
-                                : "hover:bg-gray-50"
+                                ? "hover:bg-slate-700/70"
+                                : "hover:bg-blue-50/70"
                             } border-b ${
                               isDarkMode
-                                ? "border-slate-700"
+                                ? "border-slate-700/50"
                                 : "border-gray-100"
                             } last:border-b-0`}
                           >
-                            <img
-                              src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
-                              alt={product.name || product.nome}
-                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                            />
+                            <div className="relative flex-shrink-0">
+                              <img
+                                src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
+                                alt={product.name || product.nome}
+                                className="w-16 h-16 object-cover rounded-lg shadow-md group-hover:shadow-lg transition-all duration-200 group-hover:scale-105"
+                              />
+                              <div className={`absolute inset-0 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200`}></div>
+                            </div>
                             <div className="flex-1 text-left min-w-0">
                               <h4
-                                className={`font-medium text-sm truncate ${
-                                  isDarkMode ? "text-slate-200" : "text-gray-900"
+                                className={`font-semibold text-sm mb-1 truncate group-hover:text-blue-600 transition-colors ${
+                                  isDarkMode ? "text-slate-100" : "text-gray-900"
                                 }`}
                               >
                                 {product.name || product.nome}
                               </h4>
-                              <p className="font-bold text-blue-600 text-sm">
+                              <p className="font-bold text-base bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                                 {formatPrice(product.price || product.preco)}
                               </p>
                             </div>
-                          </button>
+                          </motion.button>
                         ))}
                         <button
                           onClick={handleSearch}
-                          className={`w-full p-3 text-center text-sm font-medium transition-colors ${
+                          className={`w-full p-4 text-center text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                             isDarkMode
-                              ? "text-blue-400 hover:bg-slate-700"
-                              : "text-blue-600 hover:bg-gray-50"
+                              ? "text-blue-400 hover:bg-slate-700/70 hover:text-blue-300"
+                              : "text-blue-600 hover:bg-blue-50/70 hover:text-blue-700"
                           }`}
                         >
-                          Ver todos os resultados →
+                          <FiSearch size={16} />
+                          Ver todos os {searchResults.length}+ resultados
                         </button>
                       </div>
                     )}
