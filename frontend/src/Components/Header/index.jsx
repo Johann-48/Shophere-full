@@ -16,7 +16,11 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const profileRef = useRef(null);
+  const searchRef = useRef(null);
   const { isDarkMode, dark, light } = useTheme();
   const { role } = useAuth();
 
@@ -76,6 +80,48 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [profileOpen]);
 
+  // Close search results on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowResults(false);
+      }
+    };
+    if (showResults) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showResults]);
+
+  // Busca em tempo real quando o usuário digita
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (!searchQuery.trim() || searchQuery.length < 2) {
+        setSearchResults([]);
+        setShowResults(false);
+        return;
+      }
+
+      setSearchLoading(true);
+      try {
+        const res = await axios.get(`/api/products/search`, {
+          params: { q: searchQuery },
+        });
+        const products = res.data.products || [];
+        setSearchResults(products.slice(0, 5)); // Mostra apenas os 5 primeiros resultados
+        setShowResults(products.length > 0);
+      } catch (err) {
+        console.error("Erro ao buscar produtos:", err);
+        setSearchResults([]);
+        setShowResults(false);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+
+    // Debounce - aguarda 300ms após o usuário parar de digitar
+    const timeoutId = setTimeout(searchProducts, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
   // Só mostra Dashboard/Contatos se o usuário estiver logado
   const contactDestination = userName
     ? role === "commerce"
@@ -115,7 +161,23 @@ export default function Header() {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
+      setShowResults(false);
     }
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/produto/${productId}`);
+    setSearchQuery("");
+    setShowResults(false);
+  };
+
+  const formatPrice = (price) => {
+    const num = Number(price);
+    if (isNaN(num)) return "R$ 0,00";
+    return num.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
   };
 
   return (
@@ -137,46 +199,127 @@ export default function Header() {
         <div className="hidden md:flex justify-center">
           <AnimatePresence>
             {showSearchBar && (
-              <motion.form
+              <motion.div
                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                onSubmit={handleSearch}
-                className="w-full max-w-md"
+                className="w-full max-w-md relative"
+                ref={searchRef}
               >
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Pesquisar produtos..."
-                    className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
-                      isDarkMode
-                        ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
-                        : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
-                  />
-                  <FiSearch
-                    className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                      isDarkMode ? "text-slate-400" : "text-gray-400"
-                    }`}
-                    size={18}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="submit"
-                      className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-md text-xs font-medium ${
+                <form onSubmit={handleSearch}>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Pesquisar produtos..."
+                      className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
                         isDarkMode
-                          ? "bg-blue-600 hover:bg-blue-700"
-                          : "bg-blue-500 hover:bg-blue-600"
-                      } text-white transition-colors`}
+                          ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
+                          : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
+                      } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                    />
+                    <FiSearch
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                        isDarkMode ? "text-slate-400" : "text-gray-400"
+                      }`}
+                      size={18}
+                    />
+                    {searchQuery && (
+                      <button
+                        type="submit"
+                        className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-md text-xs font-medium ${
+                          isDarkMode
+                            ? "bg-blue-600 hover:bg-blue-700"
+                            : "bg-blue-500 hover:bg-blue-600"
+                        } text-white transition-colors`}
+                      >
+                        Buscar
+                      </button>
+                    )}
+                  </div>
+                </form>
+
+                {/* Dropdown de Resultados */}
+                <AnimatePresence>
+                  {showResults && searchResults.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className={`absolute top-full mt-2 w-full rounded-lg shadow-2xl border overflow-hidden z-50 ${
+                        isDarkMode
+                          ? "bg-slate-800 border-slate-700"
+                          : "bg-white border-gray-200"
+                      }`}
                     >
-                      Buscar
-                    </button>
+                      {searchLoading ? (
+                        <div className="p-4 text-center">
+                          <div className="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      ) : (
+                        <div className="max-h-96 overflow-y-auto">
+                          {searchResults.map((product) => (
+                            <button
+                              key={product.id}
+                              onClick={() => handleProductClick(product.id)}
+                              className={`w-full p-3 flex items-center gap-3 transition-colors ${
+                                isDarkMode
+                                  ? "hover:bg-slate-700"
+                                  : "hover:bg-gray-50"
+                              } border-b ${
+                                isDarkMode
+                                  ? "border-slate-700"
+                                  : "border-gray-100"
+                              } last:border-b-0`}
+                            >
+                              <img
+                                src={product.imagem || "https://via.placeholder.com/60"}
+                                alt={product.nome}
+                                className="w-12 h-12 object-cover rounded-lg"
+                              />
+                              <div className="flex-1 text-left">
+                                <h4
+                                  className={`font-medium text-sm ${
+                                    isDarkMode ? "text-slate-200" : "text-gray-900"
+                                  }`}
+                                >
+                                  {product.nome}
+                                </h4>
+                                <p
+                                  className={`text-xs ${
+                                    isDarkMode ? "text-slate-400" : "text-gray-500"
+                                  }`}
+                                >
+                                  {product.descricao?.substring(0, 50)}
+                                  {product.descricao?.length > 50 ? "..." : ""}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-blue-600">
+                                  {formatPrice(product.preco || product.price)}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleSearch}
+                            className={`w-full p-3 text-center text-sm font-medium transition-colors ${
+                              isDarkMode
+                                ? "text-blue-400 hover:bg-slate-700"
+                                : "text-blue-600 hover:bg-gray-50"
+                            }`}
+                          >
+                            Ver todos os resultados →
+                          </button>
+                        </div>
+                      )}
+                    </motion.div>
                   )}
-                </div>
-              </motion.form>
+                </AnimatePresence>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -289,41 +432,112 @@ export default function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden border-t border-current/10"
+            className="md:hidden border-t border-current/10 relative"
           >
-            <form onSubmit={handleSearch} className="px-4 py-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Pesquisar produtos..."
-                  className={`w-full pl-10 pr-20 py-2.5 rounded-lg border ${
-                    isDarkMode
-                      ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
-                      : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
-                />
-                <FiSearch
-                  className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                    isDarkMode ? "text-slate-400" : "text-gray-400"
-                  }`}
-                  size={18}
-                />
-                {searchQuery && (
-                  <button
-                    type="submit"
-                    className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium ${
+            <div className="px-4 py-3" ref={searchRef}>
+              <form onSubmit={handleSearch}>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Pesquisar produtos..."
+                    className={`w-full pl-10 pr-20 py-2.5 rounded-lg border ${
                       isDarkMode
-                        ? "bg-blue-600 hover:bg-blue-700"
-                        : "bg-blue-500 hover:bg-blue-600"
-                    } text-white transition-colors`}
+                        ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
+                        : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                  />
+                  <FiSearch
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                      isDarkMode ? "text-slate-400" : "text-gray-400"
+                    }`}
+                    size={18}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="submit"
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium ${
+                        isDarkMode
+                          ? "bg-blue-600 hover:bg-blue-700"
+                          : "bg-blue-500 hover:bg-blue-600"
+                      } text-white transition-colors`}
+                    >
+                      Buscar
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* Dropdown de Resultados Mobile */}
+              <AnimatePresence>
+                {showResults && searchResults.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className={`mt-2 rounded-lg shadow-2xl border overflow-hidden ${
+                      isDarkMode
+                        ? "bg-slate-800 border-slate-700"
+                        : "bg-white border-gray-200"
+                    }`}
                   >
-                    Buscar
-                  </button>
+                    {searchLoading ? (
+                      <div className="p-4 text-center">
+                        <div className="inline-block w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <div className="max-h-80 overflow-y-auto">
+                        {searchResults.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleProductClick(product.id)}
+                            className={`w-full p-3 flex items-center gap-3 transition-colors ${
+                              isDarkMode
+                                ? "hover:bg-slate-700"
+                                : "hover:bg-gray-50"
+                            } border-b ${
+                              isDarkMode
+                                ? "border-slate-700"
+                                : "border-gray-100"
+                            } last:border-b-0`}
+                          >
+                            <img
+                              src={product.imagem || "https://via.placeholder.com/60"}
+                              alt={product.nome}
+                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                            />
+                            <div className="flex-1 text-left min-w-0">
+                              <h4
+                                className={`font-medium text-sm truncate ${
+                                  isDarkMode ? "text-slate-200" : "text-gray-900"
+                                }`}
+                              >
+                                {product.nome}
+                              </h4>
+                              <p className="font-bold text-blue-600 text-sm">
+                                {formatPrice(product.preco || product.price)}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                        <button
+                          onClick={handleSearch}
+                          className={`w-full p-3 text-center text-sm font-medium transition-colors ${
+                            isDarkMode
+                              ? "text-blue-400 hover:bg-slate-700"
+                              : "text-blue-600 hover:bg-gray-50"
+                          }`}
+                        >
+                          Ver todos os resultados →
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
                 )}
-              </div>
-            </form>
+              </AnimatePresence>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
