@@ -276,8 +276,8 @@ export default function Header() {
                               } last:border-b-0`}
                             >
                               <img
-                                src={product.imagem || "https://via.placeholder.com/60"}
-                                alt={product.nome}
+                                src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
+                                alt={product.name || product.nome}
                                 className="w-12 h-12 object-cover rounded-lg"
                               />
                               <div className="flex-1 text-left">
@@ -286,20 +286,20 @@ export default function Header() {
                                     isDarkMode ? "text-slate-200" : "text-gray-900"
                                   }`}
                                 >
-                                  {product.nome}
+                                  {product.name || product.nome}
                                 </h4>
                                 <p
                                   className={`text-xs ${
                                     isDarkMode ? "text-slate-400" : "text-gray-500"
                                   }`}
                                 >
-                                  {product.descricao?.substring(0, 50)}
-                                  {product.descricao?.length > 50 ? "..." : ""}
+                                  {(product.description || product.descricao)?.substring(0, 50)}
+                                  {(product.description || product.descricao)?.length > 50 ? "..." : ""}
                                 </p>
                               </div>
                               <div className="text-right">
                                 <p className="font-bold text-blue-600">
-                                  {formatPrice(product.preco || product.price)}
+                                  {formatPrice(product.price || product.preco)}
                                 </p>
                               </div>
                             </button>
@@ -504,8 +504,8 @@ export default function Header() {
                             } last:border-b-0`}
                           >
                             <img
-                              src={product.imagem || "https://via.placeholder.com/60"}
-                              alt={product.nome}
+                              src={product.mainImage || product.imagem || "https://via.placeholder.com/60"}
+                              alt={product.name || product.nome}
                               className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
                             />
                             <div className="flex-1 text-left min-w-0">
@@ -514,10 +514,10 @@ export default function Header() {
                                   isDarkMode ? "text-slate-200" : "text-gray-900"
                                 }`}
                               >
-                                {product.nome}
+                                {product.name || product.nome}
                               </h4>
                               <p className="font-bold text-blue-600 text-sm">
-                                {formatPrice(product.preco || product.price)}
+                                {formatPrice(product.price || product.preco)}
                               </p>
                             </div>
                           </button>
