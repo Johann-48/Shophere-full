@@ -182,6 +182,7 @@ export default function LojaDashboard() {
               value={stats.totalProdutos}
               color="from-blue-500 to-cyan-500"
               delay="0"
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={<FiShoppingBag className="w-8 h-8" />}
@@ -189,6 +190,7 @@ export default function LojaDashboard() {
               value={stats.produtosAtivos}
               color="from-green-500 to-emerald-500"
               delay="100"
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={<FiMessageSquare className="w-8 h-8" />}
@@ -196,6 +198,7 @@ export default function LojaDashboard() {
               value={stats.totalConversas}
               color="from-purple-500 to-pink-500"
               delay="200"
+              isDarkMode={isDarkMode}
             />
             <StatCard
               icon={<FiDollarSign className="w-8 h-8" />}
@@ -203,6 +206,7 @@ export default function LojaDashboard() {
               value={formatCurrency(stats.valorTotal)}
               color="from-orange-500 to-red-500"
               delay="300"
+              isDarkMode={isDarkMode}
             />
           </div>
         )}
@@ -340,16 +344,16 @@ function TipItem({ text, isDarkMode }) {
   );
 }
 
-function StatCard({ icon, title, value, color, delay }) {
+function StatCard({ icon, title, value, color, delay, isDarkMode }) {
   return (
     <div
-      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+      className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300`}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-800">{value}</p>
+          <p className={`${isDarkMode ? 'text-slate-400' : 'text-gray-500'} text-sm font-medium mb-1`}>{title}</p>
+          <p className={`text-3xl font-bold ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>{value}</p>
         </div>
         <div
           className={`bg-gradient-to-r ${color} w-14 h-14 rounded-xl flex items-center justify-center text-white shadow-lg`}
@@ -423,7 +427,7 @@ function TabButton({ active, onClick, icon, text, color, isDarkMode }) {
   );
 }
 
-function AdicionarProduto() {
+function AdicionarProduto({ isDarkMode }) {
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -540,7 +544,7 @@ function AdicionarProduto() {
         <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
           Adicionar Novo Produto
         </h2>
-        <p className="text-gray-600">Preencha os dados do seu produto</p>
+        <p className={isDarkMode ? 'text-slate-400' : 'text-gray-600'}>Preencha os dados do seu produto</p>
       </div>
 
       {/* Preview da Imagem */}
@@ -574,6 +578,7 @@ function AdicionarProduto() {
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           required
+          isDarkMode={isDarkMode}
         />
         <ModernInput
           label="Preço"
@@ -584,12 +589,13 @@ function AdicionarProduto() {
           value={preco}
           onChange={(e) => setPreco(e.target.value)}
           required
+          isDarkMode={isDarkMode}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <label className={`block text-sm font-semibold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'} flex items-center gap-2`}>
             <FiShoppingBag className="text-blue-600" />
             Categoria
           </label>
@@ -597,7 +603,11 @@ function AdicionarProduto() {
             value={categoria}
             onChange={(e) => setCategoria(e.target.value)}
             required
-            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+            className={`w-full p-3 border-2 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all ${
+              isDarkMode 
+                ? 'bg-slate-800 border-slate-700 text-slate-200' 
+                : 'bg-white border-gray-200'
+            }`}
           >
             <option value="" disabled>
               Selecione uma categoria
@@ -615,6 +625,7 @@ function AdicionarProduto() {
           placeholder="Ex: Nike"
           value={marca}
           onChange={(e) => setMarca(e.target.value)}
+          isDarkMode={isDarkMode}
         />
       </div>
 
@@ -628,6 +639,7 @@ function AdicionarProduto() {
           placeholder="0"
           value={quantidade}
           onChange={(e) => setQuantidade(e.target.value)}
+          isDarkMode={isDarkMode}
         />
         <ModernInput
           label="Código de Barras"
@@ -635,11 +647,12 @@ function AdicionarProduto() {
           placeholder="000000000000"
           value={codigoBarras}
           onChange={(e) => setCodigoBarras(e.target.value)}
+          isDarkMode={isDarkMode}
         />
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <label className={`block text-sm font-semibold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'} flex items-center gap-2`}>
           <FiEdit className="text-blue-600" />
           Descrição
         </label>
@@ -648,22 +661,30 @@ function AdicionarProduto() {
           onChange={(e) => setDescricao(e.target.value)}
           placeholder="Descreva seu produto em detalhes..."
           rows={4}
-          className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
+          className={`w-full p-4 border-2 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none ${
+            isDarkMode 
+              ? 'bg-slate-800 border-slate-700 text-slate-200 placeholder-slate-500' 
+              : 'bg-white border-gray-200'
+          }`}
         />
       </div>
 
       {/* Upload de Imagem */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 space-y-4">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+      <div className={`rounded-2xl p-6 space-y-4 ${isDarkMode ? 'bg-slate-800/50' : 'bg-gradient-to-r from-blue-50 to-cyan-50'}`}>
+        <h3 className={`font-semibold ${isDarkMode ? 'text-slate-200' : 'text-gray-800'} flex items-center gap-2`}>
           <FiCamera className="text-blue-600" />
           Imagem do Produto
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="cursor-pointer">
-            <div className="border-2 border-dashed border-blue-300 rounded-xl p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
+            <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+              isDarkMode 
+                ? 'border-slate-600 hover:border-blue-500 hover:bg-slate-700' 
+                : 'border-blue-300 hover:border-blue-500 hover:bg-blue-50'
+            }`}>
               <FiCamera className="w-12 h-12 mx-auto mb-3 text-blue-600" />
-              <p className="font-medium text-gray-700">Upload de Arquivo</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>Upload de Arquivo</p>
+              <p className={`text-sm ${isDarkMode ? 'text-slate-500' : 'text-gray-500'} mt-1`}>
                 Clique para selecionar
               </p>
             </div>
@@ -681,6 +702,7 @@ function AdicionarProduto() {
               placeholder="https://exemplo.com/imagem.jpg"
               value={imagemUrl}
               onChange={(e) => setImagemUrl(e.target.value)}
+              isDarkMode={isDarkMode}
             />
           </div>
         </div>
@@ -733,10 +755,11 @@ function ModernInput({
   required = false,
   min,
   step,
+  isDarkMode,
 }) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+      <label className={`block text-sm font-semibold ${isDarkMode ? 'text-slate-300' : 'text-gray-700'} flex items-center gap-2`}>
         {icon && <span className="text-blue-600">{icon}</span>}
         {label}
       </label>
@@ -749,13 +772,17 @@ function ModernInput({
         required={required}
         min={min}
         step={step || (type === "number" ? "0.01" : undefined)}
-        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+        className={`w-full p-3 border-2 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all ${
+          isDarkMode 
+            ? 'bg-slate-800 border-slate-700 text-slate-200 placeholder-slate-500' 
+            : 'bg-white border-gray-200'
+        }`}
       />
     </div>
   );
 }
 
-function MeusProdutos() {
+function MeusProdutos({ isDarkMode }) {
   const [produtos, setProdutos] = useState([]);
   const [produtoEditandoId, setProdutoEditandoId] = useState(null);
   const [produtoEditando, setProdutoEditando] = useState(null);
@@ -1126,8 +1153,8 @@ function MeusProdutos() {
                 </div>
 
                 {/* Galeria */}
-                <div className="bg-white rounded-xl p-4 mb-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <div className={`rounded-xl p-4 mb-4 ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+                  <h4 className={`font-semibold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-slate-200' : 'text-gray-800'}`}>
                     <FiCamera className="text-blue-600" />
                     Galeria de Imagens
                   </h4>
@@ -1232,16 +1259,16 @@ function MeusProdutos() {
             ) : (
               <div
                 key={produto.id}
-                className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                className={`group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}
               >
                 <div className="flex flex-col md:flex-row">
-                  <div className="md:w-48 h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+                  <div className={`md:w-48 h-48 relative overflow-hidden ${isDarkMode ? 'bg-gradient-to-br from-slate-700 to-slate-600' : 'bg-gradient-to-br from-gray-100 to-gray-200'}`}>
                     <img
                       src={produto.imagem || "https://via.placeholder.com/200"}
                       alt={produto.nome}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-green-600">
+                    <div className={`absolute top-2 right-2 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-semibold text-green-600 ${isDarkMode ? 'bg-slate-900/90' : 'bg-white/90'}`}>
                       {produto.quantidade > 0
                         ? `${produto.quantidade} un.`
                         : "Esgotado"}
@@ -1250,7 +1277,7 @@ function MeusProdutos() {
                   <div className="flex-1 p-6">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-1">
+                        <h3 className={`text-2xl font-bold mb-1 ${isDarkMode ? 'text-slate-100' : 'text-gray-800'}`}>
                           {produto.nome}
                         </h3>
                         <p className="text-sm text-gray-500 italic">
@@ -1295,7 +1322,7 @@ function MeusProdutos() {
   );
 }
 
-function EditarLoja() {
+function EditarLoja({ isDarkMode }) {
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [form, setForm] = useState({
@@ -1512,7 +1539,7 @@ function EditarLoja() {
   );
 }
 
-function BatePapo() {
+function BatePapo({ isDarkMode }) {
   // Estado clientes e mensagens
   const [clientes, setClientes] = useState([]); // virá da API
   const [chatId, setChatId] = useState(null); // id do chat selecionado
@@ -1899,6 +1926,7 @@ function AnimatedInput({
   value,
   onChange,
   required,
+  isDarkMode,
 }) {
   return (
     <input
@@ -1908,12 +1936,16 @@ function AnimatedInput({
       onChange={onChange}
       placeholder={placeholder}
       required={required}
-      className="p-3 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 placeholder:text-gray-400"
+      className={`p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 ${
+        isDarkMode 
+          ? 'bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500' 
+          : 'bg-white border-gray-300 placeholder:text-gray-400'
+      }`}
     />
   );
 }
 
-function AnimatedTextarea({ placeholder, name, value, onChange }) {
+function AnimatedTextarea({ placeholder, name, value, onChange, isDarkMode }) {
   return (
     <textarea
       name={name}
@@ -1921,7 +1953,11 @@ function AnimatedTextarea({ placeholder, name, value, onChange }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="p-3 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 placeholder:text-gray-400 resize-none"
+      className={`p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 resize-none ${
+        isDarkMode 
+          ? 'bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500' 
+          : 'bg-white border-gray-300 placeholder:text-gray-400'
+      }`}
     />
   );
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { FiMenu, FiX, FiUser } from "react-icons/fi";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { FiMenu, FiX, FiUser, FiSearch } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import API_CONFIG from "../../config/api";
@@ -10,15 +10,36 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export default function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [userName, setUserName] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const profileRef = useRef(null);
   const { isDarkMode, dark, light } = useTheme();
   const { role } = useAuth();
 
   // Get current theme
   const currentTheme = isDarkMode ? dark : light;
+
+  // Detecta o scroll para mostrar/esconder a barra de pesquisa
+  useEffect(() => {
+    // Só ativa na página inicial
+    if (location.pathname !== "/") {
+      setShowSearchBar(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      // Mostra a barra após rolar 600px (aproximadamente após a seção de comércios)
+      const scrollPosition = window.scrollY;
+      setShowSearchBar(scrollPosition > 600);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [location.pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -89,6 +110,14 @@ export default function Header() {
     { to: "/seller", label: "Vender" },
   ];
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
+
   return (
     <header className={`w-full ${currentTheme.header} glass sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto grid grid-cols-3 items-center py-3 px-4 md:px-6">
@@ -104,8 +133,53 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Center: spacer */}
-        <div className="hidden md:flex" />
+        {/* Center: Barra de pesquisa (aparece no scroll) */}
+        <div className="hidden md:flex justify-center">
+          <AnimatePresence>
+            {showSearchBar && (
+              <motion.form
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                onSubmit={handleSearch}
+                className="w-full max-w-md"
+              >
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Pesquisar produtos..."
+                    className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
+                      isDarkMode
+                        ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
+                        : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
+                    } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                  />
+                  <FiSearch
+                    className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                      isDarkMode ? "text-slate-400" : "text-gray-400"
+                    }`}
+                    size={18}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="submit"
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-md text-xs font-medium ${
+                        isDarkMode
+                          ? "bg-blue-600 hover:bg-blue-700"
+                          : "bg-blue-500 hover:bg-blue-600"
+                      } text-white transition-colors`}
+                    >
+                      Buscar
+                    </button>
+                  )}
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Right: Theme + User icon */}
         <div className="hidden md:flex items-center justify-end gap-2">
@@ -206,6 +280,53 @@ export default function Header() {
           </button>
         </div>
       </div>
+
+      {/* Barra de pesquisa mobile (abaixo do header principal) */}
+      <AnimatePresence>
+        {showSearchBar && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden border-t border-current/10"
+          >
+            <form onSubmit={handleSearch} className="px-4 py-3">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Pesquisar produtos..."
+                  className={`w-full pl-10 pr-20 py-2.5 rounded-lg border ${
+                    isDarkMode
+                      ? "bg-slate-800/80 border-slate-700 text-white placeholder-slate-400"
+                      : "bg-white/90 border-blue-200 text-gray-900 placeholder-gray-500"
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all`}
+                />
+                <FiSearch
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                    isDarkMode ? "text-slate-400" : "text-gray-400"
+                  }`}
+                  size={18}
+                />
+                {searchQuery && (
+                  <button
+                    type="submit"
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md text-xs font-medium ${
+                      isDarkMode
+                        ? "bg-blue-600 hover:bg-blue-700"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    } text-white transition-colors`}
+                  >
+                    Buscar
+                  </button>
+                )}
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Nav Menu */}
       <AnimatePresence>
