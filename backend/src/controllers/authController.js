@@ -338,12 +338,11 @@ exports.forgotPassword = async (req, res) => {
     const { token, hashedToken } = generateResetToken();
 
     const expiresInMinutes = Number(process.env.RESET_TOKEN_EXP_MINUTES || 15);
-    const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
 
     await pool.query(
       `INSERT INTO password_reset_tokens (email, token, user_type, expires_at) 
-       VALUES (?, ?, ?, ?)`,
-      [normalizedEmail, hashedToken, userType, expiresAt]
+       VALUES (?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? MINUTE))`,
+      [normalizedEmail, hashedToken, userType, expiresInMinutes]
     );
 
     const resetUrl = buildResetUrl(token, normalizedEmail);
@@ -395,9 +394,9 @@ exports.resetPassword = async (req, res) => {
 
     const hashedToken = hashResetToken(token);
 
-    let [tokens] = await pool.query(
+    const [tokens] = await pool.query(
       `SELECT * FROM password_reset_tokens 
-       WHERE token = ? AND used = 0 AND expires_at > NOW()
+       WHERE token = ? AND used = 0 AND expires_at > UTC_TIMESTAMP()
        ORDER BY created_at DESC 
        LIMIT 1`,
       [hashedToken]
@@ -407,7 +406,7 @@ exports.resetPassword = async (req, res) => {
     if (!tokens.length) {
       [tokens] = await pool.query(
         `SELECT * FROM password_reset_tokens 
-         WHERE token = ? AND used = 0 AND expires_at > NOW()
+         WHERE token = ? AND used = 0 AND expires_at > UTC_TIMESTAMP()
          ORDER BY created_at DESC 
          LIMIT 1`,
         [token]
