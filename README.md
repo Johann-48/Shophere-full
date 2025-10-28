@@ -90,7 +90,7 @@ DB_PASSWORD=********
 DB_NAME=johann_shophere_db
 DB_PORT=3306
 JWT_SECRET=uma_chave_segura
-FRONTEND_URL=https://<seu‑dominio>.vercel.app
+FRONTEND_URL=https://shophere-production.vercel.app
 ```
 
 Endpoints úteis (produção):
@@ -100,31 +100,6 @@ Endpoints úteis (produção):
 - `/api/debug/summary` — contagem de registros principais
 
 Observação de uploads em serverless: arquivos são gravados em `/tmp` durante a execução. Para persistência, considere mover para um storage externo (S3/R2) no futuro.
-
-### Persistência de imagens (S3/R2)
-
-No Vercel, o filesystem é efêmero. O projeto já suporta armazenamento S3‑compatível para que as imagens fiquem acessíveis sempre:
-
-1. Em Settings → Environment Variables, configure:
-
-```
-STORAGE_DRIVER=s3
-S3_BUCKET=seu-bucket
-S3_REGION=us-east-1
-S3_ACCESS_KEY_ID=xxxx
-S3_SECRET_ACCESS_KEY=yyyy
-# opcional (R2/Spaces):
-S3_ENDPOINT=https://<endpoint>
-S3_FORCE_PATH_STYLE=true
-PUBLIC_UPLOADS_BASE_URL=https://<dominio-publico-do-bucket-ou-CDN>
-```
-
-2. Os endpoints de upload passam a devolver URLs públicas (https://...).
-
-3. Para registros antigos em `fotos_produto` que guardam caminhos relativos (ex.: `/uploads/xfx.jpg`), você pode:
-
-- Atualizá-los para URLs completas; ou
-- Definir `PUBLIC_UPLOADS_BASE_URL` para o backend compor URLs públicas quando necessário.
 
 ## 🏗️ Tecnologias
 
