@@ -20,6 +20,14 @@ const HERO_BANNER_FALLBACK =
 
 dotenv.config();
 
+if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+  verifyEmailTransport();
+} else {
+  console.warn(
+    "WARNING: Variáveis GMAIL_USER/GMAIL_APP_PASSWORD não configuradas; e-mails de redefinição não serão enviados."
+  );
+}
+
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
@@ -29,6 +37,7 @@ const avaliacoesRouter = require("./routes/avaliacaoProduto.routes");
 const commerceController = require("./controllers/commerceController");
 const productImagesRoutes = require("./routes/productImages.routes");
 const { toAbsoluteUrl } = require("./utils/url");
+const { verifyEmailTransport } = require("./services/email-gmail-smtp");
 
 const app = express();
 
