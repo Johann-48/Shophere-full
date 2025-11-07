@@ -179,8 +179,8 @@ export default function PrivacyPolicy() {
           </p>
           <div className={`${currentTheme.text} space-y-2 pl-4`}>
             <p>📧 Email: <span className="text-blue-600 font-semibold">privacidade@shophere.com</span></p>
-            <p>📱 Telefone: <span className="text-blue-600 font-semibold">(11) 9999-9999</span></p>
-            <p>🏢 Endereço: <span className="font-semibold">Rua das Compras, 123 - São Paulo, SP</span></p>
+            <p>📱 Telefone: <span className="text-blue-600 font-semibold">(19) 99358-8498</span></p>
+            <p>🏢 Endereço: <span className="font-semibold">Walter Boger, S/N, Lagoa Bonita, Engenheiro Coelho - SP</span></p>
           </div>
         </motion.div>
 

@@ -34,7 +34,7 @@ text-lg`}
           <ul className="space-y-3 text-sm">
             <li className="flex items-start gap-2 justify-center">
               <FiMapPin className={`mt-1 ${accentText}`} />
-              111 Bijoy Sarani, Dhaka, DH 1515, Bangladesh
+              Walter Boger, S/N, Lagoa Bonita, Engenheiro Coelho - SP
             </li>
             <li className="flex items-center gap-2 justify-center">
               <FiMail className={`${accentText}`} />
